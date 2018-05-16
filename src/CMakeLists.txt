@@ -13,8 +13,8 @@ if (WIN32)
     include_directories(dependencies/glfw-3.2.1/include) #  /usr/local/Cellar/glew/2.1.0/include dependencies/glfw/include # /usr/local/include
 endif(WIN32)
 
-find_package (glfw3 REQUIRED)
-include_directories(${glfw3_INCLUDE_DIR})
+#find_package (glfw3 REQUIRED)
+#include_directories(${glfw3_INCLUDE_DIR})
 
 find_package (OPENGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
