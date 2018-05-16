@@ -11,6 +11,7 @@ set(SOURCE_FILES main.cpp cube.cpp vec.cpp common/shader.cpp)
 if (WIN32)
     include_directories(dependencies/glew-2.1.0/include) #  /usr/local/Cellar/glew/2.1.0/include dependencies/glfw/include # /usr/local/include
     include_directories(dependencies/glfw-3.2.1/include) #  /usr/local/Cellar/glew/2.1.0/include dependencies/glfw/include # /usr/local/include
+    include_directories(dependencies/glm) #  /usr/local/Cellar/glew/2.1.0/include dependencies/glfw/include # /usr/local/include
 endif(WIN32)
 
 #find_package (glfw3 REQUIRED)
@@ -29,7 +30,7 @@ add_executable(main ${SOURCE_FILES})
 target_link_libraries(main glfw)
 target_link_libraries(main ${OPENGL_LIBRARY})
 target_link_libraries(main glew)
-
+#target_link_libraries(main glm)
 #find_package (glm REQUIRED)
 #include_directories(${glm_INCLUDE_DIR})
 #target_link_libraries(main ${glm_LIBRARY})
