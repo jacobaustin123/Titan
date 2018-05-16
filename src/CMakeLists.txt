@@ -27,9 +27,15 @@ add_executable(main ${SOURCE_FILES})
 
 #target_link_libraries(main ${glfw3_LIBRARY})
 
-target_link_libraries(main glfw)
+if (WIN32)
+    target_link_libraries(main glfw3)
+else()
+    target_link_libraries(main glfw)
+endif(WIN32)
+
 target_link_libraries(main ${OPENGL_LIBRARY})
 target_link_libraries(main glew)
+
 #target_link_libraries(main glm)
 #find_package (glm REQUIRED)
 #include_directories(${glm_INCLUDE_DIR})
