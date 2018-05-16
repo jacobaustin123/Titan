@@ -1,17 +1,17 @@
 cmake_minimum_required(VERSION 3.7)
-project(CUDA)
+project(Loch)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
-configure_file(main.cpp.in ${SOURCE_DIR}/main.cpp)
+set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
+configure_file(src/main.cpp.in ${SOURCE_DIR}/main.cpp)
 
-set(SOURCE_FILES main.cpp cube.cpp vec.cpp common/shader.cpp)
+set(SOURCE_FILES src/main.cpp src/cube.cpp src/vec.cpp src/common/shader.cpp)
 
 if (WIN32)
-    include_directories(dependencies/glew-2.1.0/include) #  /usr/local/Cellar/glew/2.1.0/include dependencies/glfw/include # /usr/local/include
-    include_directories(dependencies/glfw-3.2.1/include) #  /usr/local/Cellar/glew/2.1.0/include dependencies/glfw/include # /usr/local/include
-    include_directories(dependencies/glm) #  /usr/local/Cellar/glew/2.1.0/include dependencies/glfw/include # /usr/local/include
+    include_directories(src/dependencies/glew-2.1.0/include) #  /usr/local/Cellar/glew/2.1.0/include dependencies/glfw/include # /usr/local/include
+    include_directories(src/dependencies/glfw-3.2.1/include) #  /usr/local/Cellar/glew/2.1.0/include dependencies/glfw/include # /usr/local/include
+    include_directories(src/dependencies/glm) #  /usr/local/Cellar/glew/2.1.0/include dependencies/glfw/include # /usr/local/include
 endif(WIN32)
 
 #find_package (glfw3 REQUIRED)
