@@ -8,7 +8,9 @@ configure_file(main.cpp.in ${SOURCE_DIR}/main.cpp)
 
 set(SOURCE_FILES main.cpp cube.cpp vec.cpp common/shader.cpp)
 
-include_directories() #  /usr/local/Cellar/glew/2.1.0/include dependencies/glfw/include # /usr/local/include
+if (WIN32)
+    include_directories(dependencies/glew-2.1.0/include) #  /usr/local/Cellar/glew/2.1.0/include dependencies/glfw/include # /usr/local/include
+endif(WIN32)
 
 #find_package (glfw3 REQUIRED)
 #include_directories(${glfw3_INCLUDE_DIR})
@@ -30,5 +32,3 @@ target_link_libraries(main glew)
 #find_package (glm REQUIRED)
 #include_directories(${glm_INCLUDE_DIR})
 #target_link_libraries(main ${glm_LIBRARY})
-
-
