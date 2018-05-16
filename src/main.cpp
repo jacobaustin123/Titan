@@ -19,7 +19,7 @@ using namespace glm;
 #include "vec.hpp"
 #include "cube.hpp"
 
-#define SOURCE_DIR "/Users/JAustin/CLionProjects/CUDA"
+#define SOURCE_DIR "/Users/JAustin/Desktop/Loch/src"
 
 int main( void )
 {
