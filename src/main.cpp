@@ -18,7 +18,7 @@ using namespace glm;
 #include "vec.hpp"
 #include "cube.hpp"
 
-#cmakedefine SOURCE_DIR "${SOURCE_DIR}"
+// #cmakedefine SOURCE_DIR "${SOURCE_DIR}"
 
 int main( void )
 {
@@ -71,18 +71,18 @@ int main( void )
     glGenVertexArrays(1, &VertexArrayID);
     glBindVertexArray(VertexArrayID);
 
-    const char * dir = SOURCE_DIR;
-    char shader1[4096];
-    strcpy(shader1, dir);
-    strcat(shader1, "/shaders/TransformVertexShader.vertexshader");
-
-    char shader2[4096];
-    strcpy(shader2, dir);
-    strcat(shader2, "/shaders/ColorFragmentShader.fragmentshader");
+//    const char * dir = SOURCE_DIR;
+//    char shader1[4096];
+//    strcpy(shader1, dir);
+//    strcat(shader1, "/shaders/TransformVertexShader.vertexshader");
+//
+//    char shader2[4096];
+//    strcpy(shader2, dir);
+//    strcat(shader2, "/shaders/ColorFragmentShader.fragmentshader");
 
     // Create and compile our GLSL program from the shaders
     //    GLuint programID = LoadShaders( "SimpleTransform.vertexshader", "SingleColor.fragmentshader" );
-    GLuint programID = LoadShaders(shader1, shader2);
+    GLuint programID = LoadShaders("shaders/TransformVertexShader.vertexshader", "shaders/ColorFragmentShader.fragmentshader");
     // Get a handle for our "MVP" uniform
     GLuint MatrixID = glGetUniformLocation(programID, "MVP");
 

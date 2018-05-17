@@ -3,8 +3,8 @@ project(Loch)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
-configure_file(src/main.cpp.in ${SOURCE_DIR}/main.cpp)
+#set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
+#configure_file(src/main.cpp.in ${SOURCE_DIR}/main.cpp)
 
 set(SOURCE_FILES src/main.cpp src/cube.cpp src/vec.cpp src/common/shader.cpp)
 
