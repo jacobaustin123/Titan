@@ -114,3 +114,6 @@ double Vec::sum() {
     return data[0] + data[1] + data[2];
 }
 
+double dot(const Vec & a, const Vec & b) {
+    return (a * b).sum();
+}

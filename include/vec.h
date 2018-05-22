@@ -42,8 +42,7 @@ private:
     double data[3] = { 0 }; // initialize data to 0
 };
 
-double dot(const Vec & a, const Vec & b) {
-    return (a * b).sum();
-}
+double dot(const Vec & a, const Vec & b);
+
 #endif
 
