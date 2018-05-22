@@ -71,6 +71,8 @@ void Simulation::toArray() {
 
 void Simulation::fromArray() {
     massFromArray();
+    delete [] mass_arr;
+    delete [] spring_arr;
 
 //    Spring * data = spring_arr;
 //
