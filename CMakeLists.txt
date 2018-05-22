@@ -5,7 +5,8 @@ set(CMAKE_CXX_STANDARD 11)
 
 set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
-set(SOURCE_FILES src/main.cpp src/cube.cpp src/vec.cpp src/common/shader.cpp)
+set(SOURCE_FILES src/main.cpp src/cube.cpp src/vec.cpp src/sim.cpp src/common/shader.cpp src/sim.cpp src/mass.cpp src/spring.cpp src/object.cpp)
+include_directories(include)
 
 #add_subdirectory(src/dependencies/glfw)
 

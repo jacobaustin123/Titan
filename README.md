@@ -1,5 +1,5 @@
 # Loch
-A CUDA-based physics simulation sandbox using springs and masses to simulate flexible robots and other mechanical objects. Built in C++ but with a Python wrapper. 
+acc CUDA-based physics simulation sandbox using springs and masses to simulate flexible robots and other mechanical objects. Built in C++ but with a Python wrapper.
 
 ## Some temporary notes for compiling using CLion
 
