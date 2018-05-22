@@ -4,6 +4,20 @@
 
 #include "sim.h"
 
+Simulation::~Simulation() {
+    for (Mass * m : masses)
+        delete m;
+
+    for (Spring * s : springs)
+        delete s;
+
+    for (Constraint * c : constraints)
+        delete c;
+
+    for (ContainerObject * o : objs)
+        delete o;
+}
+
 Mass * Simulation::createMass() {
     Mass * m = new Mass();
     masses.push_back(m);
@@ -27,7 +41,7 @@ void Simulation::computeForces() {
 //        std::cout << s._left->getForce() << std::endl;
     }
 
-    for (int i = 0; i < springs.size(); i++) {
+    for (int i = 0; i < masses.size(); i++) {
         Mass * m = mass_arr + i;
         for (Constraint * c : constraints) {
 //            std::cout << c -> getForce(m -> getPosition()) << std::endl;
@@ -74,6 +88,8 @@ void Simulation::fromArray() {
     delete [] mass_arr;
     delete [] spring_arr;
 
+    delete [] spring_arr;
+    delete [] mass_arr;
 //    Spring * data = spring_arr;
 //
 //    for (Spring * s : springs) {
@@ -167,6 +183,8 @@ Cube * Simulation::createCube(const Vec & center, double side_length) { // creat
     for (Spring * s : cube -> springs) {
         springs.push_back(s);
     }
+
+    objs.push_back(cube);
 
     return cube;
 }

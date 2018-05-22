@@ -29,6 +29,7 @@ static double G = 9.81;
 class Simulation {
 public:
     Simulation() { dt = 0; }
+    ~Simulation();
 
     Mass * createMass();
     Spring * createSpring();

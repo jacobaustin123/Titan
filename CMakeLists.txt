@@ -4,9 +4,11 @@ project(Loch)
 set(CMAKE_CXX_STANDARD 11)
 
 set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
-
-set(SOURCE_FILES src/main.cpp src/cube.cpp src/vec.cpp src/sim.cpp src/common/shader.cpp src/sim.cpp src/mass.cpp src/spring.cpp src/object.cpp)
 include_directories(include)
+
+set(SOURCE_FILES src/main.cpp src/vec.cpp src/sim.cpp src/common/shader.cpp src/sim.cpp src/mass.cpp src/spring.cpp src/object.cpp)
+
+file(GLOB HEADERS "*.h")
 
 #add_subdirectory(src/dependencies/glfw)
 
@@ -38,7 +40,7 @@ if (glm_FOUND)
     link_libraries(${glm_LIBRARIES})
 endif()
 
-add_executable(main ${SOURCE_FILES})
+add_executable(main ${SOURCE_FILES} ${HEADERS})
 
 target_link_libraries(main glfw)
 target_link_libraries(main gl)

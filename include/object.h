@@ -12,6 +12,7 @@ static double DISPL_CONST = 10000;
 
 class BaseObject { // base commands for all objects
 public:
+    virtual ~BaseObject() {};
     virtual void translate(const Vec & displ) = 0; // translate all masses by fixed amount
 };
 
@@ -53,6 +54,7 @@ public:
 class Cube : public ContainerObject {
 public:
     Cube(const Vec & center, double side_length = 1.0);
+    virtual ~Cube() {};
 
     void translate(const Vec & displ);
 
