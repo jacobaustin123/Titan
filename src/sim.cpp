@@ -85,8 +85,6 @@ void Simulation::toArray() {
 
 void Simulation::fromArray() {
     massFromArray();
-    delete [] mass_arr;
-    delete [] spring_arr;
 
     delete [] spring_arr;
     delete [] mass_arr;
