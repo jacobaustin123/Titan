@@ -23,37 +23,32 @@
 
 int main() {
     Simulation sim; // initialize scene object
-    Mass * m1 = sim.createMass();
-    Mass * m2 = sim.createMass();
-    Spring * s1 = sim.createSpring();
-    s1 -> setMasses(m1, m2);
-    s1 -> setK(200);
-    s1 -> setRestLength(1);
-    m1 -> setPos(Vec(0, 0, 0));
-    m2 -> setPos(Vec(1, 1, 1));
+//    Mass * m1 = sim.createMass();
+//    Mass * m2 = sim.createMass();
+//    Spring * s1 = sim.createSpring();
+//    s1 -> setMasses(m1, m2);
+//    s1 -> setK(200);
+//    s1 -> setRestLength(1);
+//    m1 -> setPos(Vec(0, 0, 0));
+//    m2 -> setPos(Vec(1, 1, 1));
+
+    Cube * c = sim.createCube(Vec(0, 0, 5), 1);
+
+    sim.createPlane(Vec(0, 0, 1), 0);
 
     sim.setBreakpoint(1.0);
     sim.run();
 
     while (sim.time() < 10) {
         sim.setBreakpoint(sim.time() + 1);
-        std::cout << m1 -> getPosition() << " " << m2 -> getPosition() << std::endl;
+        std::cout << c -> masses[0] -> getPosition() << " " << c -> masses[1] -> getPosition() << std::endl;
         sim.resume();
     }
 
 }
 
-//int main( void )
+//int main()
 //{
-//    Simulation sim; // initialize scene object
-//    Mass * m1 = sim.createMass();
-//    Mass * m2 = sim.createMass();
-//    Spring * s1 = sim.createSpring();
-//    s1 -> setMasses(m1, m2);
-//    s1 -> setK(20);
-//    s1 -> setRestLength(1.0);
-//    m1 -> setPos(Vec(0, 0, 0));
-//    m2 -> setPos(Vec(1, 1, 1));
 //
 //    // Initialise GLFW
 //    if( !glfwInit() )

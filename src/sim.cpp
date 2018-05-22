@@ -22,18 +22,19 @@ void Simulation::setBreakpoint(double time) {
 
 void Simulation::computeForces() {
     for (int i = 0; i < springs.size(); i++) { // update the forces
-        Spring s = spring_arr[i];
-        s.setForce();
+        Spring * s = spring_arr + i;
+        s -> setForce();
 //        std::cout << s._left->getForce() << std::endl;
     }
 
     for (int i = 0; i < springs.size(); i++) {
-        Mass m = mass_arr[i];
-//        for (Constraint * c : constraints) {
-//            m -> addForce( c -> getForce(m -> getPosition()) ); // add force based on position relative to constraint
-//        }
+        Mass * m = mass_arr + i;
+        for (Constraint * c : constraints) {
+//            std::cout << c -> getForce(m -> getPosition()) << std::endl;
+            m -> addForce( c -> getForce(m -> getPosition()) ); // add force based on position relative to constraint
+        }
 
-        m.addForce(Vec(0, 0, - m.getMass() * G)); // add gravity
+        m -> addForce(Vec(0, 0, - m -> getMass() * G)); // add gravity
     }
 }
 
@@ -147,4 +148,23 @@ void Simulation::run() { // repeatedly run next
     dt = 0.01; //std::min_element(mass_arr, mass_arr + masses.size(), compareMass) -> deltat();
 
     resume();
+}
+
+Plane * Simulation::createPlane(const Vec & abc, double d ) { // creates half-space ax + by + cz < d
+    Plane * new_plane = new Plane(abc, d);
+    constraints.push_back(new_plane);
+    return new_plane;
+}
+
+Cube * Simulation::createCube(const Vec & center, double side_length) { // creates half-space ax + by + cz < d
+    Cube * cube = new Cube(center, side_length);
+    for (Mass * m : cube -> masses) {
+        masses.push_back(m);
+    }
+
+    for (Spring * s : cube -> springs) {
+        springs.push_back(s);
+    }
+
+    return cube;
 }

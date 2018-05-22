@@ -15,9 +15,6 @@
 #include <set>
 
 static double G = 9.81;
-//static double dt = 0.001;
-//static double DISPL_CONST = 100000;
-//static double k = 10000;
 
 //Ball & createBall(double radius = 1.0, const Vec & center = Vec(0, 0, 0));
 //Plane & createPlane(const Vec & abc = Vec(0, 0, 0), double d = 0); // creates half-space ax + by + cz < d
@@ -43,12 +40,18 @@ public:
 
     double time() { return T; }
 
+    Plane * createPlane(const Vec & abc, double d ); // creates half-space ax + by + cz < d
+
+    Cube * createCube(const Vec & center, double side_length); // creates half-space ax + by + cz < d
+
 private:
     double dt; // set to 0 by default, when run is called will be set to min(mass dt) unless previously set
     double T; // global simulation time
 
     std::vector<Mass *> masses;
     std::vector<Spring *> springs;
+    std::vector<Constraint *> constraints;
+    std::vector<ContainerObject *> objs;
 
     Mass * mass_arr;
     Spring * spring_arr;

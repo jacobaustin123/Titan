@@ -11,6 +11,8 @@
 class Spring {
 public:
     Spring() {};
+    Spring(Mass * left, Mass * right) : _k(1.0), _rest(1.0), _left(left), _right(right) {};
+
     Spring(double k, double rest_length, Mass * left, Mass * right) : _k(k), _rest(rest_length), _left(left), _right(right) {};
 
     Vec getForce(); // computes force on right object. left force is - right force.

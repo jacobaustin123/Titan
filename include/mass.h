@@ -9,10 +9,10 @@
 
 class Mass {
 public:
+    Mass() { m = 1.0; pos = Vec(0, 0, 0); fixed = 0; dt = 0.01; }
 
-    Mass(double mass = 1.0, const Vec & position = Vec(0, 0, 0), const Vec & velocity = Vec(0, 0, 0),
-         const Vec & acceleration = Vec(0, 0, 0), const Vec & force = Vec(0, 0, 0), int fixed = 0, double dt = 0.01) :
-            m(mass), pos(position), vel(velocity), acc(acceleration), force(force), fixed(fixed), dt(dt) {}; // defaults everything
+    Mass(double mass, const Vec & position, int fixed = 0, double dt = 0.01) :
+            m(mass), pos(position), fixed(fixed), dt(dt) {}; // defaults everything
 
     void setMass(double m) { this -> m = m; };
     void setPos(const Vec & pos) { this -> pos = pos; }
@@ -20,6 +20,7 @@ public:
     void setAcc(const Vec & acc) { this -> acc = acc; }
     void setForce(const Vec & force) { this -> force = force; }
     void setDeltaT(double dt) { this -> dt = dt; }
+    void translate(const Vec & displ) { this -> pos += displ; }
 
     void makeFixed() { fixed = 1; }
     void makeMovable() { fixed = 0; }
