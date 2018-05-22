@@ -1,6 +1,7 @@
 // Include standard headers
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 // Include GLEW
 #include <GL/glew.h>
@@ -92,9 +93,9 @@ int main()
 
     // Camera matrix
     glm::mat4 View = glm::lookAt(
-                       glm::vec3(0,-1,0.2), // Camera is at (4,3,3), in World Space
-                       glm::vec3(0,0,0), // and looks at the origin
-                       glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
+                       glm::vec3(0, 10, 3), // Camera is at (4,3,3), in World Space
+                       glm::vec3(0,0,3), // and looks at the origin
+                       glm::vec3(0,0,1)  // Head is up (set to 0,-1,0 to look upside-down)
                        );
     // Model matrix : an identity matrix (model will be at the origin)
     glm::mat4 Model = glm::mat4(1.0f);
@@ -103,7 +104,7 @@ int main()
 
     GLuint vertexbuffer;
     int count = 0;
-    GLfloat g_vertex_buffer_data[6];
+    GLfloat g_vertex_buffer_data[24];
 
     GLuint vertexbufferplatform; // this contains the vertices for the base (constraint) platform
     GLfloat vertex_buffer_platform[108] = {
@@ -230,18 +231,24 @@ int main()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
 
     Simulation sim; // initialize scene object
-    Cube * c = sim.createCube(Vec(0, 0, 5), 1);
+    Cube * c = sim.createCube(Vec(0, 0, 5), 1.0);
+    c -> setKValue(10);
+    c -> setMassValue(1.0);
+    c -> setDeltaTValue(0.001);
+
     sim.createPlane(Vec(0, 0, 1), 0);
 
-    sim.setBreakpoint(1.0);
+    sim.setBreakpoint(0.05);
     sim.run();
 
     do{
-        std::cout << c -> masses[0]->getPosition()[0] << std::endl;
+        usleep(20000);
+
+//        std::cout << c -> masses[0]->getPosition()[0] << std::endl;
         for (int i = 0; i < 8; i++) { // populate buffer with position data for cube vertices
-            g_vertex_buffer_data[3 * i] = c -> masses[i] -> getPosition()[0];
-            g_vertex_buffer_data[3 * i + 1] = c -> masses[i]->getPosition()[1];
-            g_vertex_buffer_data[3 * i + 2] = c -> masses[i]->getPosition()[2];
+            g_vertex_buffer_data[3 * i] = (GLfloat) c -> masses[i] -> getPosition()[0];
+            g_vertex_buffer_data[3 * i + 1] = (GLfloat) c -> masses[i]->getPosition()[1];
+            g_vertex_buffer_data[3 * i + 2] = (GLfloat) c -> masses[i]->getPosition()[2];
         }
 
         count++; // iterate count
@@ -249,100 +256,99 @@ int main()
         if (count % 1000 == 0) // print some random information every 1000 iterations
             std::cout << count << ": " << c ->masses[0] -> getPosition() << std::endl;
 
-//        glGenBuffers(1, &vertexbuffer); // bind cube vertex buffer
-//        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-//        glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
-//
-//        // Clear the screen
-//        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear screen
-//
-//        // Use our shader
-//        glUseProgram(programID);
-//
-//        // Send our transformation to the currently bound shader,
-//        // in the "MVP" uniform
-//        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-//
-//        // 1st attribute buffer : vertices
-//        glEnableVertexAttribArray(0);
-//        glBindBuffer(GL_ARRAY_BUFFER, vertexbufferplatform);
-//
-//        glVertexAttribPointer(
-//              0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
-//              3,                  // size
-//              GL_FLOAT,           // type
-//              GL_FALSE,           // normalized?
-//              0,                  // stride
-//              (void*)0            // array buffer offset
-//              );
-//
-//        glEnableVertexAttribArray(1);
-//        glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-//        glVertexAttribPointer(
-//          1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
-//          3,                                // size
-//          GL_FLOAT,                         // type
-//          GL_FALSE,                         // normalized?
-//          0,                                // stride
-//          (void*)0                          // array buffer offset
-//          );
-//
-//        // Draw the triangle !
-//        glDrawArrays(GL_TRIANGLES, 0, 12*3); // 12*3 indices starting at 0 -> 12 triangles
-//
-//        glDisableVertexAttribArray(1);
-//        glDisableVertexAttribArray(0);
-//        //
-//        //
-//        //        // Draw the triangle !
-//        //        glDrawArrays(GL_TRIANGLES, 0, 36); // 3 indices starting at 0 -> 1 triangle
-//
-//        glEnableVertexAttribArray(0);
-//
-//        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-//        glPointSize(10);
-//        glLineWidth(10);
-//        glVertexAttribPointer(
-//                              0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
-//                              3,                  // size
-//                              GL_FLOAT,           // type
-//                              GL_FALSE,           // normalized?
-//                              0,                  // stride
-//                              (void*)0            // array buffer offset
-//                              );
-//
-//        glEnableVertexAttribArray(1);
-//        glBindBuffer(GL_ARRAY_BUFFER, colorbuffer2);
-//        glVertexAttribPointer(
-//                              1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
-//                              3,                                // size
-//                              GL_FLOAT,                         // type
-//                              GL_FALSE,                         // normalized?
-//                              0,                                // stride
-//                              (void*)0                          // array buffer offset
-//                              );
-//
-//
-//        glDrawArrays(GL_POINTS, 0, 8); // 3 indices starting at 0 -> 1 triangle
-//        glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_BYTE, (void*) 0); // 3 indices starting at 0 -> 1 triangle
-//
-//        glDisableVertexAttribArray(1);
-//        glDisableVertexAttribArray(0);
-//
-//
-//        // Swap buffers
-//        glfwSwapInterval(0);
-//        glfwSwapBuffers(window);
-//        glfwPollEvents();
+        glGenBuffers(1, &vertexbuffer); // bind cube vertex buffer
+        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 
-        sim.setBreakpoint(sim.time() + 1.0);
+        // Clear the screen
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear screen
+
+        // Use our shader
+        glUseProgram(programID);
+
+        // Send our transformation to the currently bound shader,
+        // in the "MVP" uniform
+        glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+        // 1st attribute buffer : vertices
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexbufferplatform);
+
+        glVertexAttribPointer(
+              0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
+              3,                  // size
+              GL_FLOAT,           // type
+              GL_FALSE,           // normalized?
+              0,                  // stride
+              (void*)0            // array buffer offset
+              );
+
+        glEnableVertexAttribArray(1);
+        glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+        glVertexAttribPointer(
+          1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
+          3,                                // size
+          GL_FLOAT,                         // type
+          GL_FALSE,                         // normalized?
+          0,                                // stride
+          (void*)0                          // array buffer offset
+          );
+
+        // Draw the triangle !
+        glDrawArrays(GL_TRIANGLES, 0, 12*3); // 12*3 indices starting at 0 -> 12 triangles
+
+        glDisableVertexAttribArray(1);
+        glDisableVertexAttribArray(0);
+        //
+        //
+        //        // Draw the triangle !
+        //        glDrawArrays(GL_TRIANGLES, 0, 36); // 3 indices starting at 0 -> 1 triangle
+
+        glEnableVertexAttribArray(0);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+        glPointSize(10);
+        glLineWidth(10);
+        glVertexAttribPointer(
+                              0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
+                              3,                  // size
+                              GL_FLOAT,           // type
+                              GL_FALSE,           // normalized?
+                              0,                  // stride
+                              (void*)0            // array buffer offset
+                              );
+
+        glEnableVertexAttribArray(1);
+        glBindBuffer(GL_ARRAY_BUFFER, colorbuffer2);
+        glVertexAttribPointer(
+                              1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
+                              3,                                // size
+                              GL_FLOAT,                         // type
+                              GL_FALSE,                         // normalized?
+                              0,                                // stride
+                              (void*)0                          // array buffer offset
+                              );
+
+
+        glDrawArrays(GL_POINTS, 0, 8); // 3 indices starting at 0 -> 1 triangle
+        glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_BYTE, (void*) 0); // 3 indices starting at 0 -> 1 triangle
+
+        glDisableVertexAttribArray(1);
+        glDisableVertexAttribArray(0);
+
+
+        // Swap buffers
+        glfwSwapInterval(0);
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+
+        sim.setBreakpoint(sim.time() + 0.05);
         sim.resume();
 
     } // Check if the ESC key was pressed or the window was closed
-    while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
-          glfwWindowShouldClose(window) == 0 && sim.time() < 20.0 );
+    while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS && glfwWindowShouldClose(window) == 0 && sim.time() < 100.0 );
 
-    // Cleanup VBO and shader
+            // Cleanup VBO and shader
     glDeleteBuffers(1, &vertexbuffer);
     glDeleteProgram(programID);
     glDeleteVertexArrays(1, &VertexArrayID);

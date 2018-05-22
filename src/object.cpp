@@ -40,12 +40,31 @@ void ContainerObject::setKValue(double k) {
     }
 }
 
+void ContainerObject::setDeltaTValue(double dt) { // set masses for all Mass objects
+    for (Mass * mass : masses) {
+        mass -> setDeltaT(dt);
+    }
+}
+
+void ContainerObject::setRestLengthValue(double len) { // set masses for all Mass objects
+    for (Spring * spring : springs) {
+        spring -> setRestLength(len);
+    }
+}
+
+void ContainerObject::makeFixed() {
+    for (Mass * mass : masses) {
+        mass -> makeFixed();
+    }
+}
+
+
 Cube::Cube(const Vec & center, double side_length) {
     _center = center;
     _side_length = side_length;
 
     for (int i = 0; i < 8; i++) {
-        masses.push_back(new Mass(1.0, side_length * Vec(i & 1, (i >> 1) & 1, (i >> 2) & 1)));
+        masses.push_back(new Mass(1.0, side_length * (Vec(i & 1, (i >> 1) & 1, (i >> 2) & 1) - Vec(0.5, 0.5, 0.5)) + center));
     }
 
     for (int i = 0; i < 8; i++) { // add the appropriate springs
@@ -60,3 +79,4 @@ void Cube::translate(const Vec & displ) {
         m->translate(displ);
     }
 }
+

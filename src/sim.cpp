@@ -35,20 +35,22 @@ void Simulation::setBreakpoint(double time) {
 }
 
 void Simulation::computeForces() {
+    Spring * s = spring_arr;
+
     for (int i = 0; i < springs.size(); i++) { // update the forces
-        Spring * s = spring_arr + i;
         s -> setForce();
-//        std::cout << s._left->getForce() << std::endl;
+        s++;
     }
 
+    Mass * m = mass_arr;
     for (int i = 0; i < masses.size(); i++) {
-        Mass * m = mass_arr + i;
         for (Constraint * c : constraints) {
-//            std::cout << c -> getForce(m -> getPosition()) << std::endl;
             m -> addForce( c -> getForce(m -> getPosition()) ); // add force based on position relative to constraint
         }
 
         m -> addForce(Vec(0, 0, - m -> getMass() * G)); // add gravity
+
+        m++;
     }
 }
 
@@ -155,13 +157,15 @@ void Simulation::resume() {
     }
 }
 
-int compareMass(const Mass & x, const Mass & y) {
-    return x.deltat() < y.deltat() ? 0 : 1;
+int compareMass(const Mass * x, const Mass * y) {
+    return x -> deltat() < y -> deltat() ? 0 : 1;
 }
 
 void Simulation::run() { // repeatedly run next
     T = 0;
-    dt = 0.01; //std::min_element(mass_arr, mass_arr + masses.size(), compareMass) -> deltat();
+    if (dt == 0) {
+        dt = (*std::min_element(masses.begin(), masses.end(), compareMass))->deltat();
+    }
 
     resume();
 }

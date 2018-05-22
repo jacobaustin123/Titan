@@ -25,6 +25,10 @@ class ContainerObject : public BaseObject { // contains and manipulates groups o
 public:
     void setMassValue(double m); // set masses for all Mass objects
     void setKValue(double k); // set k for all Spring objects
+    void setDeltaTValue(double m); // set masses for all Mass objects
+    void setRestLengthValue(double m); // set masses for all Mass objects
+    void makeFixed();
+
     // we can have more of these
     std::vector<Mass *> masses;
     std::vector<Spring *> springs;
