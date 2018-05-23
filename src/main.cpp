@@ -231,19 +231,19 @@ int main()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
 
     Simulation sim; // initialize scene object
-    Cube * c = sim.createCube(Vec(0, 0, 10), 1.0);
-    c -> setKValue(100);
-    c -> setMassValue(1.0);
-    c -> setDeltaTValue(0.001);
+    Cube * c = sim.createCube(Vec(0, 0, 10), 2.0);
+    c -> setKValue(10);
+    c -> setMassValue(2.0);
+    c -> setDeltaTValue(0.00001);
     c -> setRestLengthValue(3.0);
 
     sim.createPlane(Vec(0, 0, 1), 0);
 
-    sim.setBreakpoint(0.01);
+    sim.setBreakpoint(0.05);
     sim.run();
 
     do{
-        usleep(20000);
+        usleep(2000);
 
 //        std::cout << c -> masses[0]->getPosition()[0] << std::endl;
         for (int i = 0; i < 8; i++) { // populate buffer with position data for cube vertices
@@ -343,7 +343,7 @@ int main()
         glfwSwapBuffers(window);
         glfwPollEvents();
 
-        sim.setBreakpoint(sim.time() + 0.01);
+        sim.setBreakpoint(sim.time() + 0.05);
         sim.resume();
 
     } // Check if the ESC key was pressed or the window was closed

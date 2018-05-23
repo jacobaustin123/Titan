@@ -28,7 +28,7 @@ static double G = 9.81;
 
 class Simulation {
 public:
-    Simulation() { dt = 0; }
+    Simulation() { dt = 0; RUNNING = 0; }
     ~Simulation();
 
     Mass * createMass();
@@ -45,9 +45,14 @@ public:
 
     Cube * createCube(const Vec & center, double side_length); // creates half-space ax + by + cz < d
 
+    void printPositions();
+    void printForces();
+
 private:
     double dt; // set to 0 by default, when run is called will be set to min(mass dt) unless previously set
     double T; // global simulation time
+
+    int RUNNING;
 
     std::vector<Mass *> masses;
     std::vector<Spring *> springs;

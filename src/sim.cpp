@@ -41,21 +41,21 @@ void Simulation::computeForces() {
 
     for (int i = 0; i < springs.size(); i++) { // update the forces
         s -> setForce();
-        if (s -> _right == mass_arr + 5 && fmod(time(), 1) < 0.5) {
-            std::cout << i << ": " << s -> getForce() << std::endl;
-        }
-
-        if (s -> _left == mass_arr + 5 && fmod(time(), 1) < 0.5) {
-            std::cout << i << ": " << - (s -> getForce()) << std::endl;
-        }
-
-        if (s -> _right == mass_arr + 5 && s -> _left == mass_arr + 4 && fmod(time(), 1) < 0.5) {
-            std::cout << "22: " << s -> _left -> getPosition() << s -> _right -> getPosition() << " " << ((s -> _right -> getPosition()) - (s -> _left -> getPosition())).norm() <<std::endl;
-        }
+//        if (s -> _right == mass_arr + 5 && fmod(time(), 1) < 0.5) {
+//            std::cout << i << ": " << s -> getForce() << std::endl;
+//        }
+//
+//        if (s -> _left == mass_arr + 5 && fmod(time(), 1) < 0.5) {
+//            std::cout << i << ": " << - (s -> getForce()) << std::endl;
+//        }
+//
+//        if (s -> _right == mass_arr + 5 && s -> _left == mass_arr + 4 && fmod(time(), 1) < 0.5) {
+//            std::cout << "22: " << s -> _left -> getPosition() << s -> _right -> getPosition() << " " << ((s -> _right -> getPosition()) - (s -> _left -> getPosition())).norm() <<std::endl;
+//        }
         s++;
     }
 
-    std::cout << std::endl;
+//    std::cout << std::endl;
 
 //    Mass * m = mass_arr;
 //    for (int i = 0; i < masses.size(); i++) {
@@ -147,6 +147,7 @@ void Simulation::springFromArray() {
 }
 
 void Simulation::resume() {
+    RUNNING = 1;
     toArray();
 
     while (1) {
@@ -155,14 +156,17 @@ void Simulation::resume() {
         if (!bpts.empty() && *bpts.begin() <= T) {
             bpts.erase(bpts.begin());
             fromArray();
+            RUNNING = 0;
             break;
         }
 
         computeForces(); // compute forces on all masses
 
+//        printForces();
+
         Mass * m = mass_arr;
         for (int i = 0; i < masses.size(); i++) {
-            if (!m -> isFixed() && m -> time() <= T) {
+            if (m -> time() <= T) { // !m -> isFixed()
                 m -> stepTime();
                 m -> update();
             }
@@ -180,9 +184,7 @@ int compareMass(const Mass * x, const Mass * y) {
 
 void Simulation::run() { // repeatedly run next
     T = 0;
-    if (dt == 0) {
-        dt = (*std::min_element(masses.begin(), masses.end(), compareMass))->deltat();
-    }
+    dt = (*std::min_element(masses.begin(), masses.end(), compareMass)) -> deltat();
 
     resume();
 }
@@ -206,4 +208,36 @@ Cube * Simulation::createCube(const Vec & center, double side_length) { // creat
     objs.push_back(cube);
 
     return cube;
+}
+
+void Simulation::printPositions() {
+    if (RUNNING) {
+        Mass * m = mass_arr;
+        for (int i = 0; i < masses.size(); i++) {
+            std::cout << m -> getPosition() << std::endl;
+            m++;
+        }
+    } else {
+        for (Mass * m : masses) {
+            std::cout << m->getPosition() << std::endl;
+        }
+    }
+
+    std::cout << std::endl;
+}
+
+void Simulation::printForces() {
+    if (RUNNING) {
+        Mass * m = mass_arr;
+        for (int i = 0; i < masses.size(); i++) {
+            std::cout << m -> getForce() << std::endl;
+            m++;
+        }
+    } else {
+        for (Mass * m : masses) {
+            std::cout << m->getForce() << std::endl;
+        }
+    }
+
+    std::cout << std::endl;
 }
