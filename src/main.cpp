@@ -93,8 +93,8 @@ int main()
 
     // Camera matrix
     glm::mat4 View = glm::lookAt(
-                       glm::vec3(0, 10, 3), // Camera is at (4,3,3), in World Space
-                       glm::vec3(0,0,3), // and looks at the origin
+                       glm::vec3(15, 15, 10), // Camera is at (4,3,3), in World Space
+                       glm::vec3(0,0,8), // and looks at the origin
                        glm::vec3(0,0,1)  // Head is up (set to 0,-1,0 to look upside-down)
                        );
     // Model matrix : an identity matrix (model will be at the origin)
@@ -231,14 +231,15 @@ int main()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
 
     Simulation sim; // initialize scene object
-    Cube * c = sim.createCube(Vec(0, 0, 5), 1.0);
-    c -> setKValue(10);
+    Cube * c = sim.createCube(Vec(0, 0, 10), 1.0);
+    c -> setKValue(100);
     c -> setMassValue(1.0);
     c -> setDeltaTValue(0.001);
+    c -> setRestLengthValue(3.0);
 
     sim.createPlane(Vec(0, 0, 1), 0);
 
-    sim.setBreakpoint(0.05);
+    sim.setBreakpoint(0.01);
     sim.run();
 
     do{
@@ -253,8 +254,8 @@ int main()
 
         count++; // iterate count
 
-        if (count % 1000 == 0) // print some random information every 1000 iterations
-            std::cout << count << ": " << c ->masses[0] -> getPosition() << std::endl;
+//        if (count % 1000 == 0) // print some random information every 1000 iterations
+//            std::cout << count << ": " << c ->masses[0] -> getPosition() << std::endl;
 
         glGenBuffers(1, &vertexbuffer); // bind cube vertex buffer
         glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -342,7 +343,7 @@ int main()
         glfwSwapBuffers(window);
         glfwPollEvents();
 
-        sim.setBreakpoint(sim.time() + 0.05);
+        sim.setBreakpoint(sim.time() + 0.01);
         sim.resume();
 
     } // Check if the ESC key was pressed or the window was closed

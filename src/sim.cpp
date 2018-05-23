@@ -34,24 +34,39 @@ void Simulation::setBreakpoint(double time) {
     bpts.insert(time);
 }
 
+#include <cmath>
+
 void Simulation::computeForces() {
     Spring * s = spring_arr;
 
     for (int i = 0; i < springs.size(); i++) { // update the forces
         s -> setForce();
+        if (s -> _right == mass_arr + 5 && fmod(time(), 1) < 0.5) {
+            std::cout << i << ": " << s -> getForce() << std::endl;
+        }
+
+        if (s -> _left == mass_arr + 5 && fmod(time(), 1) < 0.5) {
+            std::cout << i << ": " << - (s -> getForce()) << std::endl;
+        }
+
+        if (s -> _right == mass_arr + 5 && s -> _left == mass_arr + 4 && fmod(time(), 1) < 0.5) {
+            std::cout << "22: " << s -> _left -> getPosition() << s -> _right -> getPosition() << " " << ((s -> _right -> getPosition()) - (s -> _left -> getPosition())).norm() <<std::endl;
+        }
         s++;
     }
 
-    Mass * m = mass_arr;
-    for (int i = 0; i < masses.size(); i++) {
-        for (Constraint * c : constraints) {
-            m -> addForce( c -> getForce(m -> getPosition()) ); // add force based on position relative to constraint
-        }
+    std::cout << std::endl;
 
-        m -> addForce(Vec(0, 0, - m -> getMass() * G)); // add gravity
-
-        m++;
-    }
+//    Mass * m = mass_arr;
+//    for (int i = 0; i < masses.size(); i++) {
+//        for (Constraint * c : constraints) {
+//            m -> addForce( c -> getForce(m -> getPosition()) ); // add force based on position relative to constraint
+//        }
+//
+//        m -> addForce(Vec(0, 0, - m -> getMass() * G)); // add gravity
+//
+//        m++;
+//    }
 }
 
 Mass * Simulation::massToArray() {
@@ -144,15 +159,17 @@ void Simulation::resume() {
         }
 
         computeForces(); // compute forces on all masses
-        for (int i = 0; i < masses.size(); i++) {
 
-            Mass * m = mass_arr + i;
+        Mass * m = mass_arr;
+        for (int i = 0; i < masses.size(); i++) {
             if (!m -> isFixed() && m -> time() <= T) {
                 m -> stepTime();
                 m -> update();
             }
 
             m -> resetForce();
+
+            m++;
         }
     }
 }

@@ -6,12 +6,11 @@
 
 Vec Spring::getForce() { // computes force on right object. left force is - right force.
     Vec temp = (_right -> getPosition()) - (_left -> getPosition());
-    return temp * _k * (_rest - temp.norm()) / temp.norm();
+    return _k * (_rest - temp.norm()) * (temp / temp.norm());
 }
 
 void Spring::setForce() { // computes force on right object. left force is - right force.
     Vec f = getForce();
-//    std::cout << f << std::endl;
-    _left -> addForce(-f);
     _right -> addForce(f);
+    _left -> addForce(-f);
 }
