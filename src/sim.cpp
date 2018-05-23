@@ -41,23 +41,10 @@ void Simulation::computeForces() {
 
     for (int i = 0; i < springs.size(); i++) { // update the forces
         s -> setForce();
-//        if (s -> _right == mass_arr + 5 && fmod(time(), 1) < 0.5) {
-//            std::cout << i << ": " << s -> getForce() << std::endl;
-//        }
-//
-//        if (s -> _left == mass_arr + 5 && fmod(time(), 1) < 0.5) {
-//            std::cout << i << ": " << - (s -> getForce()) << std::endl;
-//        }
-//
-//        if (s -> _right == mass_arr + 5 && s -> _left == mass_arr + 4 && fmod(time(), 1) < 0.5) {
-//            std::cout << "22: " << s -> _left -> getPosition() << s -> _right -> getPosition() << " " << ((s -> _right -> getPosition()) - (s -> _left -> getPosition())).norm() <<std::endl;
-//        }
         s++;
     }
 
-//    std::cout << std::endl;
-
-//    Mass * m = mass_arr;
+//    Mass * m = mass_arr; // constraints and gravity
 //    for (int i = 0; i < masses.size(); i++) {
 //        for (Constraint * c : constraints) {
 //            m -> addForce( c -> getForce(m -> getPosition()) ); // add force based on position relative to constraint
