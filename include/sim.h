@@ -10,6 +10,7 @@
 #include "object.h"
 #include "vec.h"
 
+#include <algorithm>
 #include <list>
 #include <vector>
 #include <set>
