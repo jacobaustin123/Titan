@@ -53,4 +53,5 @@ target_link_libraries(debug gl)
 target_link_libraries(debug glew)
 target_link_libraries(debug glm)
 
-install(TARGETS main debug DESTINATION bin)
+install(TARGETS main debug RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY src/shaders DESTINATION ${CMAKE_BINARY_DIR})

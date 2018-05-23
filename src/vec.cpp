@@ -47,7 +47,7 @@ Vec & Vec::operator+=(const Vec & v) {
     return *this;
 }
 
-Vec Vec::operator-() {
+Vec Vec::operator-() const{
     return Vec(-data[0], -data[1], -data[2]);
 }
 
@@ -106,11 +106,11 @@ const double & Vec::operator [] (int n) const {
     }
 }
 
-double Vec::norm() {
+double Vec::norm() const {
     return sqrt(pow(data[0], 2) + pow(data[1], 2) + pow(data[2], 2));
 }
 
-double Vec::sum() {
+double Vec::sum() const {
     return data[0] + data[1] + data[2];
 }
 

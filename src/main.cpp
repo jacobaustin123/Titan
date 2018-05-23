@@ -230,12 +230,13 @@ int main()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size(), &indices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
 
-    Simulation sim; // initialize scene object
-    Cube * c = sim.createCube(Vec(0, 0, 10), 2.0);
-    c -> setKValue(10);
-    c -> setMassValue(2.0);
-    c -> setDeltaTValue(0.00001);
-    c -> setRestLengthValue(3.0);
+    Simulation sim; // initialize simulation object
+
+    Cube * c = sim.createCube(Vec(0, 0, 10), 2.0); // create Cube object centered at (0, 0, 10) with side length 2.0
+    c -> setKValue(10); // set the spring constant for all springs to 10
+    c -> setMassValue(2.0); // set all masses to 2.0
+    c -> setDeltaTValue(0.00001); // set the dt value for all masses in the cube to 0.00001
+    c -> setRestLengthValue(3.0); // set the rest length of all springs to
 
     sim.createPlane(Vec(0, 0, 1), 0);
 
