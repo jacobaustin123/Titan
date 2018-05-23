@@ -10,4 +10,4 @@ set(SOURCE_FILES src/vec.cpp src/sim.cpp src/sim.cpp src/mass.cpp src/spring.cpp
 
 file(GLOB HEADERS "*.h")
 add_executable(main src/main.cpp ${SOURCE_FILES} ${HEADERS})
-install(TARGETS main DESTINATION bin)
+install(TARGETS main DESTINATION ${CMAKE_BINARY_DIR})

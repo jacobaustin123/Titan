@@ -18,7 +18,7 @@ public:
     Vec(double x, double y, double z); // initialization from x, y, and z values
     Vec & operator = (const Vec & v);
     Vec & operator += (const Vec & v);
-    Vec operator - ();
+    Vec operator - () const;
     double & operator [] (int n);
     const double & operator [] (int n) const;
 
@@ -35,8 +35,8 @@ public:
 
     friend std::ostream & operator << (std::ostream &, const Vec &); // print
     
-    double norm(); // gives vector norm
-    double sum(); // gives vector norm
+    double norm() const; // gives vector norm
+    double sum() const; // gives vector norm
 
 private:
     double data[3] = { 0 }; // initialize data to 0
