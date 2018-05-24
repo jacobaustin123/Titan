@@ -42,7 +42,7 @@ int main() {
     for (int i = 0; i < 8; i++) {
         for (int j = i + 1; j < 8; j++) {
             Spring * s = sim.createSpring();
-            s -> setK(1.0);
+            s -> setK(1000.0);
             s -> setRestLength(2);
             s -> setMasses(m[i], m[j]);
         }
