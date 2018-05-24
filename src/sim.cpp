@@ -171,7 +171,7 @@ int compareMass(const Mass * x, const Mass * y) {
 
 void Simulation::run() { // repeatedly run next
     T = 0;
-    dt = (*std::min_element(masses.begin(), masses.end(), compareMass)) -> deltat();
+    dt = 0.01; // (*std::min_element(masses.begin(), masses.end(), compareMass)) -> deltat();
 
     resume();
 }
