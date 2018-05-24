@@ -56,7 +56,7 @@ int main() {
     while (sim.time() < 100.0) {
         sim.setBreakpoint(sim.time() + 1);
         sim.resume();
-        sim.printPositions();
+        //sim.printPositions();
     }
 
 
