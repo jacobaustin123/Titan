@@ -9,11 +9,11 @@ include_directories(include)
 
 set(SOURCE_FILES src/vec.cu src/sim.cu src/sim.cu src/mass.cu src/spring.cu src/object.cu)
 
-find_package(cuda REQUIRED)
-if (cuda_FOUND)
-    message(STATUS "cuda FOUND")
-    include_directories(${cuda_INCLUDE_DIRS})
-    link_libraries(${cuda_LIBRARIES})
+find_package(CUDA REQUIRED)
+if (CUDA_FOUND)
+    message(STATUS "CUDA FOUND")
+    include_directories(${CUDA_INCLUDE_DIRS})
+    link_libraries(${CUDA_LIBRARIES})
 endif()
 
 file(GLOB HEADERS "*.h")
