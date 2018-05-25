@@ -62,12 +62,10 @@ private:
     std::vector<Constraint *> constraints;
     std::vector<ContainerObject *> objs;
 
-    CUDA_MASS * mass_arr;
-    CUDA_SPRING * spring_arr;
+    CUDA_MASS * d_mass;
+    CUDA_SPRING * d_spring;
 
     std::set<double> bpts; // list of breakpoints
-
-    void computeForces();
 
     CUDA_MASS * massToArray();
     CUDA_SPRING * springToArray();
@@ -78,5 +76,7 @@ private:
     void springFromArray();
     void fromArray();
 };
+
+__global__ void computeForces(CUDA_MASS * device_masses, CUDA_SPRING * device_springs, int num_masses, int num_springs);
 
 #endif //LOCH_SIM_H

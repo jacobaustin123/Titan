@@ -12,6 +12,7 @@ struct CUDA_MASS;
 class Mass {
 public:
     Mass() { m = 1.0; fixed = 0; dt = 0.01; T = 0; }
+    Mass(CUDA_MASS & mass) { m = mass.m; dt = mass.dt; T = mass.T; pos = mass.pos; vel = mass.vel; acc = mass.acc; force = mass.force; fixed = mass.fixed; }
 
     Mass(double mass, const Vec & position, int fixed = 0, double dt = 0.01) :
             m(mass), pos(position), fixed(fixed), dt(dt), T(0) {}; // defaults everything
@@ -56,6 +57,7 @@ public:
 };
 
 struct CUDA_MASS {
+    CUDA_MASS();
     CUDA_MASS(Mass & mass) { m = mass.getMass(); dt = mass.deltat(); T = mass.time(); pos = mass.getPosition(); vel = mass.getVelocity(); acc = mass.getAcceleration(); force = mass.getForce(); }
 
     double m; // mass in kg

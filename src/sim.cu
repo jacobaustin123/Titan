@@ -4,6 +4,8 @@
 
 #include "sim.h"
 
+#define G 9.81;
+
 Simulation::~Simulation() {
     for (Mass * m : masses)
         delete m;
@@ -40,69 +42,42 @@ void Simulation::setBreakpoint(double time) {
     bpts.insert(time);
 }
 
-#include <cmath>
-
-void Simulation::computeForces() {
-    Spring * s = spring_arr;
-
-    for (int i = 0; i < springs.size(); i++) { // update the forces
-        s -> setForce();
-        s++;
-    }
-
-    Mass * m = mass_arr; // constraints and gravity
-    for (int i = 0; i < masses.size(); i++) {
-        for (Constraint * c : constraints) {
-            m -> addForce( c -> getForce(m -> getPosition()) ); // add force based on position relative to constraint
-        }
-
-        m -> addForce(Vec(0, 0, - m -> getMass() * G)); // add gravity
-
-        m++;
-    }
-}
-
 CUDA_MASS * Simulation::massToArray() {
     CUDA_MASS * d_mass;
     cudaMalloc(d_mass, sizeof(CUDA_MASS) * masses.size());
 
-    CUDA_MASS * iter = d_mass;
+    Mass * data = new Mass[masses.size()];
+
+    Mass * h_iter = data;
+    CUDA_MASS * d_iter = d_mass;
 
     for (Mass * m : masses) {
-        CUDA_MASS mass(*m);
-        cudaMemcpy(iter, mass, sizeof(CUDA_MASS));
-        m -> arrayptr = iter;
-        iter++;
+        CUDA_MASS temp(*m);
+        memcpy(h_iter, &temp, sizeof(CUDA_MASS));
+        m -> arrayptr = d_iter;
+        h_iter++;
+        d_iter++;
     }
 
-    this -> mass_arr = d_mass;
+    cudaMemcpy(d_mass, data, sizeof(CUDA_MASS) * masses.size());
+
+    delete [] data;
+
+    this -> d_mass = d_mass;
 
     return d_mass;
 }
 
 void Simulation::toArray() {
     CUDA_MASS * d_mass = massToArray();
-    CUDA_SPRING * d_spring;
-    cudaMalloc(d_spring, sizeof(CUDA_SPRING) * springs.size());
-
-    CUDA_SPRING * spring_iter = d_spring;
-
-    for (Spring * s : springs) {
-        CUDA_SPRING spr(*s);
-        cudaMemcpy(spring_iter, spr, sizeof(CUDA_SPRING));
-        cudaMemcpy(spring_iter, s -> _left -> arrayptr, sizeof(CUDA_MASS *));
-        cudaMemcpy((char *) spring_iter + sizeof(CUDA_MASS *), s -> _right -> arrayptr, sizeof(CUDA_MASS *));
-        spring_iter++;
-    }
-
-    this -> spring_arr = d_spring;
+    CUDA_SPRING * d_spring = springToArray();
 }
 
 void Simulation::fromArray() {
     massFromArray();
 
-    delete [] spring_arr;
-    delete [] mass_arr;
+    delete [] d_spring;
+    delete [] d_mass;
 //    Spring * data = spring_arr;
 //
 //    for (Spring * s : springs) {
@@ -113,36 +88,80 @@ void Simulation::fromArray() {
 }
 
 void Simulation::massFromArray() {
-    Mass * data = mass_arr;
+    CUDA_MASS * h_data = new CUDA_MASS[masses.size()];
+    cudaMemcpy(d_mass, h_data, sizeof(CUDA_MASS) * masses.size());
 
-    for (Mass * m : masses) {
-        memcpy(m, data, sizeof(Mass));
-        data ++;
+    for (int i = 0; i < masses.size(); i++) {
+        *masses[i] = h_data[i];
     }
+
+    delete [] h_data;
+
+    cudaFree(d_mass);
 }
 
-Spring * Simulation::springToArray() {
-    Spring * data = new Spring[springs.size()];
-    Spring * iter = data;
+CUDA_SPRING * Simulation::springToArray() {
+    CUDA_SPRING * d_spring;
+    cudaMalloc(d_spring, sizeof(CUDA_SPRING) * springs.size());
+
+    Spring * h_spring = new Spring[springs.size()];
+
+    Spring * h_iter = h_spring;
+//    CUDA_SPRING * d_iter = d_spring;
 
     for (Spring * s : springs) {
-        memcpy(iter, s, sizeof(Spring));
-        iter++;
+        CUDA_SPRING temp(*s);
+        temp._left = s -> _left -> arrayptr;
+        temp._right = s -> _right -> arrayptr;
+        memcpy(h_iter, &temp, sizeof(CUDA_SPRING));
+        h_iter++;
     }
 
-    this -> spring_arr = data;
+    cudaMemcpy(d_spring, h_spring, sizeof(CUDA_SPRING) * springs.size());
 
-    return data;
+    delete [] h_spring;
+
+    this -> d_spring = d_spring;
+
+    return d_spring;
 }
 
 void Simulation::springFromArray() {
-    Spring * data = spring_arr;
+    cudaFree(d_spring);
+}
 
-    for (Spring * s : springs) {
-        memcpy(s, data, sizeof(Spring));
-        data++;
+__global__ void computeForces(CUDA_MASS * d_mass, CUDA_SPRING * d_spring, int num_masses, int num_springs) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+
+    if ( i < num_springs ) {
+        CUDA_SPRING & spring = d_spring[i];
+        Vec temp = (spring._right -> getPosition()) - (spring._left -> getPosition());
+        Vec force = spring._k * (spring._rest - temp.norm()) * (temp / temp.norm());
+        spring.right -> force += force;
+        spring.left -> force -= force;
+    }
+
+    if (i < num_masses) {
+        CUDA_MASS & mass = d_mass[i];
+        mass.force += Vec(0, 0, - G * mass.m);
     }
 }
+
+
+__global__ void update(CUDA_MASS * d_mass, int num_masses) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+
+    if (i < num_masses) {
+        CUDA_MASS & mass = d_mass[i];
+        mass.acc = mass.force / mass.m;
+        mass.vel = mass.vel + mass.acc * mass.dt;
+        mass.pos = mass.pos + mass.vel * mass.dt;
+    }
+
+    mass.time += mass.dt;
+    mass.force = Vec(0, 0, 0);
+}
+
 
 void Simulation::resume() {
     RUNNING = 1;
@@ -158,21 +177,8 @@ void Simulation::resume() {
             break;
         }
 
-        computeForces(); // compute forces on all masses
-
-//        printForces();
-
-        Mass * m = mass_arr;
-        for (int i = 0; i < masses.size(); i++) {
-            if (m -> time() <= T) { // !m -> isFixed()
-                m -> stepTime();
-                m -> update();
-            }
-
-            m -> resetForce();
-
-            m++;
-        }
+        computeForces(d_mass, d_spring, masses.size(), springs.size()); // KERNEL
+        update(d_mass, masses.size());
     }
 }
 
