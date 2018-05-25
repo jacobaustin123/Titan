@@ -17,3 +17,13 @@ void Mass::addForce(const Vec & v) { // add force vector to current force
 void Mass::resetForce() {
     force = Vec();
 }
+
+CUDA_MASS::CUDA_MASS(Mass &mass) {
+    m = mass.getMass();
+    dt = mass.deltat();
+    T = mass.time();
+    pos = mass.getPosition();
+    vel = mass.getVelocity();
+    acc = mass.getAcceleration();
+    force = mass.getForce();
+}

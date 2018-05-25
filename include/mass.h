@@ -7,22 +7,7 @@
 
 #include "vec.h"
 
-class Mass;
-
-struct CUDA_MASS {
-    CUDA_MASS();
-    CUDA_MASS(Mass & mass) { m = mass.getMass(); dt = mass.deltat(); T = mass.time(); pos = mass.getPosition(); vel = mass.getVelocity(); acc = mass.getAcceleration(); force = mass.getForce(); }
-
-    double m; // mass in kg
-    double dt; // update interval
-    double T; // local time
-    Vec pos; // position in m
-    Vec vel; // velocity in m/s
-    Vec acc; // acceleration in m/s^2
-    Vec force; // force in kg m / s^2
-
-    int fixed; // is the mass position fixed?
-};
+class CUDA_MASS;
 
 class Mass {
 public:
@@ -69,6 +54,21 @@ public:
 
     int fixed; // is the mass position fixed?
     struct CUDA_MASS * arrayptr;
+};
+
+struct CUDA_MASS {
+    CUDA_MASS();
+    CUDA_MASS(Mass & mass);
+
+    double m; // mass in kg
+    double dt; // update interval
+    double T; // local time
+    Vec pos; // position in m
+    Vec vel; // velocity in m/s
+    Vec acc; // acceleration in m/s^2
+    Vec force; // force in kg m / s^2
+
+    int fixed; // is the mass position fixed?
 };
 
 #endif //LOCH_MASS_H
