@@ -18,6 +18,7 @@ endif()
 
 file(GLOB HEADERS "*.h")
 cuda_add_executable(main src/main.cpp ${SOURCE_FILES} ${HEADERS})
+add_definitions(-std=c++0x)
 
 target_link_libraries(main CUDA)
 
