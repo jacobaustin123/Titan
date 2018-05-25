@@ -21,6 +21,6 @@ cuda_add_executable(main src/main.cpp ${SOURCE_FILES} ${HEADERS})
 add_definitions(-std=c++0x)
 
 target_link_libraries(main cuda)
-
+target_compile_options(-g -Wall)
 
 install(TARGETS main DESTINATION ${CMAKE_BINARY_DIR})
