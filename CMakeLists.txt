@@ -20,6 +20,7 @@ file(GLOB HEADERS "*.h")
 cuda_add_executable(main src/main.cpp ${SOURCE_FILES} ${HEADERS})
 add_definitions(-std=c++0x)
 set(CMAKE_CXX_FLAGS "-g -Wall")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
 
 target_link_libraries(main cuda)
 
