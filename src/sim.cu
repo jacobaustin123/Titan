@@ -58,8 +58,6 @@ CUDA_MASS * Simulation::massToArray() {
 
     cudaMemcpy(d_mass, data, sizeof(CUDA_MASS) * masses.size(), cudaMemcpyHostToDevice);
 
-    data -> pos.print();
-
     delete [] data;
 
     this -> d_mass = d_mass;
@@ -93,7 +91,6 @@ CUDA_SPRING * Simulation::springToArray() {
 void Simulation::toArray() {
     CUDA_MASS * d_mass = massToArray();
     CUDA_SPRING * d_spring = springToArray();
-    d_mass -> pos.print();
 }
 
 void Simulation::massFromArray() {
@@ -117,6 +114,16 @@ void Simulation::springFromArray() {
 void Simulation::fromArray() {
     massFromArray();
     springFromArray();
+}
+
+__global__ void printMasses(CUDA_MASS * d_masses, int num_masses) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+
+    if (i < num_masses) {
+        for (int j = 0; i < num_masses; j++) {
+            d_masses[j].pos.print();
+        }
+    }
 }
 
 __global__ void computeSpringForces(CUDA_SPRING * d_spring, int num_springs) {
@@ -158,9 +165,11 @@ __global__ void update(CUDA_MASS * d_mass, int num_masses) {
 
 void Simulation::resume() {
     int threadsPerBlock = 256;
+    int massBlocksPerGrid = (masses.size() + threadsPerBlock - 1) / threadsPerBlock;
 
     RUNNING = 1;
     toArray();
+    printMasses<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size());
 
     while (1) {
         T += dt;
