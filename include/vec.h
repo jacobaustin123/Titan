@@ -16,6 +16,9 @@
 #endif
 
 #include <iostream>
+#include <cuda_runtime.h>
+#include <helper_cuda.h>
+#include <cuda.h>
 
 class Vec {
 public:

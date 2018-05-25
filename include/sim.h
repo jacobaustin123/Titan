@@ -14,6 +14,9 @@
 #include <list>
 #include <vector>
 #include <set>
+#include <cuda_runtime.h>
+#include <helper_cuda.h>
+#include <cuda.h>
 
 static double G = 9.81;
 
@@ -77,6 +80,7 @@ private:
     void fromArray();
 };
 
-__global__ void computeForces(CUDA_MASS * device_masses, CUDA_SPRING * device_springs, int num_masses, int num_springs);
+__global__ void computeSpringForces(CUDA_SPRING * device_springs, int num_springs);
+__global__ void computeMassForces(CUDA_MASS * device_masses, int num_masses);
 
 #endif //LOCH_SIM_H

@@ -130,7 +130,7 @@ void Simulation::springFromArray() {
     cudaFree(d_spring);
 }
 
-__global__ void computeForces(CUDA_MASS * d_mass, CUDA_SPRING * d_spring, int num_masses, int num_springs) {
+__global__ void computeSpringForces(CUDA_SPRING * d_spring, int num_springs) {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
 
     if ( i < num_springs ) {
@@ -140,6 +140,10 @@ __global__ void computeForces(CUDA_MASS * d_mass, CUDA_SPRING * d_spring, int nu
         spring.right -> force += force;
         spring.left -> force -= force;
     }
+}
+
+__global__ void computeMassForces(CUDA_MASS * d_mass, int num_masses) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
 
     if (i < num_masses) {
         CUDA_MASS & mass = d_mass[i];
@@ -164,6 +168,8 @@ __global__ void update(CUDA_MASS * d_mass, int num_masses) {
 
 
 void Simulation::resume() {
+    int threadsPerBlock = 256;
+
     RUNNING = 1;
     toArray();
 
@@ -177,8 +183,13 @@ void Simulation::resume() {
             break;
         }
 
-        computeForces(d_mass, d_spring, masses.size(), springs.size()); // KERNEL
-        update(d_mass, masses.size());
+
+        int massBlocksPerGrid = (masses.size() + threadsPerBlock - 1) / threadsPerBlock;
+        int springBlocksPerGrid = (springs.size() + threadsPerBlock - 1) / threadsPerBlock;
+
+        computeSpringForces<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size()); // KERNEL
+        computeMassForces<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size()); // KERNEL
+        update<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size());
     }
 }
 
