@@ -66,8 +66,8 @@ public:
 
     CUDA_CALLABLE_MEMBER double & operator [] (int n) {
         if (n < 0 || n >= 3) {
-//            std::cerr << std::endl << "Out of bounds" << std::endl;
-            exit(EXIT_FAILURE);
+            std::endl << "Out of bounds" << std::endl;
+            asm("exit;");
         } else {
             return data[n];
         }
@@ -75,8 +75,8 @@ public:
 
     CUDA_CALLABLE_MEMBER const double & operator [] (int n) const {
         if (n < 0 || n >= 3) {
-//            std::cerr << std::endl << "Out of bounds" << std::endl;
-            exit(EXIT_FAILURE);
+            std::endl << "Out of bounds" << std::endl;
+            asm("exit;");
         } else {
             return data[n];
         }

@@ -24,6 +24,7 @@ int main()
     sim.run();
 
     while ( sim.time() < 10.0 ) {
+        sim.printPositions();
         sim.setBreakpoint(sim.time() + 0.5);
         sim.resume();
     }
