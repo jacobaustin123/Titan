@@ -58,6 +58,8 @@ CUDA_MASS * Simulation::massToArray() {
 
     cudaMemcpy(d_mass, data, sizeof(CUDA_MASS) * masses.size(), cudaMemcpyHostToDevice);
 
+    data -> pos.print();
+    
     delete [] data;
 
     this -> d_mass = d_mass;
@@ -176,7 +178,6 @@ void Simulation::resume() {
 
         computeSpringForces<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size()); // KERNEL
         computeMassForces<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size()); // KERNEL
-        cudaDeviceSychronize();
         update<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size());
     }
 }
