@@ -69,7 +69,6 @@ Mass * Simulation::massToArray() {
     for (Mass * m : masses) {
         memcpy(iter, m, sizeof(Mass));
         m -> arrayptr = iter;
-//        std::cout << iter -> getPosition() << m -> getPosition() << std::endl;
         iter++;
     }
 
@@ -204,32 +203,16 @@ Cube * Simulation::createCube(const Vec & center, double side_length) { // creat
 }
 
 void Simulation::printPositions() {
-    if (RUNNING) {
-        Mass * m = mass_arr;
-        for (int i = 0; i < masses.size(); i++) {
-            std::cout << m -> getPosition() << std::endl;
-            m++;
-        }
-    } else {
-        for (Mass * m : masses) {
+    for (Mass * m : masses) {
             std::cout << m->getPosition() << std::endl;
-        }
     }
 
     std::cout << std::endl;
 }
 
 void Simulation::printForces() {
-    if (RUNNING) {
-        Mass * m = mass_arr;
-        for (int i = 0; i < masses.size(); i++) {
-            std::cout << m -> getForce() << std::endl;
-            m++;
-        }
-    } else {
-        for (Mass * m : masses) {
-            std::cout << m->getForce() << std::endl;
-        }
+    for (Mass * m : masses) {
+        std::cout << m->getForce() << std::endl;
     }
 
     std::cout << std::endl;
