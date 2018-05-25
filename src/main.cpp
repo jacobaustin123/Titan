@@ -18,7 +18,7 @@ int main()
     for (Spring * s : c -> springs) {
         s -> setRestLength((s -> _right->getPosition() - s -> _left->getPosition()).norm());
     }
-    sim.createPlane(Vec(0, 0, 1), 0);
+//    sim.createPlane(Vec(0, 0, 1), 0);
 
     sim.setBreakpoint(0.01);
     sim.run();
