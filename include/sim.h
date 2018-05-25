@@ -62,15 +62,16 @@ private:
     std::vector<Constraint *> constraints;
     std::vector<ContainerObject *> objs;
 
-    Mass * mass_arr;
-    Spring * spring_arr;
+    CUDA_MASS * mass_arr;
+    CUDA_SPRING * spring_arr;
 
     std::set<double> bpts; // list of breakpoints
 
     void computeForces();
 
-    Mass * massToArray();
-    Spring * springToArray();
+    CUDA_MASS * massToArray();
+    CUDA_SPRING * springToArray();
+
     void toArray();
 
     void massFromArray();

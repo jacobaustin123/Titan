@@ -8,6 +8,8 @@
 #include "mass.h"
 #include "vec.h"
 
+struct CUDA_SPRING;
+
 class Spring {
 public:
     Spring() {};
@@ -23,6 +25,16 @@ public:
     void setLeft(Mass * left) { _left = left; }
     void setRight(Mass * right) { _right = right; }
     void setMasses(Mass * left, Mass * right) { _left = left; _right = right; }
+
+    Mass * _left; // pointer to left mass object
+    Mass * _right; // pointer to right mass object
+
+    double _k; // spring constant (N/m)
+    double _rest; // spring rest length (meters)
+};
+
+struct CUDA_SPRING {
+    CUDA_SPRING(Spring & s) { _left = s._left; _right = s._right; _k = s._k; _rest = s._rest; return *this; }
 
     Mass * _left; // pointer to left mass object
     Mass * _right; // pointer to right mass object

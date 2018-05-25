@@ -62,29 +62,34 @@ void Simulation::computeForces() {
     }
 }
 
-Mass * Simulation::massToArray() {
-    Mass * data = new Mass[masses.size()];
-    Mass * iter = data;
+CUDA_MASS * Simulation::massToArray() {
+    CUDA_MASS * d_mass;
+    cudaMalloc(d_mass, sizeof(CUDA_MASS) * masses.size());
+
+    CUDA_MASS * iter = d_mass;
 
     for (Mass * m : masses) {
-        memcpy(iter, m, sizeof(Mass));
+        CUDA_MASS mass(*m);
+        cudaMemcpy(iter, mass, sizeof(CUDA_MASS));
         m -> arrayptr = iter;
         iter++;
     }
 
-    this->mass_arr = data;
+    this -> mass_arr = d_mass;
 
-    return data;
+    return d_mass;
 }
 
 void Simulation::toArray() {
-    Mass * mass_data = massToArray();
-    Spring * spring_data = new Spring[springs.size()];
+    CUDA_MASS * d_mass = massToArray();
+    CUDA_SPRING * d_spring;
+    cudaMalloc(d_spring, sizeof(CUDA_SPRING) * springs.size());
 
-    Spring * spring_iter = spring_data;
+    CUDA_SPRING * spring_iter = d_spring;
 
     for (Spring * s : springs) {
-        memcpy(spring_iter, s, sizeof(Spring));
+        CUDA_SPRING spr(*s);
+        cudaMemcpy(spring_iter, spr, sizeof(CUDA_SPRING));
         spring_iter -> setMasses(s -> _left -> arrayptr, s -> _right -> arrayptr);
         spring_iter++;
     }
