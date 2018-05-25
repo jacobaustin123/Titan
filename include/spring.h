@@ -36,8 +36,8 @@ public:
 struct CUDA_SPRING {
     CUDA_SPRING(Spring & s) { _left = s._left; _right = s._right; _k = s._k; _rest = s._rest; return *this; }
 
-    Mass * _left; // pointer to left mass object
-    Mass * _right; // pointer to right mass object
+    CUDA_MASS * _left; // pointer to left mass object
+    CUDA_MASS * _right; // pointer to right mass object
 
     double _k; // spring constant (N/m)
     double _rest; // spring rest length (meters)

@@ -90,11 +90,12 @@ void Simulation::toArray() {
     for (Spring * s : springs) {
         CUDA_SPRING spr(*s);
         cudaMemcpy(spring_iter, spr, sizeof(CUDA_SPRING));
-        spring_iter -> setMasses(s -> _left -> arrayptr, s -> _right -> arrayptr);
+        cudaMemcpy(spring_iter, s -> _left -> arrayptr, sizeof(CUDA_MASS *));
+        cudaMemcpy((char *) spring_iter + sizeof(CUDA_MASS *), s -> _right -> arrayptr, sizeof(CUDA_MASS *));
         spring_iter++;
     }
 
-    this -> spring_arr = spring_data;
+    this -> spring_arr = d_spring;
 }
 
 void Simulation::fromArray() {
