@@ -59,7 +59,7 @@ CUDA_MASS * Simulation::massToArray() {
     cudaMemcpy(d_mass, data, sizeof(CUDA_MASS) * masses.size(), cudaMemcpyHostToDevice);
 
     data -> pos.print();
-    
+
     delete [] data;
 
     this -> d_mass = d_mass;
