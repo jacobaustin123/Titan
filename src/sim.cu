@@ -135,10 +135,10 @@ __global__ void computeSpringForces(CUDA_SPRING * d_spring, int num_springs) {
 
     if ( i < num_springs ) {
         CUDA_SPRING & spring = d_spring[i];
-        Vec temp = (spring._right -> getPosition()) - (spring._left -> getPosition());
+        Vec temp = (spring._right -> pos) - (spring._left -> pos);
         Vec force = spring._k * (spring._rest - temp.norm()) * (temp / temp.norm());
-        spring.right -> force += force;
-        spring.left -> force -= force;
+        spring._right -> force += force;
+        spring._left -> force -= force;
     }
 }
 
