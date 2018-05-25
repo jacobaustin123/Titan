@@ -91,6 +91,7 @@ CUDA_SPRING * Simulation::springToArray() {
 void Simulation::toArray() {
     CUDA_MASS * d_mass = massToArray();
     CUDA_SPRING * d_spring = springToArray();
+    d_mass -> pos.print();
 }
 
 void Simulation::massFromArray() {

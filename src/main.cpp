@@ -20,6 +20,8 @@ int main()
     }
 //    sim.createPlane(Vec(0, 0, 1), 0);
 
+    sim.printPositions();
+    
     sim.setBreakpoint(0.01);
     sim.run();
 
