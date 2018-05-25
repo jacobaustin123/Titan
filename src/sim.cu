@@ -118,7 +118,8 @@ void Simulation::fromArray() {
 
 __global__ void printMasses(CUDA_MASS * d_masses, int num_masses) {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
-
+    printf("%d", threadIdx.x);
+    
     if (i < 50) {
         printf("hello");
         //d_masses[i].pos.print();
@@ -226,7 +227,7 @@ void Simulation::printPositions() {
         std::cout << "\nDEVICE MASSES: " << std::endl;
         int threadsPerBlock = 256;
         int massBlocksPerGrid = (masses.size() + threadsPerBlock - 1) / threadsPerBlock;
-        std::cout << massBlocksPerGrid << threadsPerBlock << std::endl;
+        std::cout << massBlocksPerGrid << " " << threadsPerBlock << std::endl;
         printMasses<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size());
         cudaDeviceSynchronize();
     }
