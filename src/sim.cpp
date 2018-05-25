@@ -30,6 +30,12 @@ Spring * Simulation::createSpring() {
     return s;
 }
 
+Spring * Simulation::createSpring(Mass * m1, Mass * m2, double k, double len) {
+    Spring * s = new Spring(m1, m2, k, len);
+    springs.push_back(s);
+    return s;
+}
+
 void Simulation::setBreakpoint(double time) {
     bpts.insert(time);
 }
@@ -44,16 +50,16 @@ void Simulation::computeForces() {
         s++;
     }
 
-//    Mass * m = mass_arr; // constraints and gravity
-//    for (int i = 0; i < masses.size(); i++) {
-//        for (Constraint * c : constraints) {
-//            m -> addForce( c -> getForce(m -> getPosition()) ); // add force based on position relative to constraint
-//        }
-//
-//        m -> addForce(Vec(0, 0, - m -> getMass() * G)); // add gravity
-//
-//        m++;
-//    }
+    Mass * m = mass_arr; // constraints and gravity
+    for (int i = 0; i < masses.size(); i++) {
+        for (Constraint * c : constraints) {
+            m -> addForce( c -> getForce(m -> getPosition()) ); // add force based on position relative to constraint
+        }
+
+        m -> addForce(Vec(0, 0, - m -> getMass() * G)); // add gravity
+
+        m++;
+    }
 }
 
 Mass * Simulation::massToArray() {

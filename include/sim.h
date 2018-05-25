@@ -34,6 +34,8 @@ public:
 
     Mass * createMass();
     Spring * createSpring();
+    Spring * createSpring(Mass * m1, Mass * m2, double k = 1.0, double len = 1.0);
+
 
     void setBreakpoint(double time);
 
