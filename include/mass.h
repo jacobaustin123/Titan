@@ -10,7 +10,7 @@
 class Mass;
 
 struct CUDA_MASS {
-    CUDA_MASS();
+    CUDA_MASS() {};
     CUDA_MASS(Mass & mass);
 
     double m; // mass in kg
