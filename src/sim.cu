@@ -176,6 +176,7 @@ void Simulation::resume() {
 
         computeSpringForces<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size()); // KERNEL
         computeMassForces<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size()); // KERNEL
+        cudaDeviceSychronize();
         update<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size());
     }
 }
