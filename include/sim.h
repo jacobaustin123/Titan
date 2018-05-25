@@ -49,9 +49,9 @@ public:
     Plane * createPlane(const Vec & abc, double d ); // creates half-space ax + by + cz < d
 
     Cube * createCube(const Vec & center, double side_length); // creates half-space ax + by + cz < d
-
-    void printPositions();
-    void printForces();
+//
+//    void printPositions();
+//    void printForces();
 
 private:
     double dt; // set to 0 by default, when run is called will be set to min(mass dt) unless previously set
