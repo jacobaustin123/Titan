@@ -223,6 +223,7 @@ Cube * Simulation::createCube(const Vec & center, double side_length) { // creat
 }
 
 void Simulation::printPositions() {
+    std::cout << "Mass positions: " << std::endl;
     if (RUNNING) {
         int threadsPerBlock = 256;
         int massBlocksPerGrid = (masses.size() + threadsPerBlock - 1) / threadsPerBlock;
