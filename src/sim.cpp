@@ -30,6 +30,12 @@ Spring * Simulation::createSpring() {
     return s;
 }
 
+Spring * Simulation::createSpring(Mass * m1, Mass * m2, double k, double len) {
+    Spring * s = new Spring(m1, m2, k, len);
+    springs.push_back(s);
+    return s;
+}
+
 void Simulation::setBreakpoint(double time) {
     bpts.insert(time);
 }

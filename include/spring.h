@@ -11,7 +11,7 @@
 class Spring {
 public:
     Spring() {};
-    Spring(Mass * left, Mass * right) : _k(1.0), _rest(1.0), _left(left), _right(right) {};
+    Spring(Mass * left, Mass * right, double K = 1.0, double rest_len = 1.0) : _k(K), _rest(rest_len), _left(left), _right(right) {};
 
     Spring(double k, double rest_length, Mass * left, Mass * right) : _k(k), _rest(rest_length), _left(left), _right(right) {};
 

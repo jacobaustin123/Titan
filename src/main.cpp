@@ -234,17 +234,20 @@ int main()
 
     Cube * c = sim.createCube(Vec(0, 0, 10), 2.0); // create Cube object centered at (0, 0, 10) with side length 2.0
     c -> setKValue(1000); // set the spring constant for all springs to 10
-    c -> setMassValue(2.0); // set all masses to 2.0
-    c -> setDeltaTValue(0.0001); // set the dt value for all masses in the cube to 0.00001
-    c -> setRestLengthValue(3.0); // set the rest length of all springs to
+    c -> setMassValue(1.0); // set all masses to 2.0
+    c -> setDeltaTValue(0.00001); // set the dt value for all masses in the cube to 0.00001
+//    c -> setRestLengthValue(2.0); // set the rest length of all springs to
 
+    for (Spring * s : c -> springs) {
+        s -> setRestLength((s -> _right->getPosition() - s -> _left->getPosition()).norm());
+    }
     sim.createPlane(Vec(0, 0, 1), 0);
 
-    sim.setBreakpoint(0.03);
+    sim.setBreakpoint(0.01);
     sim.run();
 
     do{
-        usleep(2000);
+//        usleep(20);
 
 //        std::cout << c -> masses[0]->getPosition()[0] << std::endl;
         for (int i = 0; i < 8; i++) { // populate buffer with position data for cube vertices
