@@ -120,7 +120,8 @@ __global__ void printMasses(CUDA_MASS * d_masses, int num_masses) {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
 
     if (i < num_masses) {
-        d_masses[i].pos.print();
+        printf("hello");
+        //d_masses[i].pos.print();
     }
 }
 
