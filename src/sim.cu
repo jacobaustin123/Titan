@@ -4,8 +4,6 @@
 
 #include "sim.h"
 
-#define G 9.81;
-
 Simulation::~Simulation() {
     for (Mass * m : masses)
         delete m;
@@ -138,7 +136,7 @@ __global__ void computeSpringForces(CUDA_SPRING * d_spring, int num_springs) {
         Vec temp = (spring._right -> pos) - (spring._left -> pos);
         Vec force = spring._k * (spring._rest - temp.norm()) * (temp / temp.norm());
         spring._right -> force += force;
-        spring._left -> force -= force;
+        spring._left -> force += -force;
     }
 }
 
@@ -160,10 +158,10 @@ __global__ void update(CUDA_MASS * d_mass, int num_masses) {
         mass.acc = mass.force / mass.m;
         mass.vel = mass.vel + mass.acc * mass.dt;
         mass.pos = mass.pos + mass.vel * mass.dt;
-    }
 
-    mass.time += mass.dt;
-    mass.force = Vec(0, 0, 0);
+        mass.time += mass.dt;
+        mass.force = Vec(0, 0, 0);
+    }
 }
 
 
