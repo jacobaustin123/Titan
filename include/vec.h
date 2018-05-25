@@ -68,7 +68,6 @@ public:
         if (n < 0 || n >= 3) {
             printf("%d\n", "Out of bounds!");
             asm("exit;");
-            return 0;
         } else {
             return data[n];
         }
@@ -78,7 +77,6 @@ public:
         if (n < 0 || n >= 3) {
             printf("%d\n", "Out of bounds!");
             asm("exit;");
-            return 0;
         } else {
             return data[n];
         }
