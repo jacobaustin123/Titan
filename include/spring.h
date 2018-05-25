@@ -34,6 +34,7 @@ public:
 };
 
 struct CUDA_SPRING {
+    CUDA_SPRING() {};
     CUDA_SPRING(Spring & s, CUDA_MASS * left, CUDA_MASS * right) {
         _left = left;
         _right = right;

@@ -44,14 +44,13 @@ CUDA_MASS * Simulation::massToArray() {
     CUDA_MASS * d_mass;
     cudaMalloc((void **)&d_mass, sizeof(CUDA_MASS) * masses.size());
 
-    Mass * data = new Mass[masses.size()];
+    CUDA_MASS * data = new CUDA_MASS[masses.size()];
 
-    Mass * h_iter = data;
+    CUDA_MASS * h_iter = data;
     CUDA_MASS * d_iter = d_mass;
 
     for (Mass * m : masses) {
-        CUDA_MASS temp(*m);
-        memcpy(h_iter, &temp, sizeof(CUDA_MASS));
+        *h_iter = CUDA_MASS(*m);
         m -> arrayptr = d_iter;
         h_iter++;
         d_iter++;
@@ -66,49 +65,17 @@ CUDA_MASS * Simulation::massToArray() {
     return d_mass;
 }
 
-void Simulation::toArray() {
-    CUDA_MASS * d_mass = massToArray();
-    CUDA_SPRING * d_spring = springToArray();
-}
-
-void Simulation::fromArray() {
-    massFromArray();
-    springFromArray();
-
-//    Spring * data = spring_arr;
-//
-//    for (Spring * s : springs) {
-//        memcpy(s, data, sizeof(Spring));
-//        s -> setMasses(masses[(data -> _left) - mass_arr], masses[(data -> _right) - mass_arr]);
-//        data += sizeof(Spring);
-//    }
-}
-
-void Simulation::massFromArray() {
-    CUDA_MASS * h_data = new CUDA_MASS[masses.size()];
-    cudaMemcpy(h_data, d_mass, sizeof(CUDA_MASS) * masses.size(), cudaMemcpyDeviceToHost);
-
-    for (int i = 0; i < masses.size(); i++) {
-        *masses[i] = h_data[i];
-    }
-
-    delete [] h_data;
-
-    cudaFree(d_mass);
-}
-
 CUDA_SPRING * Simulation::springToArray() {
     CUDA_SPRING * d_spring;
     cudaMalloc((void **)& d_spring, sizeof(CUDA_SPRING) * springs.size());
 
-    Spring * h_spring = new Spring[springs.size()];
+    CUDA_SPRING * h_spring = new CUDA_SPRING[springs.size()];
 
-    Spring * h_iter = h_spring;
+    CUDA_SPRING * h_iter = h_spring;
 //    CUDA_SPRING * d_iter = d_spring;
 
     for (Spring * s : springs) {
-        CUDA_SPRING temp(*s, s -> _left -> arrayptr, s -> _right -> arrayptr);
-        memcpy(h_iter, &temp, sizeof(CUDA_SPRING));
+        *h_iter = CUDA_SPRING(*s, s -> _left -> arrayptr, s -> _right -> arrayptr);
         h_iter++;
     }
 
@@ -121,8 +88,32 @@ CUDA_SPRING * Simulation::springToArray() {
     return d_spring;
 }
 
+void Simulation::toArray() {
+    CUDA_MASS * d_mass = massToArray();
+    CUDA_SPRING * d_spring = springToArray();
+}
+
+void Simulation::massFromArray() {
+    CUDA_MASS * h_data = new CUDA_MASS[masses.size()];
+    cudaMemcpy(h_data, d_mass, sizeof(CUDA_MASS) * masses.size(), cudaMemcpyDeviceToHost);
+
+    for (int i = 0; i < masses.size(); i++) {
+        *masses[i] = Mass(h_data[i]);
+    }
+
+    delete [] h_data;
+
+    cudaFree(d_mass);
+}
+
 void Simulation::springFromArray() {
     cudaFree(d_spring);
+}
+
+
+void Simulation::fromArray() {
+    massFromArray();
+    springFromArray();
 }
 
 __global__ void computeSpringForces(CUDA_SPRING * d_spring, int num_springs) {
