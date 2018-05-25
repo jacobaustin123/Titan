@@ -170,15 +170,15 @@ void Simulation::resume() {
     }
 }
 
-int compareMass(const Mass * x, const Mass * y) {
+int compareMass(const Mass * x, const Mass * y) { // Compare two masses' dts
     return x -> deltat() < y -> deltat() ? 0 : 1;
 }
 
 void Simulation::run() { // repeatedly run next
     T = 0;
     dt = 0.01; // (*std::min_element(masses.begin(), masses.end(), compareMass)) -> deltat();
-
-    resume();
+    
+    resume(); //Start the simulation for the first time
 }
 
 Plane * Simulation::createPlane(const Vec & abc, double d ) { // creates half-space ax + by + cz < d
