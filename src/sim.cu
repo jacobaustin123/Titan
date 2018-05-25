@@ -115,7 +115,7 @@ CUDA_SPRING * Simulation::springToArray() {
         h_iter++;
     }
 
-    cudaMemcpy(d_spring, h_spring, sizeof(CUDA_SPRING) * springs.size());
+    cudaMemcpy(d_spring, h_spring, sizeof(CUDA_SPRING) * springs.size(), cudaMemcpyHostToDevice);
 
     delete [] h_spring;
 
@@ -145,7 +145,7 @@ __global__ void computeMassForces(CUDA_MASS * d_mass, int num_masses) {
 
     if (i < num_masses) {
         CUDA_MASS & mass = d_mass[i];
-        mass.force += Vec(0, 0, - G * mass.m);
+        mass.force += Vec(0, 0, - 9.81 * mass.m);
     }
 }
 
@@ -159,7 +159,7 @@ __global__ void update(CUDA_MASS * d_mass, int num_masses) {
         mass.vel = mass.vel + mass.acc * mass.dt;
         mass.pos = mass.pos + mass.vel * mass.dt;
 
-        mass.time += mass.dt;
+        mass.T += mass.dt;
         mass.force = Vec(0, 0, 0);
     }
 }
