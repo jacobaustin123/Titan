@@ -228,7 +228,7 @@ void Simulation::printPositions() {
         int threadsPerBlock = 256;
         int massBlocksPerGrid = (masses.size() + threadsPerBlock - 1) / threadsPerBlock;
         std::cout << massBlocksPerGrid << " " << threadsPerBlock << std::endl;
-        printMasses<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size());
+        printMasses<<<12, threadsPerBlock>>>(d_mass, masses.size());
         cudaDeviceSynchronize();
     }
     else {
