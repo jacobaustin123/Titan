@@ -9,18 +9,18 @@ include_directories(include)
 
 set(SOURCE_FILES src/vec.cu src/sim.cu src/sim.cu src/mass.cpp src/spring.cpp src/object.cpp)
 
-find_package(CUDA REQUIRED)
-if (CUDA_FOUND)
-    message(STATUS "CUDA FOUND")
-    include_directories(${CUDA_INCLUDE_DIRS})
-    link_libraries(${CUDA_LIBRARIES})
+find_package(cuda REQUIRED)
+if (cuda_FOUND)
+    message(STATUS "cuda FOUND")
+    include_directories(${cuda_INCLUDE_DIRS})
+    link_libraries(${cuda_LIBRARIES})
 endif()
 
 file(GLOB HEADERS "*.h")
 cuda_add_executable(main src/main.cpp ${SOURCE_FILES} ${HEADERS})
 add_definitions(-std=c++0x)
 
-target_link_libraries(main CUDA)
+target_link_libraries(main cuda)
 
 
 install(TARGETS main DESTINATION ${CMAKE_BINARY_DIR})
