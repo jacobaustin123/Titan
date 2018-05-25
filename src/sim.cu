@@ -59,7 +59,7 @@ CUDA_MASS * Simulation::massToArray() {
         d_iter++;
     }
 
-    cudaMemcpy(d_mass, data, sizeof(CUDA_MASS) * masses.size());
+    cudaMemcpy(d_mass, data, sizeof(CUDA_MASS) * masses.size(), cudaMemcpyHostToDevice);
 
     delete [] data;
 
@@ -89,7 +89,7 @@ void Simulation::fromArray() {
 
 void Simulation::massFromArray() {
     CUDA_MASS * h_data = new CUDA_MASS[masses.size()];
-    cudaMemcpy(d_mass, h_data, sizeof(CUDA_MASS) * masses.size());
+    cudaMemcpy(h_data, d_mass, sizeof(CUDA_MASS) * masses.size(), cudaMemcpyDeviceToHost);
 
     for (int i = 0; i < masses.size(); i++) {
         *masses[i] = h_data[i];
