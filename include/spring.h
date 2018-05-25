@@ -34,7 +34,12 @@ public:
 };
 
 struct CUDA_SPRING {
-    CUDA_SPRING(Spring & s) { _left = s._left; _right = s._right; _k = s._k; _rest = s._rest; return *this; }
+    CUDA_SPRING(Spring & s, CUDA_MASS * left, CUDA_MASS * m2) {
+        _left = left;
+        _right =right;
+        _k = s._k;
+        _rest = s._rest;
+    }
 
     CUDA_MASS * _left; // pointer to left mass object
     CUDA_MASS * _right; // pointer to right mass object

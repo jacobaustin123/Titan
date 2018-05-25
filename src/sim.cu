@@ -108,9 +108,7 @@ CUDA_SPRING * Simulation::springToArray() {
 //    CUDA_SPRING * d_iter = d_spring;
 
     for (Spring * s : springs) {
-        CUDA_SPRING temp(*s);
-        temp._left = s -> _left -> arrayptr;
-        temp._right = s -> _right -> arrayptr;
+        CUDA_SPRING temp(*s, s -> _left -> arrayptr, s -> _right -> arrayptr);
         memcpy(h_iter, &temp, sizeof(CUDA_SPRING));
         h_iter++;
     }

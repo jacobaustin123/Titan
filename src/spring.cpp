@@ -14,3 +14,4 @@ void Spring::setForce() { // computes force on right object. left force is - rig
     _right -> addForce(f);
     _left -> addForce(-f);
 }
+
