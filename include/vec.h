@@ -115,7 +115,7 @@ public:
     } // print
 
     CUDA_CALLABLE_MEMBER void print() {
-        printf("(%d, %d, %d)\n", data[0], data[1], data[2]);
+        printf("(%3f, %3f, %3f)\n", data[0], data[1], data[2]);
     }
 
     CUDA_CALLABLE_MEMBER double norm() const {
