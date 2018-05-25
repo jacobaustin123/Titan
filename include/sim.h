@@ -15,7 +15,6 @@
 #include <vector>
 #include <set>
 #include <cuda_runtime.h>
-#include <helper_cuda.h>
 #include <cuda.h>
 
 static double G = 9.81;

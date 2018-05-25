@@ -44,7 +44,7 @@ void Simulation::setBreakpoint(double time) {
 
 CUDA_MASS * Simulation::massToArray() {
     CUDA_MASS * d_mass;
-    cudaMalloc(d_mass, sizeof(CUDA_MASS) * masses.size());
+    cudaMalloc((void **)&d_mass, sizeof(CUDA_MASS) * masses.size());
 
     Mass * data = new Mass[masses.size()];
 
@@ -102,7 +102,7 @@ void Simulation::massFromArray() {
 
 CUDA_SPRING * Simulation::springToArray() {
     CUDA_SPRING * d_spring;
-    cudaMalloc(d_spring, sizeof(CUDA_SPRING) * springs.size());
+    cudaMalloc((void **)& d_spring, sizeof(CUDA_SPRING) * springs.size());
 
     Spring * h_spring = new Spring[springs.size()];
 
