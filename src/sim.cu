@@ -220,14 +220,14 @@ Cube * Simulation::createCube(const Vec & center, double side_length) { // creat
     return cube;
 }
 
-//void Simulation::printPositions() {
-//    for (Mass * m : masses) {
-//            std::cout << m->getPosition() << std::endl;
-//    }
-//
-//    std::cout << std::endl;
-//}
-//
+void Simulation::printPositions() {
+    for (Mass * m : masses) {
+            std::cout << m->getPosition() << std::endl;
+    }
+
+    std::cout << std::endl;
+}
+
 //void Simulation::printForces() {
 //    for (Mass * m : masses) {
 //        std::cout << m->getForce() << std::endl;

@@ -110,9 +110,9 @@ public:
         return Vec(v1.data[0] / v2.data[0], v1.data[1] / v2.data[1], v1.data[2] / v2.data[2]);
     } // two Vecs (elementwise)
 
-//    CUDA_CALLABLE_MEMBER friend std::ostream & operator << (std::ostream & strm, const Vec & v) {
-//        return strm << "(" << v[0] << ", " << v[1] << ", " << v[2] << ")";
-//    } // print
+    friend std::ostream & operator << (std::ostream & strm, const Vec & v) {
+        return strm << "(" << v[0] << ", " << v[1] << ", " << v[2] << ")";
+    } // print
 
     CUDA_CALLABLE_MEMBER double norm() const {
         return sqrt(pow(data[0], 2) + pow(data[1], 2) + pow(data[2], 2));

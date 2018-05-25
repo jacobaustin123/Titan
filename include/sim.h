@@ -50,7 +50,7 @@ public:
 
     Cube * createCube(const Vec & center, double side_length); // creates half-space ax + by + cz < d
 //
-//    void printPositions();
+    void printPositions();
 //    void printForces();
 
 private:
