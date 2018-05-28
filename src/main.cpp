@@ -230,6 +230,9 @@ int main()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size(), &indices[0], GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
 
+    glGenBuffers(1, &vertexbuffer); // bind cube vertex buffer
+    glfwSwapInterval(0);
+
     Simulation sim; // initialize simulation object
 
     Cube * c = sim.createCube(Vec(0, 0, 10), 2.0); // create Cube object centered at (0, 0, 10) with side length 2.0
@@ -261,7 +264,6 @@ int main()
 //        if (count % 1000 == 0) // print some random information every 1000 iterations
 //            std::cout << count << ": " << c ->masses[0] -> getPosition() << std::endl;
 
-        glGenBuffers(1, &vertexbuffer); // bind cube vertex buffer
         glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
         glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
 
@@ -343,7 +345,6 @@ int main()
 
 
         // Swap buffers
-        glfwSwapInterval(0);
         glfwSwapBuffers(window);
         glfwPollEvents();
 
