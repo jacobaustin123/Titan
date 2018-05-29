@@ -37,7 +37,7 @@ Spring * Simulation::createSpring(Mass * m1, Mass * m2, double k, double len) {
 }
 
 void Simulation::setBreakpoint(double time) {
-    bpts.insert(time);
+    bpts.insert(Event(nullptr, time));
 }
 
 #include <cmath>
@@ -145,12 +145,20 @@ void Simulation::resume() {
     while (1) {
         T += dt;
 
-        if (!bpts.empty() && *bpts.begin() <= T) {
-            bpts.erase(bpts.begin());
+        if (!bpts.empty() && (*bpts.begin()).time <= T) {
             fromArray();
-            RUNNING = 0;
-            break;
+            if ((*bpts.begin()).func != nullptr) {
+                (*bpts.begin()).func();
+                bpts.erase(bpts.begin());
+                resume();
+                break;
+            } else {
+                bpts.erase(bpts.begin());
+                RUNNING = 0;
+                break;
+            }
         }
+
 
         computeForces(); // compute forces on all masses
 

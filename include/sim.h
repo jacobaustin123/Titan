@@ -27,6 +27,18 @@ static double G = 9.81;
 
 // std::vector<Constraint *> constraints; // global constraints, for initial example
 
+struct Event {
+    Event(void (*func)(), double time) { this -> func = func; this -> time = time; }
+    void (*func)();
+    double time;
+};
+
+struct compareEvents {
+    bool operator()(const Event & a, const Event & b) {
+        return a.time < b.time;
+    }
+};
+
 class Simulation {
 public:
     Simulation() { dt = 0; RUNNING = 0; }
@@ -36,6 +48,13 @@ public:
     Spring * createSpring();
     Spring * createSpring(Mass * m1, Mass * m2, double k = 1.0, double len = 1.0);
 
+    Mass * getMass(int i) { return masses[i]; }
+    Spring * getSpring(int i) { return springs[i]; }
+    ContainerObject * getObject(int i) { return objs[i]; }
+
+    void runFunc(void (*func)(), double time) {
+        bpts.insert(Event(func, time));
+    }
 
     void setBreakpoint(double time);
 
@@ -45,13 +64,11 @@ public:
     double time() { return T; }
 
     Plane * createPlane(const Vec & abc, double d ); // creates half-space ax + by + cz < d
-
     Cube * createCube(const Vec & center, double side_length); // creates half-space ax + by + cz < d
 
     void printPositions();
     void printForces();
 
-private:
     double dt; // set to 0 by default, when run is called will be set to min(mass dt) unless previously set
     double T; // global simulation time
 
@@ -65,7 +82,7 @@ private:
     Mass * mass_arr;
     Spring * spring_arr;
 
-    std::set<double> bpts; // list of breakpoints
+    std::set<Event, compareEvents> bpts; // list of breakpoints
 
     void computeForces();
 
