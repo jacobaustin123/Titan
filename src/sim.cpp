@@ -151,6 +151,7 @@ void Simulation::resume() {
                 (*bpts.begin()).func();
                 bpts.erase(bpts.begin());
                 resume();
+                RUNNING = 0;
                 break;
             } else {
                 bpts.erase(bpts.begin());

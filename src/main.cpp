@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <cmath>
 
 // Include GLEW
 #include <GL/glew.h>
@@ -245,7 +246,7 @@ int main()
     Cube * c = sim.createCube(Vec(0, 0, 10), 2.0); // create Cube object centered at (0, 0, 10) with side length 2.0
     c -> setKValue(1000); // set the spring constant for all springs to 10
     c -> setMassValue(1.0); // set all masses to 2.0
-    c -> setDeltaTValue(0.0001); // set the dt value for all masses in the cube to 0.00001
+    c -> setDeltaTValue(0.00005); // set the dt value for all masses in the cube to 0.00001
 //    c -> setRestLengthValue(2.0); // set the rest length of all springs to
 
     for (Spring * s : c -> springs) {
@@ -253,11 +254,15 @@ int main()
     }
     sim.createPlane(Vec(0, 0, 1), 0);
 
-    sim.runFunc(translateMass, 0.5);
-    sim.runFunc(translateMass, 1.0);
-    sim.runFunc(translateMass, 1.5);
+    sim.runFunc(translateMass, 1000);
+    sim.runFunc(translateMass, 2000);
+    sim.runFunc(translateMass, 3000);
 
-    sim.setBreakpoint(0.01);
+    sim.setBreakpoint(1.0);
+
+    for (Event e : sim.bpts)
+        std::cout << e.time << " ";
+
     sim.run();
 
     do{
@@ -359,11 +364,11 @@ int main()
         glfwSwapBuffers(window);
         glfwPollEvents();
 
-        sim.setBreakpoint(sim.time() + 0.01);
+        sim.setBreakpoint(sim.time() + 2);
         sim.resume();
 
     } // Check if the ESC key was pressed or the window was closed
-    while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS && glfwWindowShouldClose(window) == 0 && sim.time() < 100.0 );
+    while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS && glfwWindowShouldClose(window) == 0);
 
             // Cleanup VBO and shader
     glDeleteBuffers(1, &vertexbuffer);
