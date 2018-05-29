@@ -30,7 +30,6 @@ public:
     friend Vec operator * (const Vec & v1, const Vec & v2); // two Vecs (elementwise)
 
     friend Vec operator / (const Vec & v, const double x); // double and vec
-//    friend Vec operator / (const double x, const Vec & v); // not needed
     friend Vec operator / (const Vec & v1, const Vec & v2); // two Vecs (elementwise)
 
     friend std::ostream & operator << (std::ostream &, const Vec &); // print
@@ -44,5 +43,6 @@ private:
 
 double dot(const Vec & a, const Vec & b);
 
+Vec cross(const Vec &v1, const Vec &v2);
 #endif
 
