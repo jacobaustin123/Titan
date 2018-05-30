@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 include_directories(include)
 
-set(SOURCE_FILES src/vec.cpp src/sim.cpp src/common/shader.cpp src/sim.cpp src/mass.cpp src/spring.cpp src/object.cpp)
+set(SOURCE_FILES src/vec.cpp src/sim.cpp src/common/shader.cpp src/sim.cpp src/mass.cpp src/spring.cpp src/object.cpp src/graphics.cpp)
 
 file(GLOB HEADERS "*.h")
 
@@ -42,8 +42,8 @@ if (glm_FOUND)
     link_libraries(${glm_LIBRARIES})
 endif()
 
-add_executable(main src/main.cpp ${SOURCE_FILES} ${HEADERS} include/graphics.h)
-#add_executable(debug src/mydebug.cpp ${SOURCE_FILES} ${HEADERS} src/graphics.cpp)
+add_executable(main src/main.cpp ${SOURCE_FILES} ${HEADERS})
+#add_executable(debug src/mydebug.cpp ${SOURCE_FILES} ${HEADERS})
 
 target_link_libraries(main glfw)
 target_link_libraries(main gl)

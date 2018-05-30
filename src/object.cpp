@@ -71,7 +71,7 @@ Cube::Cube(const Vec & center, double side_length) {
     for (int i = 0; i < 8; i++) { // add the appropriate springs
         for (int j = i + 1; j < 8; j++) {
             springs.push_back(new Spring(masses[i], masses[j]));
-            std::cout << count << ": " << i << ", " << j << std::endl; // debug
+//            std::cout << count << ": " << i << ", " << j << std::endl; // debug
             count++; // debug
         }
     }

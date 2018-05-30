@@ -20,7 +20,7 @@ using namespace glm;
 #include "vec.h"
 #include "sim.h"
 
-#include "graphics.cpp"
+#include "graphics.h"
 
 // #cmakedefine SOURCE_DIR "${SOURCE_DIR}"
 
