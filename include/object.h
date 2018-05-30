@@ -6,6 +6,16 @@
 #include "spring.h"
 #include "vec.h"
 
+// Include GLEW
+#include <GL/glew.h>
+
+// Include GLFW
+#include <GLFW/glfw3.h>
+
+// Include GLM
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 static double DISPL_CONST = 10000;
 
 // base class for larger objects like Cubes, etc.
@@ -19,6 +29,8 @@ public:
 class Constraint : public BaseObject { // constraint like plane or sphere which applies force to masses
 public:
     virtual Vec getForce(const Vec & position) = 0; // returns force on an object based on its position, e.g. plane or
+    virtual void generateBuffers() = 0;
+    virtual void draw() = 0;
 };
 
 class ContainerObject : public BaseObject { // contains and manipulates groups of masses and springs
@@ -28,6 +40,10 @@ public:
     void setDeltaTValue(double m); // set masses for all Mass objects
     void setRestLengthValue(double len); // set masses for all Mass objects
     void makeFixed();
+
+    virtual void generateBuffers() = 0;
+    virtual void updateBuffers() = 0;
+    virtual void draw() = 0;
 
     // we can have more of these
     std::vector<Mass *> masses;
@@ -53,17 +69,34 @@ public:
     Vec _normal;
     double _offset;
     void translate(const Vec & displ);
+
+    void generateBuffers();
+    void draw();
+
+    GLuint vertices;
+    GLuint colors;
 };
 
 class Cube : public ContainerObject {
 public:
     Cube(const Vec & center, double side_length = 1.0);
-    virtual ~Cube() {};
+    virtual ~Cube() {
+        glDeleteBuffers(1, &colors);
+        glDeleteBuffers(1, &indices);
+        glDeleteBuffers(1, &vertices);
+    };
 
     void translate(const Vec & displ);
+    void generateBuffers();
+    void updateBuffers();
+    void draw();
 
     double _side_length;
     Vec _center;
+
+    GLuint colors;
+    GLuint vertices;
+    GLuint indices;
 };
 
 #endif //LOCH_OBJECT_H

@@ -16,6 +16,12 @@ Simulation::~Simulation() {
 
     for (ContainerObject * o : objs)
         delete o;
+
+    glDeleteProgram(programID);
+    glDeleteVertexArrays(1, &VertexArrayID);
+
+//     Close OpenGL window and terminate GLFW
+    glfwTerminate();
 }
 
 Mass * Simulation::createMass() {
@@ -176,6 +182,32 @@ void Simulation::resume() {
 
             m++;
         }
+
+
+        if (fmod(T, 500 * dt) < dt) {
+            fromArray();
+
+            clearScreen();
+
+            for (ContainerObject * c : objs) {
+                c -> updateBuffers();
+                c -> draw();
+            }
+
+            for (Constraint * c : constraints) {
+                c -> draw();
+            }
+
+            renderScreen();
+
+            if (glfwGetKey(window, GLFW_KEY_ESCAPE ) == GLFW_PRESS || glfwWindowShouldClose(window) != 0) {
+                RUNNING = 0;
+                fromArray();
+                break;
+            }
+
+            toArray();
+        }
     }
 }
 
@@ -187,7 +219,45 @@ void Simulation::run() { // repeatedly run next
     T = 0;
     dt = 0.01; // (*std::min_element(masses.begin(), masses.end(), compareMass)) -> deltat();
 
+    this -> window = createGLFWWindow();
+
+    GLuint VertexArrayID;
+    glGenVertexArrays(1, &VertexArrayID);
+    glBindVertexArray(VertexArrayID);
+
+    // Create and compile our GLSL program from the shaders
+    this -> programID = LoadShaders("shaders/TransformVertexShader.vertexshader", "shaders/ColorFragmentShader.fragmentshader");
+    // Get a handle for our "MVP" uniform
+    this -> MatrixID = glGetUniformLocation(programID, "MVP");
+
+    this -> MVP = getProjection();
+
+    for (ContainerObject * c : objs) {
+        c -> generateBuffers();
+    }
+
+    for (Constraint * c : constraints) {
+        c -> generateBuffers();
+    }
+
     resume();
+}
+
+void Simulation::clearScreen() {
+    // Clear the screen
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear screen
+
+    // Use our shader
+    glUseProgram(programID);
+
+    // Send our transformation to the currently bound shader in the "MVP" uniform
+    glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+}
+
+void Simulation::renderScreen() {
+    // Swap buffers
+    glfwSwapBuffers(window);
+    glfwPollEvents();
 }
 
 Plane * Simulation::createPlane(const Vec & abc, double d ) { // creates half-space ax + by + cz < d

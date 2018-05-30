@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.7)
 project(Loch)
 
+set(CMAKE_CXX_FLAGS "-g -Wall -Wextra")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_STANDARD 11)
 
 set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
@@ -40,18 +42,18 @@ if (glm_FOUND)
     link_libraries(${glm_LIBRARIES})
 endif()
 
-add_executable(main src/main.cpp ${SOURCE_FILES} ${HEADERS})
-add_executable(debug src/mydebug.cpp ${SOURCE_FILES} ${HEADERS})
+add_executable(main src/main.cpp ${SOURCE_FILES} ${HEADERS} include/graphics.h)
+#add_executable(debug src/mydebug.cpp ${SOURCE_FILES} ${HEADERS} src/graphics.cpp)
 
 target_link_libraries(main glfw)
 target_link_libraries(main gl)
 target_link_libraries(main glew)
 target_link_libraries(main glm)
 
-target_link_libraries(debug glfw)
-target_link_libraries(debug gl)
-target_link_libraries(debug glew)
-target_link_libraries(debug glm)
+#target_link_libraries(debug glfw)
+#target_link_libraries(debug gl)
+#target_link_libraries(debug glew)
+#target_link_libraries(debug glm)
 
-install(TARGETS main debug RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
+install(TARGETS main RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
 file(COPY src/shaders DESTINATION ${CMAKE_BINARY_DIR})

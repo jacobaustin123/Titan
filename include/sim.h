@@ -9,6 +9,8 @@
 #include "mass.h"
 #include "object.h"
 #include "vec.h"
+#include "graphics.h"
+#include "../src/common/shader.h"
 
 #include <algorithm>
 #include <list>
@@ -81,6 +83,15 @@ public:
 
     Mass * mass_arr;
     Spring * spring_arr;
+
+    GLuint VertexArrayID;
+    GLuint programID;
+    GLuint MatrixID;
+    GLFWwindow * window;
+    glm::mat4 MVP;
+
+    void clearScreen();
+    void renderScreen();
 
     std::set<Event, compareEvents> bpts; // list of breakpoints
 
