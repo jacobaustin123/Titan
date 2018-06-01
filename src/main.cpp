@@ -1,10 +1,10 @@
 // Include standard headers
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 #include "vec.h"
 #include "sim.h"
+#include <Windows.h>
 
 int main()
 {
@@ -18,18 +18,22 @@ int main()
     for (Spring * s : c -> springs) {
         s -> setRestLength((s -> _right->getPosition() - s -> _left->getPosition()).norm());
     }
-//    sim.createPlane(Vec(0, 0, 1), 0);
+    sim.createPlane(Vec(0, 0, 1), 0);
 
     sim.printPositions();
 
     sim.setBreakpoint(0.5);
     sim.run();
 
-    while ( sim.time() < 10.0 ) {
-        sim.printPositions();
-        sim.setBreakpoint(sim.time() + 0.5);
-        sim.resume();
-    }
+	while (sim.time() < 10.0) {
+		sim.printPositions();
+//
+		sim.setBreakpoint(sim.time() + 0.5); // or sim.next()
+		sim.resume();
+//
+	}
+
+	Sleep(1000000);
 
     return 0;
 }

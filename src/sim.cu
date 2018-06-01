@@ -161,7 +161,7 @@ __global__ void update(CUDA_MASS * d_mass, int num_masses) {
 }
 
 void Simulation::resume() {
-    int threadsPerBlock = 256;
+    int threadsPerBlock = 1024;
 
     RUNNING = 1;
     toArray();
@@ -223,10 +223,10 @@ Cube * Simulation::createCube(const Vec & center, double side_length) { // creat
 void Simulation::printPositions() {
     if (RUNNING) {
         std::cout << "\nDEVICE MASSES: " << std::endl;
-        int threadsPerBlock = 256;
+        int threadsPerBlock = 1024;
         int massBlocksPerGrid = (masses.size() + threadsPerBlock - 1) / threadsPerBlock;
         std::cout << massBlocksPerGrid << " " << threadsPerBlock << std::endl;
-        printMasses<<<12, threadsPerBlock>>>(d_mass, masses.size());
+        printMasses<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size());
         cudaDeviceSynchronize();
     }
     else {
