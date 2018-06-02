@@ -155,6 +155,11 @@ void Simulation::resume() {
             fromArray();
             if ((*bpts.begin()).func != nullptr) {
                 (*bpts.begin()).func();
+                if ((*bpts.begin()).repeat != 0) {
+                    Event new_event = (*bpts.begin());
+                    new_event.time += new_event.repeat;
+                    bpts.insert(new_event);
+                }
                 bpts.erase(bpts.begin());
                 resume();
                 RUNNING = 0;
@@ -184,7 +189,7 @@ void Simulation::resume() {
         }
 
 
-        if (fmod(T, 500 * dt) < dt) {
+        if (fmod(T, 2500 * dt) < dt) {
             fromArray();
 
             clearScreen();
@@ -217,7 +222,7 @@ int compareMass(const Mass * x, const Mass * y) {
 
 void Simulation::run() { // repeatedly run next
     T = 0;
-    dt = 0.01; // (*std::min_element(masses.begin(), masses.end(), compareMass)) -> deltat();
+    dt = (*std::min_element(masses.begin(), masses.end(), compareMass)) -> deltat();
 
     this -> window = createGLFWWindow();
 

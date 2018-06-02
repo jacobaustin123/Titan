@@ -30,9 +30,15 @@ static double G = 9.81;
 // std::vector<Constraint *> constraints; // global constraints, for initial example
 
 struct Event {
-    Event(void (*func)(), double time) { this -> func = func; this -> time = time; }
+    Event(void (*func)(), double time, double repeat = 0) {
+        this -> func = func;
+        this -> time = time;
+        this -> repeat = repeat;
+    }
+
     void (*func)();
     double time;
+    double repeat;
 };
 
 struct compareEvents {
@@ -54,8 +60,8 @@ public:
     Spring * getSpring(int i) { return springs[i]; }
     ContainerObject * getObject(int i) { return objs[i]; }
 
-    void runFunc(void (*func)(), double time) {
-        bpts.insert(Event(func, time));
+    void runFunc(void (*func)(), double time, double repeat = 0) {
+        bpts.insert(Event(func, time, repeat));
     }
 
     void setBreakpoint(double time);

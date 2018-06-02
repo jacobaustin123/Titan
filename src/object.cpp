@@ -3,6 +3,7 @@
 //
 
 #include "object.h"
+#include <cmath>
 
 //class Plane : public Constraint { // plane constraint, force is proportional to negative distance wrt plane
 //public:
@@ -14,9 +15,21 @@
 //    double _offset;
 //};
 
+inline double round( double val )
+{
+    if( val < 0 ) return ceil(val - 0.5);
+    return floor(val + 0.5);
+}
+
+inline Vec round(const Vec & v, float n) {
+    Vec temp = pow(10.0, n) * v;
+    return Vec(round(temp[0]), round(temp[1]), round(temp[2])) / pow(10.0, n);
+}
+
 Vec Plane::getForce(const Vec & position) { // returns force on an object based on its position, e.g. plane or
     double disp = dot(position, _normal) - _offset;
-    return (disp < 0) ? - DISPL_CONST * disp * _normal : 0 * _normal;
+//    if (disp < 0) printf("%.15e\n", round(- disp * DISPL_CONST * _normal, 4)[2]);
+    return (disp < 0) ? - disp * DISPL_CONST * _normal : 0 * _normal; // - disp
 }
 
 Plane::Plane(const Vec & normal, double d) {
@@ -176,7 +189,7 @@ void Plane::generateBuffers() {
     float length = 5;
     float width = 5;
     float depth = 1;
-    glm::vec3 color = {0.2f, 0.3f, 0.5f};
+    glm::vec3 color = {0.22f, 0.71f, 0.0f};
 
     GLfloat vertex_buffer_platform[108] = {
             -length, -width,-depth,
