@@ -1,7 +1,6 @@
 // Include standard headers
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <cmath>
 
 // Include GLEW
@@ -24,11 +23,6 @@ using namespace glm;
 static Simulation sim;
 
 // #cmakedefine SOURCE_DIR "${SOURCE_DIR}"
-
-
-
-
-
 
 void translateMass() {
     ContainerObject * o = sim.getObject(0);
