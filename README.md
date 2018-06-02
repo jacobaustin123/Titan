@@ -1,14 +1,28 @@
 # Loch
 CUDA-based physics simulation sandbox using springs and masses to simulate flexible robots and other mechanical objects. Built in C++ but with a future Python wrapper.
 
-## To compile
+## To compile and run
 
-Create a build directory inside the main directory, navigate to it, and the run ```cmake ..``` and then ```make```. This will produce a ```main``` executable which can be run using ```./main```.
+The project has 3 main branches right now - the master/newAPI branch, the graphics/newAPIgraphics branch, and the CUDA branch. Each has their own dependency requirements. 
 
-## Some temporary notes for compiling using CLion
+The master branch has no dependencies, and can be compiled and run using cmake by creating a build directory inside the repo, and running ```cmake ..``` and then ```make``` from that folder. This will produce a ```main``` executable which can be run using ```./main```.
 
-For CLion to compile and run, you need to set the working directory to the src folder. Go to Run/Edit Configurations and set the working directory to src.
+The graphics branch requires OpenGL, glm, GLEW, and glfw3, which can be installed using vcpkg, apt-get, or brew on Windows/Linux/Mac OS respectively. To use vcpkg, run
 
-Right now there are two branches, the master branch and the graphics branch. The graphics branch supports a very badly-performant OpenGL graphics rendering for certain objects (mainly just what has been hardcoded in the main function). This branch requires the glfw, glm, OpenGL, and GLEW libraries. 
+```S> cd ~
+PS> mkdir tools
+PS> cd tools
+PS> git clone https://github.com/Microsoft/vcpkg.git
+PS> cd vcpkg
+PS> .\bootstrap-vckpg.bat
+PS> .\vcpkg integrate install # Keep the output showing `CMAKE_TOOLCHAIN_FILE` variable
+PS> .\vcpkg integrate powershell # You may need to 
+PS> Set-ExecutionPolicy Unrestricted -Scope CurrentUser # May need to run this to allow the vcpkg powershell integration to work
 
-These can be installed on Linux with sudo apt-get glfw3 glm glew. On Mac OS, use homebrew to install them. For Windows, we're working on it.
+```
+
+to install vcpkg, and then run
+
+```PS> vcpkg --triplet x64-windows install glfw3 GLEW glm```
+
+For the CUDA branch (and future CUDA/graphics branch), CUDA 9.2 also must be installed, as well as the Windows VS compiler. The CUDAgraphics branch has the same requirements as above.
