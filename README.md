@@ -25,6 +25,6 @@ to install vcpkg, and then run
 
 ```PS> vcpkg --triplet x64-windows install glfw3 GLEW glm```
 
-then when compiling with CMake from the build directory, run CMake using ```cmake .. -G Ninja -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake```
+then when compiling with CMake from the build directory, run CMake using ```cmake .. -G Ninja -DCMAKE_TOOLCHAIN_FILE=[path to vcpkg root]/scripts/buildsystems/vcpkg.cmake```
 
 For the CUDA branch (and future CUDA/graphics branch), CUDA 9.2 also must be installed, as well as the Windows VS compiler. The CUDAgraphics branch has the same requirements as above.
