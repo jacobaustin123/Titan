@@ -1,11 +1,14 @@
 cmake_minimum_required(VERSION 3.7)
 project(Loch)
 
+set(CMAKE_CXX_STANDARD 14)
+
 set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 include_directories(include)
 
 set(SOURCE_FILES src/vec.cpp src/sim.cpp src/common/shader.cpp src/sim.cpp src/mass.cpp src/spring.cpp src/object.cpp src/graphics.cpp)
-set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} C:/Users/PLoch/Documents/dependencies)
+
+#set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} C:/Users/PLoch/Documents/dependencies)
 
 file(GLOB HEADERS "*.h")
 
@@ -41,9 +44,15 @@ add_executable(main src/main.cpp ${SOURCE_FILES} ${HEADERS})
 #add_executable(debug src/mydebug.cpp ${SOURCE_FILES} ${HEADERS})
 
 target_link_libraries(main PRIVATE glfw)
-#target_link_libraries(main PRIVATE gl)
-target_link_libraries(main PRIVATE GLEW::GLEW)
 target_link_libraries(main PRIVATE glm)
+
+if ( WIN32 )
+    target_link_libraries(main PRIVATE GLEW::GLEW)
+else()
+    target_link_libraries(main PRIVATE GLEW)
+    target_link_libraries(main PRIVATE gl)
+endif()
+
 
 #target_link_libraries(debug glfw)
 #target_link_libraries(debug gl)
