@@ -28,3 +28,7 @@ to install vcpkg, and then run
 then when compiling with CMake from the build directory, run CMake using ```cmake .. -G Ninja -DCMAKE_TOOLCHAIN_FILE=[path to vcpkg root]/scripts/buildsystems/vcpkg.cmake```
 
 For the CUDA branch (and future CUDA/graphics branch), CUDA 9.2 also must be installed, as well as the Windows VS compiler. The CUDAgraphics branch has the same requirements as above.
+
+## Debug notes
+
+For CLion, need to have the compiler set to Visual Studio in Windows. Make sure to use the right link_library names given by vcpkg.
