@@ -216,13 +216,16 @@ void Simulation::resume() {
     }
 }
 
-int compareMass(const Mass * x, const Mass * y) {
-    return x -> deltat() < y -> deltat() ? 0 : 1;
-}
-
 void Simulation::run() { // repeatedly run next
     T = 0;
-    dt = (*std::min_element(masses.begin(), masses.end(), compareMass)) -> deltat();
+
+    dt = 1000000;
+    for (Mass * m : masses) {
+        if (m -> deltat() < dt)
+            dt = m -> deltat();
+    }
+
+//    dt = (*std::min_element(masses.begin(), masses.end(), cmp)) -> deltat();
 
     this -> window = createGLFWWindow();
 

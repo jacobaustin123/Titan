@@ -19,7 +19,8 @@ using namespace glm;
 #include "vec.h"
 #include "sim.h"
 
-#include "graphics.cpp"
+#include "graphics.h"
+
 static Simulation sim;
 
 // #cmakedefine SOURCE_DIR "${SOURCE_DIR}"
@@ -46,16 +47,6 @@ int main()
     for (Spring * s : c -> springs) {
         s -> setRestLength((s -> _right->getPosition() - s -> _left->getPosition()).norm());
     }
-
-    Mass * m1 = sim.createMass();
-    Mass * m2 = sim.createMass();
-    Spring * s1 = sim.createSpring(m1, m2);
-
-    sim.runFunc(translateMass, run_at_time = 0, duration = 0.0001); // schedule function to run at time 0, repeat every 2.5 s
-
-    sim.setBreakpoint(20000); // set breakpoint (could be end of program or just time to check for updates)
-    sim.run();
-
 
     Plane * p = sim.createPlane(Vec(0, 0, 1), 0); // add a constraint (can't go below plane z = 0)
 

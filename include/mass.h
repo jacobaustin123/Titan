@@ -40,7 +40,6 @@ public:
     void resetForce(); // set force = 0;
 
     Mass * arrayptr;
-
 private:
     double m; // mass in kg
     double dt; // update interval

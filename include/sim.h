@@ -112,4 +112,11 @@ public:
     void fromArray();
 };
 
+
+struct cmp {
+    bool operator()(const Mass * x, const Mass * y) {
+        return (x -> deltat()) < (y -> deltat()) ? 0: 1;
+    }
+};
+
 #endif //LOCH_SIM_H
