@@ -65,4 +65,4 @@ else()
     target_link_libraries(main PRIVATE gl)
 endif()
 
-install(TARGETS main DESTINATION ${CMAKE_BINARY_DIR})
+#install(TARGETS main DESTINATION ${CMAKE_BINARY_DIR})
