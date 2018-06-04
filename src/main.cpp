@@ -30,11 +30,10 @@ void translateMass() {
     o -> translate(3 * Vec(cos(sim.time()), sin(sim.time()), 0));
 }
 
-void doSomething() { // user defined function
-    Mass * m1 = sim.getMass(0);
 
-    if (m1->getPosition()[0] < 5)
-        m1->setPos(Vec(0, 1, 0)); // no time specified, fulfilled immediately.
+void doStuff() { // user defined function
+    Mass * m1 = sim.getMass(0);
+    m1 -> setPos(Vec(0.1, 0.1, 0.1));
 }
 
 int main()

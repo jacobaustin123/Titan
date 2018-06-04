@@ -83,6 +83,20 @@ Mass * Simulation::massToArray() {
     return data;
 }
 
+Spring * Simulation::springToArray() {
+    Spring * data = new Spring[springs.size()];
+    Spring * iter = data;
+
+    for (Spring * s : springs) {
+        memcpy(iter, s, sizeof(Spring));
+        iter++;
+    }
+
+    this -> spring_arr = data;
+
+    return data;
+}
+
 void Simulation::toArray() {
     Mass * mass_data = massToArray();
     Spring * spring_data = new Spring[springs.size()];
@@ -101,15 +115,8 @@ void Simulation::toArray() {
 void Simulation::fromArray() {
     massFromArray();
 
-    delete [] spring_arr;
-    delete [] mass_arr;
-//    Spring * data = spring_arr;
-//
-//    for (Spring * s : springs) {
-//        memcpy(s, data, sizeof(Spring));
-//        s -> setMasses(masses[(data -> _left) - mass_arr], masses[(data -> _right) - mass_arr]);
-//        data += sizeof(Spring);
-//    }
+    delete[] this -> spring_arr;
+    delete[] this -> mass_arr;
 }
 
 void Simulation::massFromArray() {
@@ -119,20 +126,6 @@ void Simulation::massFromArray() {
         memcpy(m, data, sizeof(Mass));
         data ++;
     }
-}
-
-Spring * Simulation::springToArray() {
-    Spring * data = new Spring[springs.size()];
-    Spring * iter = data;
-
-    for (Spring * s : springs) {
-        memcpy(iter, s, sizeof(Spring));
-        iter++;
-    }
-
-    this -> spring_arr = data;
-
-    return data;
 }
 
 void Simulation::springFromArray() {
@@ -153,6 +146,7 @@ void Simulation::resume() {
 
         if (!bpts.empty() && (*bpts.begin()).time <= T) {
             fromArray();
+
             if ((*bpts.begin()).func != nullptr) {
                 (*bpts.begin()).func();
                 if ((*bpts.begin()).repeat != 0) {
@@ -207,7 +201,6 @@ void Simulation::resume() {
 
             if (glfwGetKey(window, GLFW_KEY_ESCAPE ) == GLFW_PRESS || glfwWindowShouldClose(window) != 0) {
                 RUNNING = 0;
-                fromArray();
                 break;
             }
 
