@@ -53,7 +53,7 @@ add_executable(main src/main.cpp ${SOURCE_FILES} ${HEADERS})
 target_compile_features(main PUBLIC cxx_std_11)
 
 set_target_properties(main PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-target_link_libraries(main cuda)
+target_link_libraries(main PRIVATE cuda)
 
 target_link_libraries(main PRIVATE glfw)
 target_link_libraries(main PRIVATE glm)
