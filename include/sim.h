@@ -10,7 +10,7 @@
 #include "object.h"
 #include "vec.h"
 #include "graphics.h"
-#include "common/shader.cpp"
+#include "common/shader.h"
 
 #include <algorithm>
 #include <list>
@@ -54,7 +54,9 @@ public:
     Cube * createCube(const Vec & center, double side_length); // creates half-space ax + by + cz < d
 //
     void printPositions();
-//    void printForces();
+    void printForces();
+    void printSprings();
+    void printSpringForces();
 
 private:
     double dt; // set to 0 by default, when run is called will be set to min(mass dt) unless previously set

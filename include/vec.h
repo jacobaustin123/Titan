@@ -60,6 +60,8 @@ public:
         return *this;
     }
 
+    __device__ void atomicVecAdd(const Vec & v); // fix this
+
     CUDA_CALLABLE_MEMBER Vec operator-() const{
         return Vec(-data[0], -data[1], -data[2]);
     }
@@ -131,6 +133,5 @@ private:
 };
 
 double dot(const Vec & a, const Vec & b);
-
 #endif
 

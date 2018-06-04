@@ -16,6 +16,11 @@ Simulation::~Simulation() {
 
     for (ContainerObject * o : objs)
         delete o;
+
+    glDeleteProgram(programID);
+    glDeleteVertexArrays(1, &VertexArrayID);
+
+    glfwTerminate();
 }
 
 Mass * Simulation::createMass() {
@@ -89,7 +94,7 @@ CUDA_SPRING * Simulation::springToArray() {
 }
 
 void Simulation::toArray() {
-    CUDA_MASS * d_mass = massToArray();
+    CUDA_MASS * d_mass = massToArray(); // must come first
     CUDA_SPRING * d_spring = springToArray();
 }
 
@@ -124,6 +129,30 @@ __global__ void printMasses(CUDA_MASS * d_masses, int num_masses) {
     }
 }
 
+__global__ void printForce(CUDA_MASS * d_masses, int num_masses) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+
+    if (i < num_masses) {
+        d_masses[i].force.print();
+    }
+}
+
+__global__ void printSpring(CUDA_SPRING * d_springs, int num_springs) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+
+    if (i < num_springs) {
+        printf("%d: left: (%5f, %5f, %5f), right:  (%5f, %5f, %5f)\n\n ", i, d_springs[i]._left -> pos[0], d_springs[i]._left -> pos[1], d_springs[i]._left -> pos[2], d_springs[i]._right -> pos[0], d_springs[i]._right -> pos[1], d_springs[i]._right -> pos[2]);
+    }
+}
+
+__global__ void printSpringForce(CUDA_SPRING * d_springs, int num_springs) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+
+    if (i < num_springs) {
+        printf("%d: left: (%5f, %5f, %5f), right:  (%5f, %5f, %5f)\n\n ", i, d_springs[i]._left -> force[0], d_springs[i]._left -> force[1], d_springs[i]._left -> force[2], d_springs[i]._right -> force[0], d_springs[i]._right -> force[1], d_springs[i]._right -> force[2]);
+    }
+}
+
 __global__ void computeSpringForces(CUDA_SPRING * d_spring, int num_springs) {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
 
@@ -131,8 +160,12 @@ __global__ void computeSpringForces(CUDA_SPRING * d_spring, int num_springs) {
         CUDA_SPRING & spring = d_spring[i];
         Vec temp = (spring._right -> pos) - (spring._left -> pos);
         Vec force = spring._k * (spring._rest - temp.norm()) * (temp / temp.norm());
-        spring._right -> force += force;
-        spring._left -> force += -force;
+
+//        if (i == 0)
+//            printf("(%5f, %5f, %5f)\n", force[0], force[1], force[2]);
+
+        spring._right -> force.atomicVecAdd(force);
+        spring._left -> force.atomicVecAdd(-force);
     }
 }
 
@@ -141,10 +174,10 @@ __global__ void computeMassForces(CUDA_MASS * d_mass, int num_masses) {
 
     if (i < num_masses) {
         CUDA_MASS & mass = d_mass[i];
-        mass.force += Vec(0, 0, - 9.81 * mass.m);
+        mass.force.atomicVecAdd(Vec(0, 0, - 9.81 * mass.m));
 
         if (mass.pos[2] < 0)
-            mass.force += Vec(0, 0, - 10000 * mass.pos[2]);
+            mass.force.atomicVecAdd(Vec(0, 0, - 10000 * mass.pos[2]));
     }
 }
 
@@ -158,7 +191,7 @@ __global__ void update(CUDA_MASS * d_mass, int num_masses) {
         mass.vel = mass.vel + mass.acc * mass.dt;
         mass.pos = mass.pos + mass.vel * mass.dt;
 
-        mass.T += mass.dt;
+//        mass.T += mass.dt;
         mass.force = Vec(0, 0, 0);
     }
 }
@@ -181,12 +214,15 @@ void Simulation::renderScreen() {
 }
 
 void Simulation::resume() {
-    int threadsPerBlock = 1024;
+    int threadsPerBlock = 1024; //1024
 
     RUNNING = 1;
     toArray();
 
-    printPositions();
+//    printSprings();
+//    printSpringForces();
+//
+//    printPositions();
 
     while (1) {
         T += dt;
@@ -204,9 +240,11 @@ void Simulation::resume() {
 
         computeSpringForces<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size()); // KERNEL
         computeMassForces<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size()); // KERNEL
+        cudaDeviceSynchronize();
+
         update<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size());
 
-        if (fmod(T, 2500 * dt) < dt) {
+        if (fmod(T, 250 * dt) < dt) {
             fromArray();
 
             clearScreen();
@@ -309,10 +347,56 @@ void Simulation::printPositions() {
     std::cout << std::endl;
 }
 
-//void Simulation::printForces() {
-//    for (Mass * m : masses) {
-//        std::cout << m->getForce() << std::endl;
-//    }
-//
-//    std::cout << std::endl;
-//}
+void Simulation::printSprings() {
+    if (RUNNING) {
+        std::cout << "\nDEVICE SPRINGS: " << std::endl;
+        int threadsPerBlock = 1024;
+        int springBlocksPerGrid = (springs.size() + threadsPerBlock - 1) / threadsPerBlock;
+        printSpring<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size());
+        cudaDeviceSynchronize();
+    }
+    else {
+        std::cout << "\nHOST SPRINGS: " << std::endl;
+        for (Spring * s : springs) {
+            std::cout << s->_left->getPosition() << s->_right->getPosition() << std::endl;
+        }
+    }
+
+    std::cout << std::endl;
+}
+
+void Simulation::printSpringForces() {
+    if (RUNNING) {
+        std::cout << "\nDEVICE SPRINGS: " << std::endl;
+        int threadsPerBlock = 1024;
+        int springBlocksPerGrid = (springs.size() + threadsPerBlock - 1) / threadsPerBlock;
+        printSpringForce<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size());
+        cudaDeviceSynchronize();
+    }
+    else {
+        std::cout << "\nHOST SPRINGS: " << std::endl;
+        for (Spring * s : springs) {
+            std::cout << s->_left->getForce() << s->_right->getForce() << std::endl;
+        }
+    }
+
+    std::cout << std::endl;
+}
+
+void Simulation::printForces() {
+    if (RUNNING) {
+        std::cout << "\nDEVICE FORCES: " << std::endl;
+        int threadsPerBlock = 1024;
+        int massBlocksPerGrid = (masses.size() + threadsPerBlock - 1) / threadsPerBlock;
+        printForce<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size());
+        cudaDeviceSynchronize();
+    }
+    else {
+        std::cout << "\nHOST FORCES: " << std::endl;
+        for (Mass * m : masses) {
+            std::cout << m->getForce() << std::endl;
+        }
+    }
+
+    std::cout << std::endl;
+}
