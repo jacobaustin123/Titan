@@ -79,8 +79,12 @@ private:
     void massFromArray();
     void springFromArray();
     void fromArray();
-
+    
+    GLuint VertexArrayID;
+    GLuint programID;
+    GLuint MatrixID;
     GLFWwindow * window;
+    glm::mat4 MVP;
 
     void clearScreen();
     void renderScreen();
