@@ -10,6 +10,7 @@
 #include "object.h"
 #include "vec.h"
 #include "graphics.h"
+#include "common/shader.cpp"
 
 #include <algorithm>
 #include <list>
@@ -79,7 +80,7 @@ private:
     void massFromArray();
     void springFromArray();
     void fromArray();
-    
+
     GLuint VertexArrayID;
     GLuint programID;
     GLuint MatrixID;

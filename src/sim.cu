@@ -238,9 +238,36 @@ int compareMass(const Mass * x, const Mass * y) { // Compare two masses' dts
 
 void Simulation::run() { // repeatedly run next
     T = 0;
-    dt = 0.01; // (*std::min_element(masses.begin(), masses.end(), compareMass)) -> deltat();
-    
-    resume(); //Start the simulation for the first time
+    dt = 1000000;
+    for (Mass * m : masses) {
+        if (m -> deltat() < dt)
+            dt = m -> deltat();
+    }
+
+//    dt = (*std::min_element(masses.begin(), masses.end(), cmp)) -> deltat();
+
+    this -> window = createGLFWWindow();
+
+    GLuint VertexArrayID;
+    glGenVertexArrays(1, &VertexArrayID);
+    glBindVertexArray(VertexArrayID);
+
+    // Create and compile our GLSL program from the shaders
+    this -> programID = LoadShaders("shaders/TransformVertexShader.vertexshader", "shaders/ColorFragmentShader.fragmentshader");
+    // Get a handle for our "MVP" uniform
+    this -> MatrixID = glGetUniformLocation(programID, "MVP");
+
+    this -> MVP = getProjection();
+
+    for (ContainerObject * c : objs) {
+        c -> generateBuffers();
+    }
+
+    for (Constraint * c : constraints) {
+        c -> generateBuffers();
+    }
+
+    resume();
 }
 
 Plane * Simulation::createPlane(const Vec & abc, double d ) { // creates half-space ax + by + cz < d
