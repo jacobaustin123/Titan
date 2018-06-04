@@ -142,6 +142,9 @@ __global__ void computeMassForces(CUDA_MASS * d_mass, int num_masses) {
     if (i < num_masses) {
         CUDA_MASS & mass = d_mass[i];
         mass.force += Vec(0, 0, - 9.81 * mass.m);
+
+        if (mass.pos[2] < 0)
+            mass.force += Vec(0, 0, - 10000 * mass.pos[2]);
     }
 }
 
@@ -158,6 +161,23 @@ __global__ void update(CUDA_MASS * d_mass, int num_masses) {
         mass.T += mass.dt;
         mass.force = Vec(0, 0, 0);
     }
+}
+
+void Simulation::clearScreen() {
+    // Clear the screen
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear screen
+
+    // Use our shader
+    glUseProgram(programID);
+
+    // Send our transformation to the currently bound shader in the "MVP" uniform
+    glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+}
+
+void Simulation::renderScreen() {
+    // Swap buffers
+    glfwSwapBuffers(window);
+    glfwPollEvents();
 }
 
 void Simulation::resume() {
@@ -185,6 +205,30 @@ void Simulation::resume() {
         computeSpringForces<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size()); // KERNEL
         computeMassForces<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size()); // KERNEL
         update<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size());
+
+        if (fmod(T, 2500 * dt) < dt) {
+            fromArray();
+
+            clearScreen();
+
+            for (ContainerObject * c : objs) {
+                c -> updateBuffers();
+                c -> draw();
+            }
+
+            for (Constraint * c : constraints) {
+                c -> draw();
+            }
+
+            renderScreen();
+
+            if (glfwGetKey(window, GLFW_KEY_ESCAPE ) == GLFW_PRESS || glfwWindowShouldClose(window) != 0) {
+                RUNNING = 0;
+                break;
+            }
+
+            toArray();
+        }
     }
 }
 
@@ -225,7 +269,6 @@ void Simulation::printPositions() {
         std::cout << "\nDEVICE MASSES: " << std::endl;
         int threadsPerBlock = 1024;
         int massBlocksPerGrid = (masses.size() + threadsPerBlock - 1) / threadsPerBlock;
-        std::cout << massBlocksPerGrid << " " << threadsPerBlock << std::endl;
         printMasses<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size());
         cudaDeviceSynchronize();
     }

@@ -1,39 +1,46 @@
 // Include standard headers
 #include <stdio.h>
 #include <stdlib.h>
+#include <cmath>
 
+// Include GLEW
+#include <GL/glew.h>
+
+// Include GLFW
+#include <GLFW/glfw3.h>
+
+// Include GLM
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+using namespace glm;
+
+// Include shaders and support files
+#include "common/shader.h"
 #include "vec.h"
 #include "sim.h"
-#include <Windows.h>
+
+#include "graphics.h"
+
+static Simulation sim;
+
+
+
 
 int main()
 {
-    Simulation sim; // initialize simulation object
-
-    Cube * c = sim.createCube(Vec(0, 0, 5), 0.5); // create Cube object centered at (0, 0, 10) with side length 2.0
+    Cube * c = sim.createCube(Vec(0, 0, 10), 2.0); // create Cube object centered at (0, 0, 10) with side length 2.0
     c -> setKValue(1000); // set the spring constant for all springs to 10
-    c -> setMassValue(1.0); // set all masses to 2.0
-    c -> setDeltaTValue(0.00001); // set the dt value for all masses in the cube to 0.00001
+    c -> setMassValue(1.0); // set all masses to 1.0
+    c -> setDeltaTValue(0.00001); // set the dt value for all masses in the cube to 0.00005
 
     for (Spring * s : c -> springs) {
         s -> setRestLength((s -> _right->getPosition() - s -> _left->getPosition()).norm());
     }
-    sim.createPlane(Vec(0, 0, 1), 0);
 
-    sim.printPositions();
+    Plane * p = sim.createPlane(Vec(0, 0, 1), 0); // add a constraint (can't go below plane z = 0)
 
-    sim.setBreakpoint(0.5);
+    sim.setBreakpoint(20000); // set breakpoint (could be end of program or just time to check for updates)
     sim.run();
-
-	while (sim.time() < 10.0) {
-		sim.printPositions();
-//
-		sim.setBreakpoint(sim.time() + 0.5); // or sim.next()
-		sim.resume();
-//
-	}
-
-	Sleep(1000000);
 
     return 0;
 }

@@ -9,6 +9,7 @@
 #include "mass.h"
 #include "object.h"
 #include "vec.h"
+#include "graphics.h"
 
 #include <algorithm>
 #include <list>
@@ -78,6 +79,11 @@ private:
     void massFromArray();
     void springFromArray();
     void fromArray();
+
+    GLFWwindow * window;
+
+    void clearScreen();
+    void renderScreen();
 };
 
 __global__ void computeSpringForces(CUDA_SPRING * device_springs, int num_springs);

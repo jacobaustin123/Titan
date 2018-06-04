@@ -8,7 +8,7 @@ SET(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++11")
 set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 include_directories(include)
 
-set(SOURCE_FILES src/vec.cu src/sim.cu src/sim.cu src/mass.cu src/spring.cu src/object.cu)
+set(SOURCE_FILES src/vec.cu src/sim.cu src/sim.cu src/mass.cu src/spring.cu src/object.cu src/graphics.cpp)
 
 find_package(CUDA REQUIRED)
 if (CUDA_FOUND)
