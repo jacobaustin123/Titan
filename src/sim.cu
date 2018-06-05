@@ -224,7 +224,7 @@ void Simulation::renderScreen() {
 }
 
 void Simulation::resume() {
-    int threadsPerBlock = 1024; //1024
+    int threadsPerBlock = 1024;
 
     RUNNING = 1;
     toArray();
@@ -250,7 +250,8 @@ void Simulation::resume() {
 
         computeSpringForces<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size()); // KERNEL
         computeMassForces<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size()); // KERNEL
-        cudaDeviceSynchronize();
+        cudaDeviceSynchronize(); /*Necessary? Why halt CPU until end of compute Sprinf and MAss if we nee to call
+        another kernel afterwards*/
 
         update<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size());
 

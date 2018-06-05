@@ -98,19 +98,22 @@ public:
 
     CUDA_CALLABLE_MEMBER friend Vec operator*(const Vec & v, const double x) {
         return x * v;
-    } // double and Vec
+    } // double times Vec
+
+
+    //Check possible redundancy of above two operators
 
     CUDA_CALLABLE_MEMBER friend Vec operator*(const Vec & v1, const Vec & v2) {
         return Vec(v1.data[0] * v2.data[0], v1.data[1] * v2.data[1], v1.data[2] * v2.data[2]);
-    } // two Vecs (elementwise)
+    } // Multiplies two Vecs (elementwise)
 
     CUDA_CALLABLE_MEMBER friend Vec operator/(const Vec & v, const double x) {
         return Vec(v.data[0] / x, v.data[1] / x, v.data[2] / x);
-    } // double and vec
+    } //  vector over double
 
     CUDA_CALLABLE_MEMBER friend Vec operator/(const Vec & v1, const Vec & v2) {
         return Vec(v1.data[0] / v2.data[0], v1.data[1] / v2.data[1], v1.data[2] / v2.data[2]);
-    } // two Vecs (elementwise)
+    } // divides two Vecs (elementwise)
 
     friend std::ostream & operator << (std::ostream & strm, const Vec & v) {
         return strm << "(" << v[0] << ", " << v[1] << ", " << v[2] << ")";
@@ -126,7 +129,7 @@ public:
 
     CUDA_CALLABLE_MEMBER double sum() const {
         return data[0] + data[1] + data[2];
-    } // gives vector norm
+    } // sums all components of the vector
 
 private:
     double data[3] = { 0 }; // initialize data to 0

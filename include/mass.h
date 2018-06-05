@@ -8,7 +8,9 @@
 #include "vec.h"
 
 class Mass;
+struct CUDA_MASS;
 
+//Struct with CPU Spring properties used for optimal memory allocation on GPU memory
 struct CUDA_MASS {
     CUDA_MASS() {};
     CUDA_MASS(Mass & mass);
@@ -24,12 +26,24 @@ struct CUDA_MASS {
     int fixed; // is the mass position fixed?
 };
 
-
 class Mass {
 public:
-    Mass() { m = 1.0; fixed = 0; dt = 0.01; T = 0; }
-    Mass(struct CUDA_MASS & mass) { m = mass.m; dt = mass.dt; T = mass.T; pos = mass.pos; vel = mass.vel; acc = mass.acc; force = mass.force; fixed = mass.fixed; }
 
+    //Properties
+    double m; // mass in kg
+    double dt; // update interval
+    double T; // local time
+    Vec pos; // position in m
+    Vec vel; // velocity in m/s
+    Vec acc; // acceleration in m/s^2
+    Vec force; // force in kg m / s^2
+    int fixed; // is the mass position fixed?
+    struct CUDA_MASS * arrayptr; //Pointer to struct version for GPU cudaMemAlloc
+
+    //Set
+    Mass() { m = 1.0; fixed = 0; dt = 0.01; T = 0; }
+    Mass(struct CUDA_MASS & mass)
+            { m = mass.m; dt = mass.dt; T = mass.T; pos = mass.pos; vel = mass.vel; acc = mass.acc; force = mass.force; fixed = mass.fixed; }
     Mass(double mass, const Vec & position, int fixed = 0, double dt = 0.01) :
             m(mass), pos(position), fixed(fixed), dt(dt), T(0) {}; // defaults everything
 
@@ -40,10 +54,10 @@ public:
     void setForce(const Vec & force) { this -> force = force; }
     void setDeltaT(double dt) { this -> dt = dt; }
     void translate(const Vec & displ) { this -> pos += displ; }
-
     void makeFixed() { fixed = 1; }
     void makeMovable() { fixed = 0; }
 
+    //Get
     int isFixed() { return (fixed == 1); }
     double getMass() { return m; }
     const Vec & getPosition() { return pos; }
@@ -54,22 +68,12 @@ public:
     double deltat() const { return dt; }
     void stepTime() { T += dt; }
 
-    // private sort of
-
+    //Methods
     void update(); // update pos, vel, and acc based on force
     void addForce(const Vec &); // add force vector to current force
     void resetForce(); // set force = 0;
 
-    double m; // mass in kg
-    double dt; // update interval
-    double T; // local time
-    Vec pos; // position in m
-    Vec vel; // velocity in m/s
-    Vec acc; // acceleration in m/s^2
-    Vec force; // force in kg m / s^2
-
-    int fixed; // is the mass position fixed?
-    struct CUDA_MASS * arrayptr;
 };
+
 
 #endif //LOCH_MASS_H

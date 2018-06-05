@@ -35,44 +35,62 @@ public:
 
 class ContainerObject : public BaseObject { // contains and manipulates groups of masses and springs
 public:
+
+    //Set
     void setMassValue(double m); // set masses for all Mass objects
     void setKValue(double k); // set k for all Spring objects
     void setDeltaTValue(double m); // set masses for all Mass objects
     void setRestLengthValue(double len); // set masses for all Mass objects
     void makeFixed();
 
+    // Local list of masses (under sim.masses/springs)
+    std::vector<Mass *> masses;
+    std::vector<Spring *> springs;
+
+    //Graphics
     virtual void generateBuffers() = 0;
     virtual void updateBuffers() = 0;
     virtual void draw() = 0;
 
-    // we can have more of these
+    // Local list of masses (under sim.masses/springs)
     std::vector<Mass *> masses;
     std::vector<Spring *> springs;
 };
 
 class Ball : public Constraint { // ball constraint, force is inversely proportional to distance
 public:
+    //Set
     void setRadius(double r) { _radius = r; }
     void setCenter(const Vec & center) { _center = center; }
 
 private:
+    //Properties
     double _radius;
     Vec _center;
 };
 
 class Plane : public Constraint { // plane constraint, force is proportional to negative distance wrt plane
 public:
+
     Plane(const Vec & normal, double d);
-    Vec getForce(const Vec & position);
+
+    //Properties
+    Vec _normal;   //Normal Force [N]
+    double _offset;
+
+    //Set
     void setNormal(const Vec & normal) { _normal = normal; }; // normal is (a, b, c)
     void setOffset(double d) { _offset = d; }; // ax + by + cz < d
-    Vec _normal;
-    double _offset;
+
+    //Modify
     void translate(const Vec & displ);
 
+    //Get
+    Vec getForce(const Vec & position);
+
+    //Graphics
     void generateBuffers();
     void draw();
-
     GLuint vertices;
     GLuint colors;
 };
@@ -80,19 +98,23 @@ public:
 class Cube : public ContainerObject {
 public:
     Cube(const Vec & center, double side_length = 1.0);
+
+    //Properties
+    double _side_length;
+    Vec _center;
+
+    //Modify
+    void translate(const Vec & displ);
+
+    //Graphics
     virtual ~Cube() {
         glDeleteBuffers(1, &colors);
         glDeleteBuffers(1, &indices);
         glDeleteBuffers(1, &vertices);
     };
-
-    void translate(const Vec & displ);
     void generateBuffers();
     void updateBuffers();
     void draw();
-
-    double _side_length;
-    Vec _center;
 
     GLuint colors;
     GLuint vertices;
