@@ -41,7 +41,6 @@ public:
     Spring * createSpring();
     Spring * createSpring(Mass * m1, Mass * m2, double k = 1.0, double len = 1.0);
 
-
     void setBreakpoint(double time);
 
     void run(); // should set dt to min(mass dt) if not 0, resets everything
@@ -50,6 +49,8 @@ public:
     double time() { return T; }
 
     Plane * createPlane(const Vec & abc, double d ); // creates half-space ax + by + cz < d
+
+    void setAcc(const Vec & acc) {this -> GlobalAcc};
 
     Cube * createCube(const Vec & center, double side_length); // creates half-space ax + by + cz < d
 //
@@ -61,6 +62,7 @@ public:
 private:
     double dt; // set to 0 by default, when run is called will be set to min(mass dt) unless previously set
     double T; // global simulation time
+    Vec GlobalAcc; //Vector of global accelerations
 
     int RUNNING;
 
