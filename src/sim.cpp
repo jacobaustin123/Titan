@@ -17,11 +17,13 @@ Simulation::~Simulation() {
     for (ContainerObject * o : objs)
         delete o;
 
+#ifdef GRAPHICS
     glDeleteProgram(programID);
     glDeleteVertexArrays(1, &VertexArrayID);
 
 //     Close OpenGL window and terminate GLFW
     glfwTerminate();
+#endif
 }
 
 Mass * Simulation::createMass() {
@@ -84,21 +86,6 @@ Mass * Simulation::massToArray() {
 }
 
 Spring * Simulation::springToArray() {
-    Spring * data = new Spring[springs.size()];
-    Spring * iter = data;
-
-    for (Spring * s : springs) {
-        memcpy(iter, s, sizeof(Spring));
-        iter++;
-    }
-
-    this -> spring_arr = data;
-
-    return data;
-}
-
-void Simulation::toArray() {
-    Mass * mass_data = massToArray();
     Spring * spring_data = new Spring[springs.size()];
 
     Spring * spring_iter = spring_data;
@@ -110,13 +97,18 @@ void Simulation::toArray() {
     }
 
     this -> spring_arr = spring_data;
+
+    return spring_data;
+}
+
+void Simulation::toArray() {
+    Mass * mass_data = massToArray();
+    Spring * spring_data = springToArray();
 }
 
 void Simulation::fromArray() {
     massFromArray();
-
-    delete[] this -> spring_arr;
-    delete[] this -> mass_arr;
+    springFromArray();
 }
 
 void Simulation::massFromArray() {
@@ -126,15 +118,12 @@ void Simulation::massFromArray() {
         memcpy(m, data, sizeof(Mass));
         data ++;
     }
+
+    delete[] mass_arr;
 }
 
 void Simulation::springFromArray() {
-    Spring * data = spring_arr;
-
-    for (Spring * s : springs) {
-        memcpy(s, data, sizeof(Spring));
-        data++;
-    }
+    delete [] spring_arr;
 }
 
 void Simulation::resume() {
@@ -168,8 +157,6 @@ void Simulation::resume() {
 
         computeForces(); // compute forces on all masses
 
-//        printForces();
-
         Mass * m = mass_arr;
         for (int i = 0; i < masses.size(); i++) {
             if (m -> time() <= T) { // !m -> isFixed()
@@ -182,8 +169,8 @@ void Simulation::resume() {
             m++;
         }
 
-
-        if (fmod(T, 2500 * dt) < dt) {
+#ifdef GRAPHICS
+        if (fmod(T, 250 * dt) < dt) {
             fromArray();
 
             clearScreen();
@@ -206,6 +193,7 @@ void Simulation::resume() {
 
             toArray();
         }
+#endif
     }
 }
 
@@ -218,8 +206,7 @@ void Simulation::run() { // repeatedly run next
             dt = m -> deltat();
     }
 
-//    dt = (*std::min_element(masses.begin(), masses.end(), cmp)) -> deltat();
-
+#ifdef GRAPHICS
     this -> window = createGLFWWindow();
 
     GLuint VertexArrayID;
@@ -240,31 +227,9 @@ void Simulation::run() { // repeatedly run next
     for (Constraint * c : constraints) {
         c -> generateBuffers();
     }
+#endif
 
     resume();
-}
-
-void Simulation::clearScreen() {
-    // Clear the screen
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear screen
-
-    // Use our shader
-    glUseProgram(programID);
-
-    // Send our transformation to the currently bound shader in the "MVP" uniform
-    glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-}
-
-void Simulation::renderScreen() {
-    // Swap buffers
-    glfwSwapBuffers(window);
-    glfwPollEvents();
-}
-
-Plane * Simulation::createPlane(const Vec & abc, double d ) { // creates half-space ax + by + cz < d
-    Plane * new_plane = new Plane(abc, d);
-    constraints.push_back(new_plane);
-    return new_plane;
 }
 
 Cube * Simulation::createCube(const Vec & center, double side_length) { // creates half-space ax + by + cz < d
@@ -284,7 +249,7 @@ Cube * Simulation::createCube(const Vec & center, double side_length) { // creat
 
 void Simulation::printPositions() {
     for (Mass * m : masses) {
-            std::cout << m->getPosition() << std::endl;
+        std::cout << m->getPosition() << std::endl;
     }
 
     std::cout << std::endl;
@@ -297,3 +262,29 @@ void Simulation::printForces() {
 
     std::cout << std::endl;
 }
+
+Plane * Simulation::createPlane(const Vec & abc, double d ) { // creates half-space ax + by + cz < d
+    Plane * new_plane = new Plane(abc, d);
+    constraints.push_back(new_plane);
+    return new_plane;
+}
+
+#ifdef GRAPHICS
+void Simulation::clearScreen() {
+    // Clear the screen
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear screen
+
+    // Use our shader
+    glUseProgram(programID);
+
+    // Send our transformation to the currently bound shader in the "MVP" uniform
+    glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+}
+
+void Simulation::renderScreen() {
+    // Swap buffers
+    glfwSwapBuffers(window);
+    glfwPollEvents();
+}
+
+#endif

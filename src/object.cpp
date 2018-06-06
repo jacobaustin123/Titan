@@ -5,16 +5,6 @@
 #include "object.h"
 #include <cmath>
 
-//class Plane : public Constraint { // plane constraint, force is proportional to negative distance wrt plane
-//public:
-//    void setNormal(const Vec & normal) { _normal = normal; }; // normal is (a, b, c)
-//    void setOffset(double d) { _offset = d; }; // ax + by + cz < d
-//
-//private:
-//    Vec _normal;
-//    double _offset;
-//};
-
 inline double round( double val )
 {
     if( val < 0 ) return ceil(val - 0.5);
@@ -96,6 +86,7 @@ void Cube::translate(const Vec & displ) {
     }
 }
 
+#ifdef GRAPHICS
 
 void Cube::generateBuffers() {
     static const GLfloat g_color_buffer_data[] = { // colors for the cube
@@ -315,3 +306,4 @@ void Plane::draw() {
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(0);
 }
+#endif

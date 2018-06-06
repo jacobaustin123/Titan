@@ -9,25 +9,18 @@
 #include "mass.h"
 #include "object.h"
 #include "vec.h"
-#include "graphics.h"
-#include "../src/common/shader.h"
 
 #include <algorithm>
 #include <list>
 #include <vector>
 #include <set>
 
+#ifdef GRAPHICS
+#include "graphics.h"
+#include "../src/common/shader.h"
+#endif
+
 static double G = 9.81;
-
-//Ball & createBall(double radius = 1.0, const Vec & center = Vec(0, 0, 0));
-//Plane & createPlane(const Vec & abc = Vec(0, 0, 0), double d = 0); // creates half-space ax + by + cz < d
-
-//Mass * getMassByIndex(int n); // can support negative values (from end)
-//Spring * getSpringByIndex(int n);
-
-//void resume();
-
-// std::vector<Constraint *> constraints; // global constraints, for initial example
 
 struct Event {
     Event(void (*func)(), double time, double repeat = 0) {
@@ -90,6 +83,7 @@ public:
     Mass * mass_arr;
     Spring * spring_arr;
 
+#ifdef GRAPHICS
     GLuint VertexArrayID;
     GLuint programID;
     GLuint MatrixID;
@@ -98,6 +92,7 @@ public:
 
     void clearScreen();
     void renderScreen();
+#endif
 
     std::set<Event, compareEvents> bpts; // list of breakpoints
 
@@ -110,13 +105,6 @@ public:
     void massFromArray();
     void springFromArray();
     void fromArray();
-};
-
-
-struct cmp {
-    bool operator()(const Mass * x, const Mass * y) {
-        return (x -> deltat()) < (y -> deltat()) ? 0: 1;
-    }
 };
 
 #endif //LOCH_SIM_H

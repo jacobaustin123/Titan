@@ -40,24 +40,17 @@ if (glm_FOUND)
     link_libraries(${glm_LIBRARIES})
 endif()
 
-add_executable(main src/main.cpp ${SOURCE_FILES} ${HEADERS})
-#add_executable(debug src/mydebug.cpp ${SOURCE_FILES} ${HEADERS})
+add_executable(graphics src/main.cpp ${SOURCE_FILES} ${HEADERS})
+target_compile_definitions(graphics PRIVATE GRAPHICS)
 
-target_link_libraries(main PRIVATE glfw)
-target_link_libraries(main PRIVATE glm)
+target_link_libraries(graphics PRIVATE glfw)
+target_link_libraries(graphics PRIVATE glm)
 
 if ( WIN32 )
-    target_link_libraries(main PRIVATE GLEW::GLEW)
+    target_link_libraries(graphics PRIVATE GLEW::GLEW)
 else()
-    target_link_libraries(main PRIVATE GLEW)
-    target_link_libraries(main PRIVATE gl)
+    target_link_libraries(graphics PRIVATE GLEW)
+    target_link_libraries(graphics PRIVATE gl)
 endif()
 
-
-#target_link_libraries(debug glfw)
-#target_link_libraries(debug gl)
-#target_link_libraries(debug glew)
-#target_link_libraries(debug glm)
-
-install(TARGETS main RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
-file(COPY src/shaders DESTINATION ${CMAKE_BINARY_DIR})
+add_executable(nographics src/main.cpp ${SOURCE_FILES} ${HEADERS})
