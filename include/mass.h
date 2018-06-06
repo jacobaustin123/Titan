@@ -41,7 +41,7 @@ public:
     struct CUDA_MASS * arrayptr; //Pointer to struct version for GPU cudaMemAlloc
 
     //Set
-    Mass() { m = 1.0; fixed = 0; dt = 0.01; T = 0; }
+    Mass() { m = 1.0; fixed = 0; dt = 0.01; T = 0; } // constructor
     Mass(struct CUDA_MASS & mass)
             { m = mass.m; dt = mass.dt; T = mass.T; pos = mass.pos; vel = mass.vel; acc = mass.acc; force = mass.force; fixed = mass.fixed; }
     Mass(double mass, const Vec & position, int fixed = 0, double dt = 0.01) :

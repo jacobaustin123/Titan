@@ -38,7 +38,7 @@ public:
     CUDA_SPRING *arrayptr; //Pointer to struct version for GPU cudaMemAlloc
 
     //Set
-    Spring() {}; //Create spring without initialization of variables
+    Spring() {}; //Constructor
     Spring(Mass * left, Mass * right, double K = 1.0, double rest_len = 1.0) :
             _k(K), _rest(rest_len), _left(left), _right(right) {}; //
     Spring(double k, double rest_length, Mass * left, Mass * right) :
