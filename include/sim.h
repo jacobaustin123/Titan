@@ -53,7 +53,7 @@ public:
     void resume(); // same as above but w/out reset
 
     //Set
-    void setAcc(const Vec & acc) {this -> GlobalAcc + Vec;}  //Adds specified acceleration to global acceleration
+    void setAcc(const Vec & acc) {this -> GlobalAcc + acc;}  //Adds specified acceleration to global acceleration
 
     //Get
     double time() { return T; }

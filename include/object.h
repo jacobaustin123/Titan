@@ -51,10 +51,6 @@ public:
     virtual void generateBuffers() = 0;
     virtual void updateBuffers() = 0;
     virtual void draw() = 0;
-
-    // Local list of masses (under sim.masses/springs)
-    std::vector<Mass *> masses;
-    std::vector<Spring *> springs;
 };
 
 class Ball : public Constraint { // ball constraint, force is inversely proportional to distance
