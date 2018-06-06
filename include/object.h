@@ -30,7 +30,11 @@ class Constraint : public BaseObject { // constraint like plane or sphere which 
 public:
     virtual Vec getForce(const Vec & position) = 0; // returns force on an object based on its position, e.g. plane or
     virtual void generateBuffers() = 0;
+
+#ifdef GRAPHICS
     virtual void draw() = 0;
+#endif
+
 };
 
 class ContainerObject : public BaseObject { // contains and manipulates groups of masses and springs
@@ -47,10 +51,13 @@ public:
     std::vector<Mass *> masses;
     std::vector<Spring *> springs;
 
+#ifdef GRAPHICS
     //Graphics
     virtual void generateBuffers() = 0;
     virtual void updateBuffers() = 0;
     virtual void draw() = 0;
+#endif
+
 };
 
 class Ball : public Constraint { // ball constraint, force is inversely proportional to distance
@@ -84,11 +91,14 @@ public:
     //Get
     Vec getForce(const Vec & position);
 
+#ifdef GRAPHICS
     //Graphics
     void generateBuffers();
     void draw();
     GLuint vertices;
     GLuint colors;
+#endif
+
 };
 
 class Cube : public ContainerObject {
@@ -102,6 +112,7 @@ public:
     //Modify
     void translate(const Vec & displ);
 
+#ifdef GRAPHICS
     //Graphics
     virtual ~Cube() {
         glDeleteBuffers(1, &colors);
@@ -115,6 +126,8 @@ public:
     GLuint colors;
     GLuint vertices;
     GLuint indices;
+#endif
+
 };
 
 #endif //LOCH_OBJECT_H

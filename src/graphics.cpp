@@ -1,3 +1,5 @@
+#ifdef GRAPHICS
+
 // Include GLEW
 #include <GL/glew.h>
 
@@ -90,3 +92,5 @@ glm::mat4 getProjection() {
 
     return MVP;
 }
+
+#endif

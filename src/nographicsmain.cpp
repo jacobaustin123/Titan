@@ -31,8 +31,13 @@ int main()
 
     Plane * p = sim.createPlane(Vec(0, 0, 1), 0); // add a constraint (can't go below plane z = 0)
 
-    sim.setBreakpoint(100); // set breakpoint (could be end of program or just time to check for updates)
-    sim.run();
+    sim.setBreakpoint(0.5); // set breakpoint (could be end of program or just time to check for updates)
+
+    while (sim.time() < 10) {
+        sim.printPositions();
+        sim.setBreakpoint(sim.time() + 0.5);
+        sim.resume();
+    }
 
     return 0;
 }

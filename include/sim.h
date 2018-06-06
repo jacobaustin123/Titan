@@ -9,8 +9,13 @@
 #include "mass.h"
 #include "object.h"
 #include "vec.h"
+
+#ifdef GRAPHICS
+
 #include "graphics.h"
 #include "common/shader.h"
+
+#endif
 
 #include <algorithm>
 #include <list>
@@ -21,16 +26,6 @@
 #include <cuda_device_runtime_api.h>
 
 static double G = 9.81;
-
-//Ball & createBall(double radius = 1.0, const Vec & center = Vec(0, 0, 0));
-//Plane & createPlane(const Vec & abc = Vec(0, 0, 0), double d = 0); // creates half-space ax + by + cz < d
-
-//Mass * getMassByIndex(int n); // can support negative values (from end)
-//Spring * getSpringByIndex(int n);
-
-//void resume();
-
-// std::vector<Constraint *> constraints; // global constraints, for initial example
 
 class Simulation {
 public:
@@ -90,6 +85,8 @@ private:
     void springFromArray();
     void fromArray();
 
+#ifdef GRAPHICS
+
     GLuint VertexArrayID;
     GLuint programID;
     GLuint MatrixID;
@@ -98,6 +95,8 @@ private:
 
     void clearScreen();
     void renderScreen();
+
+#endif
 };
 
 __global__ void computeSpringForces(CUDA_SPRING * device_springs, int num_springs);

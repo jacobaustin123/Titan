@@ -86,7 +86,7 @@ void Cube::translate(const Vec & displ) {
     }
 }
 
-
+#ifdef GRAPHICS
 void Cube::generateBuffers() {
     static const GLfloat g_color_buffer_data[] = { // colors for the cube
             1.0f, 0.2f, 0.2f,
@@ -305,3 +305,4 @@ void Plane::draw() {
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(0);
 }
+#endif

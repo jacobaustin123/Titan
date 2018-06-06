@@ -17,10 +17,12 @@ Simulation::~Simulation() {
     for (ContainerObject * o : objs)
         delete o;
 
+#ifdef GRAPHICS
     glDeleteProgram(programID);
     glDeleteVertexArrays(1, &VertexArrayID);
 
     glfwTerminate();
+#endif
 }
 
 Mass * Simulation::createMass() {
@@ -161,9 +163,6 @@ __global__ void computeSpringForces(CUDA_SPRING * d_spring, int num_springs) {
         Vec temp = (spring._right -> pos) - (spring._left -> pos);
         Vec force = spring._k * (spring._rest - temp.norm()) * (temp / temp.norm());
 
-//        if (i == 0)
-//            printf("(%5f, %5f, %5f)\n", force[0], force[1], force[2]);
-
         spring._right -> force.atomicVecAdd(force);
         spring._left -> force.atomicVecAdd(-force);
     }
@@ -196,6 +195,7 @@ __global__ void update(CUDA_MASS * d_mass, int num_masses) {
     }
 }
 
+#ifdef GRAPHICS
 void Simulation::clearScreen() {
     // Clear the screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear screen
@@ -212,6 +212,7 @@ void Simulation::renderScreen() {
     glfwSwapBuffers(window);
     glfwPollEvents();
 }
+#endif
 
 void Simulation::resume() {
     int threadsPerBlock = 1024;
@@ -245,6 +246,7 @@ void Simulation::resume() {
 
         update<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size());
 
+#ifdef GRAPHICS
         if (fmod(T, 250 * dt) < dt) {
             fromArray();
 
@@ -268,11 +270,9 @@ void Simulation::resume() {
 
             toArray();
         }
-    }
-}
+#endif
 
-int compareMass(const Mass * x, const Mass * y) { // Compare two masses' dts
-    return x -> deltat() < y -> deltat() ? 0 : 1;
+    }
 }
 
 void Simulation::run() { // repeatedly run next
@@ -285,6 +285,7 @@ void Simulation::run() { // repeatedly run next
 
 //    dt = (*std::min_element(masses.begin(), masses.end(), cmp)) -> deltat();
 
+#ifdef GRAPHICS
     this -> window = createGLFWWindow();
 
     GLuint VertexArrayID;
@@ -305,6 +306,7 @@ void Simulation::run() { // repeatedly run next
     for (Constraint * c : constraints) {
         c -> generateBuffers();
     }
+#endif
 
     resume();
 }

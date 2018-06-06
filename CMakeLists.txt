@@ -49,20 +49,20 @@ endif()
 
 file(GLOB HEADERS "*.h")
 
-add_executable(main src/main.cpp ${SOURCE_FILES} ${HEADERS})
-target_compile_features(main PUBLIC cxx_std_11)
+add_executable(nographics src/nographicsmain.cpp ${SOURCE_FILES} ${HEADERS})
+target_compile_features(nographics PUBLIC cxx_std_11)
+set_target_properties(nographics PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+target_link_libraries(nographics PRIVATE cuda)
 
-set_target_properties(main PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-target_link_libraries(main PRIVATE cuda)
+add_executable(graphics src/main.cpp ${SOURCE_FILES} ${HEADERS})
+target_compile_definitions(graphics PRIVATE GRAPHICS)
 
-target_link_libraries(main PRIVATE glfw)
-target_link_libraries(main PRIVATE glm)
+target_link_libraries(graphics PRIVATE glfw)
+target_link_libraries(graphics PRIVATE glm)
 
 if ( WIN32 )
-    target_link_libraries(main PRIVATE GLEW::GLEW)
+    target_link_libraries(graphics PRIVATE GLEW::GLEW)
 else()
-    target_link_libraries(main PRIVATE GLEW)
-    target_link_libraries(main PRIVATE gl)
+    target_link_libraries(graphics PRIVATE GLEW)
+    target_link_libraries(graphics PRIVATE gl)
 endif()
-
-#install(TARGETS main DESTINATION ${CMAKE_BINARY_DIR})

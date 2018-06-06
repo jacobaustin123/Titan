@@ -2,6 +2,7 @@
 // Created by Jacob Austin on 5/29/18.
 //
 
+#ifdef GRAPHICS
 #ifndef LOCH_GRAPHICS_H
 #define LOCH_GRAPHICS_H
 
@@ -20,3 +21,4 @@ GLFWwindow * createGLFWWindow();
 glm::mat4 getProjection();
 
 #endif //LOCH_GRAPHICS_H
+#endif
