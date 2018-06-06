@@ -3,6 +3,7 @@
 //
 
 #include "sim.h"
+#include <cmath>
 
 Simulation::~Simulation() {
     for (Mass * m : masses)
@@ -48,7 +49,28 @@ void Simulation::setBreakpoint(double time) {
     bpts.insert(Event(nullptr, time));
 }
 
-#include <cmath>
+void Simulation::setSpringConstant(double k) {
+    for (Spring * s : springs) {
+        s -> setK(k);
+    }
+}
+
+void Simulation::defaultRestLength() {
+    for (Spring * s : springs) {
+        s -> setRestLength((s ->_left->getPosition() - s -> _right->getPosition()).norm());
+    }
+}
+
+void Simulation::setMass(double m) {
+    for (Mass * mass : masses) {
+        mass -> setMass(m);
+    }
+}
+void Simulation::setMassDeltaT(double dt) {
+    for (Mass * m : masses) {
+        m -> setDeltaT(dt);
+    }
+}
 
 void Simulation::computeForces() {
     Spring * s = spring_arr;
@@ -243,6 +265,10 @@ Cube * Simulation::createCube(const Vec & center, double side_length) { // creat
     }
 
     objs.push_back(cube);
+
+    for (Spring * s : cube -> springs) {
+        s -> setRestLength((s -> _right -> getPosition() - s -> _left -> getPosition()).norm());
+    }
 
     return cube;
 }
