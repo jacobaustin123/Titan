@@ -49,10 +49,12 @@ endif()
 
 file(GLOB HEADERS "include/*.h") # add all headers to the project
 
-add_executable(nographics src/nographicsmain.cpp ${SOURCE_FILES} ${HEADERS}) # create nographics target
+add_executable(nographics src/main.cpp ${SOURCE_FILES} ${HEADERS}) # create nographics target
 target_compile_features(nographics PUBLIC cxx_std_11)
 set_target_properties(nographics PROPERTIES CUDA_SEPARABLE_COMPILATION ON) # allows declarations and implementations to be separated
 target_link_libraries(nographics PRIVATE cuda)
+
+
 
 add_executable(graphics src/main.cpp ${SOURCE_FILES} ${HEADERS}) # create graphics target
 target_compile_definitions(graphics PRIVATE GRAPHICS) # defines the GRAPHICS preprocessor variable
