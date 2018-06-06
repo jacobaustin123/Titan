@@ -28,12 +28,10 @@ __device__ double atomicDoubleAdd(double* address, double val)
 }
 #endif
 
-//__device__ extern double atomicAdd(double* address, double val);
-
-__device__ void Vec::atomicVecAdd(const Vec & v) {
-    atomicDoubleAdd(&data[0], (double) v.data[0]);
-    atomicDoubleAdd(&data[1], (double) v.data[1]);
-    atomicDoubleAdd(&data[2], (double) v.data[2]);
+CUDA_DEVICE void Vec::atomicVecAdd(const Vec & v) {
+atomicDoubleAdd(&data[0], (double) v.data[0]);
+atomicDoubleAdd(&data[1], (double) v.data[1]);
+atomicDoubleAdd(&data[2], (double) v.data[2]);
 }
 
 //Vec::Vec() {

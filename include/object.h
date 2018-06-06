@@ -6,6 +6,8 @@
 #include "spring.h"
 #include "vec.h"
 
+#ifdef GRAPHICS
+
 // Include GLEW
 #include <GL/glew.h>
 
@@ -15,6 +17,7 @@
 // Include GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#endif
 
 static double DISPL_CONST = 10000;
 
@@ -29,9 +32,9 @@ public:
 class Constraint : public BaseObject { // constraint like plane or sphere which applies force to masses
 public:
     virtual Vec getForce(const Vec & position) = 0; // returns force on an object based on its position, e.g. plane or
-    virtual void generateBuffers() = 0;
 
 #ifdef GRAPHICS
+    virtual void generateBuffers() = 0;
     virtual void draw() = 0;
 #endif
 

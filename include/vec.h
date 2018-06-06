@@ -15,6 +15,12 @@
 #define CUDA_CALLABLE_MEMBER
 #endif
 
+#ifdef __CUDACC__
+#define CUDA_DEVICE __device__
+#else
+#define CUDA_DEVICE
+#endif
+
 #include <iostream>
 #include <cuda_runtime.h>
 #include <cuda.h>
@@ -60,7 +66,7 @@ public:
         return *this;
     }
 
-    __device__ void atomicVecAdd(const Vec & v); // fix this
+    CUDA_DEVICE void atomicVecAdd(const Vec & v);
 
     CUDA_CALLABLE_MEMBER Vec operator-() const{
         return Vec(-data[0], -data[1], -data[2]);

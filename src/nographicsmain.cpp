@@ -6,7 +6,6 @@
 #include "vec.h"
 #include "sim.h"
 
-
 static Simulation sim;
 
 int main()
@@ -31,9 +30,10 @@ int main()
 
     Plane * p = sim.createPlane(Vec(0, 0, 1), 0); // add a constraint (can't go below plane z = 0)
 
-    sim.setBreakpoint(0.5); // set breakpoint (could be end of program or just time to check for updates)
+    sim.setBreakpoint(0.1); // set breakpoint (could be end of program or just time to check for updates)
+    sim.run();
 
-    while (sim.time() < 10) {
+    while (sim.time() < 5) {
         sim.printPositions();
         sim.setBreakpoint(sim.time() + 0.5);
         sim.resume();
