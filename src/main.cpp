@@ -9,10 +9,10 @@
 
 static Simulation sim;
 
-//void translateMass() {
-//    ContainerObject * o = sim.getObject(0);
-//    o->translate(Vec(cos(sim.time()), sin(sim.time()), 0));
-//}
+void translateMass() {
+    ContainerObject * o = sim.getObject(0);
+    o->translate(Vec(cos(sim.time()), sin(sim.time()), 1));
+}
 
 int main()
 {
@@ -30,12 +30,12 @@ int main()
 
 #ifdef GRAPHICS
     sim.setBreakpoint(40);
-//    sim.runFunc(translateMass, 1.0);
+//    sim.runFunc(translateMass, 0, 1.0);
 
     sim.run();
 #else
     sim.setBreakpoint(0.01);
-//    sim.runFunc(translateMass, 1.0);
+//    sim.runFunc(translateMass, 0, 1.0);
     sim.run();
 
     while (sim.time() < 1) {
