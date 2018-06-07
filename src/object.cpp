@@ -89,9 +89,7 @@ Lattice::Lattice(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
     this -> nx = nx;
     this -> ny = ny;
     this -> nz = nz;
-
-    std::cout << "creating masses" << std::endl;
-
+    
     for (int i = 0; i < nx; i++) {
         for (int j = 0; j < ny; j++) {
             for (int k = 0; k < nz; k++) {
@@ -99,8 +97,6 @@ Lattice::Lattice(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
             }
         }
     }
-
-    std::cout << "creating springs" << std::endl;
 
     for (int i = 0; i < nx; i++) {
         for (int j = 0; j < ny; j++) {
@@ -111,8 +107,6 @@ Lattice::Lattice(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
                             if (l != 0 || m != 0 || n != 0) {
                                 springs.push_back(new Spring(masses[k + j * nz + i * ny * nz],
                                                              masses[(k + n) + (j + m) * nz + (i + l) * ny * nz]));
-                                std::cout << k + j * nz + i * ny * nz << " "
-                                          << (k + n) + (j + m) * nz + (i + l) * ny * nz << std::endl;
                             }
                         }
                     }
@@ -120,8 +114,6 @@ Lattice::Lattice(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
             }
         }
     }
-
-    std::cout << "done" << std::endl;
 
 }
 

@@ -21,18 +21,12 @@ int main()
 //    Cube * c3 = sim.createCube(Vec(2, 2, 5), 2); // create Cube object centered at (0, 0, 10) with side length 2.0
 //    Cube * c4 = sim.createCube(Vec(-2, -2, 5), 2); // create Cube object centered at (0, 0, 10) with side length 2.0
 //
-    std::cout << "Generating Lattice" << std::endl;
-
     Lattice * l1 = sim.createLattice(Vec(0, 0, 5), Vec(5, 5, 2), 5, 5, 3);
-
-    std::cout << "Finished generating Lattice" << std::endl;
 
     sim.setSpringConstant(10000);
     sim.setMassDeltaT(0.0001);
 
     sim.createPlane(Vec(0, 0, 1), 0);
-
-    std::cout << sim.masses.size() << " " << sim.springs.size() << std::endl;
 
 #ifdef GRAPHICS
     sim.setBreakpoint(40);
