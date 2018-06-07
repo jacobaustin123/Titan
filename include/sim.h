@@ -37,18 +37,20 @@ public:
     Spring * createSpring();
     Spring * createSpring(Mass * m1, Mass * m2, double k = 1.0, double len = 1.0);
 
+    Plane * createPlane(const Vec & abc, double d ); // creates half-space ax + by + cz < d
+    Cube * createCube(const Vec & center, double side_length); // creates cube
+    Lattice * createLattice(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
+
+    void setSpringConstant(double k);
+    void defaultRestLength();
+    void setMass(double m);
+    void setMassDeltaT(double dt);
 
     void setBreakpoint(double time);
-
-    Plane * createPlane(const Vec & abc, double d ); // creates half-space ax + by + cz < d
-    Cube * createCube(const Vec & center, double side_length); // creates half-space ax + by + cz < d
 
     //Control
     void run(); // should set dt to min(mass dt) if not 0, resets everything
     void resume(); // same as above but w/out reset
-
-    //Set
-    void setAcc(const Vec & acc) {this -> GlobalAcc + acc;}  //Adds specified acceleration to global acceleration
 
     //Get
     double time() { return T; }
@@ -56,13 +58,12 @@ public:
     //Prints
     void printPositions();
     void printForces();
-    void printSprings();
-    void printSpringForces();
+//    void printSprings();
+//    void printSpringForces();
 
 private:
     double dt; // set to 0 by default, when run is called will be set to min(mass dt) unless previously set
     double T; // global simulation time
-    Vec GlobalAcc; //Vector of global acceleration to be applied to all masses (i.e. gravity)
 
     int RUNNING;
 
@@ -78,7 +79,6 @@ private:
 
     CUDA_MASS * massToArray();
     CUDA_SPRING * springToArray();
-
     void toArray();
 
     void massFromArray();
@@ -93,8 +93,15 @@ private:
     GLFWwindow * window;
     glm::mat4 MVP;
 
+    GLuint vertices;
+    GLuint colors;
+    GLuint indices;
+
     void clearScreen();
     void renderScreen();
+    void updateBuffers();
+    void generateBuffers();
+    void draw();
 
 #endif
 };

@@ -14,10 +14,11 @@ Simulation::~Simulation() {
     for (Constraint * c : constraints)
         delete c;
 
-    for (ContainerObject * o : objs)
-        delete o;
-
 #ifdef GRAPHICS
+    glDeleteBuffers(1, &vertices);
+    glDeleteBuffers(1, &colors);
+    glDeleteBuffers(1, &indices);
+
     glDeleteProgram(programID);
     glDeleteVertexArrays(1, &VertexArrayID);
 
@@ -41,6 +42,29 @@ Spring * Simulation::createSpring(Mass * m1, Mass * m2, double k, double len) {
     Spring * s = new Spring(m1, m2, k, len);
     springs.push_back(s);
     return s;
+}
+
+void Simulation::setSpringConstant(double k) {
+    for (Spring * s : springs) {
+        s -> setK(k);
+    }
+}
+
+void Simulation::defaultRestLength() {
+    for (Spring * s : springs) {
+        s -> setRestLength((s ->_left->getPosition() - s -> _right->getPosition()).norm());
+    }
+}
+
+void Simulation::setMass(double m) {
+    for (Mass * mass : masses) {
+        mass -> setMass(m);
+    }
+}
+void Simulation::setMassDeltaT(double dt) {
+    for (Mass * m : masses) {
+        m -> setDeltaT(dt);
+    }
 }
 
 void Simulation::setBreakpoint(double time) {
@@ -147,15 +171,15 @@ __global__ void printSpring(CUDA_SPRING * d_springs, int num_springs) {
     }
 }
 
-__global__ void printSpringForce(CUDA_SPRING * d_springs, int num_springs) {
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
+//__global__ void printSpringForce(CUDA_SPRING * d_springs, int num_springs) {
+//    int i = blockDim.x * blockIdx.x + threadIdx.x;
+//
+//    if (i < num_springs) {
+//        printf("%d: left: (%5f, %5f, %5f), right:  (%5f, %5f, %5f)\n\n ", i, d_springs[i]._left -> force[0], d_springs[i]._left -> force[1], d_springs[i]._left -> force[2], d_springs[i]._right -> force[0], d_springs[i]._right -> force[1], d_springs[i]._right -> force[2]);
+//    }
+//}
 
-    if (i < num_springs) {
-        printf("%d: left: (%5f, %5f, %5f), right:  (%5f, %5f, %5f)\n\n ", i, d_springs[i]._left -> force[0], d_springs[i]._left -> force[1], d_springs[i]._left -> force[2], d_springs[i]._right -> force[0], d_springs[i]._right -> force[1], d_springs[i]._right -> force[2]);
-    }
-}
-
-__global__ void computeSpringForces(CUDA_SPRING * d_spring, int num_springs) {
+__global__ void computeSpringForces(CUDA_SPRING * device_springs, int num_springs) {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
 
     if ( i < num_springs ) {
@@ -248,14 +272,10 @@ void Simulation::resume() {
 
 #ifdef GRAPHICS
         if (fmod(T, 250 * dt) < dt) {
-            fromArray();
-
             clearScreen();
 
-            for (ContainerObject * c : objs) {
-                c -> updateBuffers();
-                c -> draw();
-            }
+            updateBuffers();
+            draw();
 
             for (Constraint * c : constraints) {
                 c -> draw();
@@ -267,8 +287,6 @@ void Simulation::resume() {
                 RUNNING = 0;
                 break;
             }
-
-            toArray();
         }
 #endif
 
@@ -282,8 +300,6 @@ void Simulation::run() { // repeatedly run next
         if (m -> deltat() < dt)
             dt = m -> deltat();
     }
-
-//    dt = (*std::min_element(masses.begin(), masses.end(), cmp)) -> deltat();
 
 #ifdef GRAPHICS
     this -> window = createGLFWWindow();
@@ -299,9 +315,7 @@ void Simulation::run() { // repeatedly run next
 
     this -> MVP = getProjection();
 
-    for (ContainerObject * c : objs) {
-        c -> generateBuffers();
-    }
+    generateBuffers();
 
     for (Constraint * c : constraints) {
         c -> generateBuffers();
@@ -310,6 +324,119 @@ void Simulation::run() { // repeatedly run next
 
     resume();
 }
+
+#ifdef GRAPHICS
+
+void Simulation::generateBuffers() {
+    {
+        GLuint colorbuffer; // bind colors to buffer colorbuffer
+        glGenBuffers(1, &colorbuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+        glBufferData(GL_ARRAY_BUFFER, 3 * masses.size() * sizeof(GLfloat), NULL, GL_STATIC_DRAW);
+        cudaGLRegisterBufferObject(colorbuffer);
+        this -> colors = colorbuffer;
+    }
+
+    {
+        GLuint elementbuffer; // create buffer for main cube object
+        glGenBuffers(1, &elementbuffer);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * springs.size() * sizeof(GLuint), NULL, GL_STATIC_DRAW); // second argument is number of bytes
+        cudaGLRegisterBufferObject(elementbuffer);
+        this -> indices = elementbuffer;
+    }
+
+    {
+        GLuint vertexbuffer;
+        glGenBuffers(1, &vertexbuffer); // bind cube vertex buffer
+        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+        glBufferData(GL_ARRAY_BUFFER, 3 * masses.size() * sizeof(GLfloat), NULL, GL_STATIC_DRAW);
+        cudaGLRegisterBufferObject(vertexbuffer);
+        this -> vertices = vertexbuffer;
+    }
+}
+
+void Simulation::updateBuffers() {
+    {
+        GLfloat *color_buffer_data = new GLfloat[3 * masses.size()];
+
+        for (int i = 0; i < masses.size(); i++) {
+            color_buffer_data[3 * i] = (GLfloat) d_mass[i].color[0];
+            color_buffer_data[3 * i + 1] = (GLfloat) d_mass[i].color[1];
+            color_buffer_data[3 * i + 2] = (GLfloat) d_mass[i].color[2];
+        }
+
+        glBindBuffer(GL_ARRAY_BUFFER, colors);
+        glBufferData(GL_ARRAY_BUFFER, 3 * masses.size() * sizeof(GLfloat), color_buffer_data, GL_STATIC_DRAW);
+
+        delete [] color_buffer_data;
+    }
+
+    {
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->indices);
+
+        GLuint *indices = new GLuint[2 * springs.size()]; // this contains the order in which to draw the lines between points
+
+        for (int i = 0; i < springs.size(); i++) {
+            indices[2 * i] = (springs[i]->_left) -> arrayptr - d_mass;
+            indices[2 * i + 1] = (springs[i]->_right)->arrayptr - d_mass;
+        }
+
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * springs.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW); // second argument is number of bytes
+
+        delete [] indices;
+    }
+
+    {
+        GLfloat *vertex_data = new GLfloat[3 * masses.size()];
+
+        for (int i = 0; i < masses.size(); i++) {
+            vertex_data[3 * i] = (GLfloat) d_mass[i].getPosition()[0];
+            vertex_data[3 * i + 1] = (GLfloat) d_mass[i].getPosition()[1];
+            vertex_data[3 * i + 2] = (GLfloat) d_mass[i].getPosition()[2];
+        }
+
+        glBindBuffer(GL_ARRAY_BUFFER, vertices);
+        glBufferData(GL_ARRAY_BUFFER, 3 * masses.size() * sizeof(GLfloat), vertex_data, GL_STATIC_DRAW);
+
+        delete [] vertex_data;
+    }
+}
+
+void Simulation::draw() {
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, this -> vertices);
+    glPointSize(10);
+    glLineWidth(10);
+    glVertexAttribPointer(
+            0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
+            3,                  // size
+            GL_FLOAT,           // type
+            GL_FALSE,           // normalized?
+            0,                  // stride
+            (void*)0            // array buffer offset
+    );
+
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, this -> colors);
+    glVertexAttribPointer(
+            1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
+            3,                                // size
+            GL_FLOAT,                         // type
+            GL_FALSE,                         // normalized?
+            0,                                // stride
+            (void*)0                          // array buffer offset
+    );
+
+    glDrawArrays(GL_POINTS, 0, masses.size()); // 3 indices starting at 0 -> 1 triangle
+    glDrawElements(GL_LINES, 2 * springs.size(), GL_UNSIGNED_INT, (void*) 0); // 3 indices starting at 0 -> 1 triangle
+
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(0);
+}
+
+#endif
 
 Plane * Simulation::createPlane(const Vec & abc, double d ) { // creates half-space ax + by + cz < d
     Plane * new_plane = new Plane(abc, d);
@@ -329,7 +456,31 @@ Cube * Simulation::createCube(const Vec & center, double side_length) { // creat
 
     objs.push_back(cube);
 
+    for (Spring * s : cube -> springs) {
+        s -> setRestLength((s -> _right -> getPosition() - s -> _left -> getPosition()).norm());
+    }
+
     return cube;
+}
+
+Lattice * Simulation::createLattice(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
+    Lattice * l = new Lattice(center, dims, nx, ny, nz);
+
+    for (Mass * m : l -> masses) {
+        masses.push_back(m);
+    }
+
+    for (Spring * s : l -> springs) {
+        springs.push_back(s);
+    }
+
+    objs.push_back(l);
+
+    for (Spring * s : l -> springs) {
+        s -> setRestLength((s -> _right -> getPosition() - s -> _left -> getPosition()).norm());
+    }
+
+    return l;
 }
 
 void Simulation::printPositions() {
@@ -350,41 +501,41 @@ void Simulation::printPositions() {
     std::cout << std::endl;
 }
 
-void Simulation::printSprings() {
-    if (RUNNING) {
-        std::cout << "\nDEVICE SPRINGS: " << std::endl;
-        int threadsPerBlock = 1024;
-        int springBlocksPerGrid = (springs.size() + threadsPerBlock - 1) / threadsPerBlock;
-        printSpring<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size());
-        cudaDeviceSynchronize();
-    }
-    else {
-        std::cout << "\nHOST SPRINGS: " << std::endl;
-        for (Spring * s : springs) {
-            std::cout << s->_left->getPosition() << s->_right->getPosition() << std::endl;
-        }
-    }
+//void Simulation::printSprings() {
+//    if (RUNNING) {
+//        std::cout << "\nDEVICE SPRINGS: " << std::endl;
+//        int threadsPerBlock = 1024;
+//        int springBlocksPerGrid = (springs.size() + threadsPerBlock - 1) / threadsPerBlock;
+//        printSpring<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size());
+//        cudaDeviceSynchronize();
+//    }
+//    else {
+//        std::cout << "\nHOST SPRINGS: " << std::endl;
+//        for (Spring * s : springs) {
+//            std::cout << s->_left->getPosition() << s->_right->getPosition() << std::endl;
+//        }
+//    }
+//
+//    std::cout << std::endl;
+//}
 
-    std::cout << std::endl;
-}
-
-void Simulation::printSpringForces() {
-    if (RUNNING) {
-        std::cout << "\nDEVICE SPRINGS: " << std::endl;
-        int threadsPerBlock = 1024;
-        int springBlocksPerGrid = (springs.size() + threadsPerBlock - 1) / threadsPerBlock;
-        printSpringForce<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size());
-        cudaDeviceSynchronize();
-    }
-    else {
-        std::cout << "\nHOST SPRINGS: " << std::endl;
-        for (Spring * s : springs) {
-            std::cout << s->_left->getForce() << s->_right->getForce() << std::endl;
-        }
-    }
-
-    std::cout << std::endl;
-}
+//void Simulation::printSpringForces() {
+//    if (RUNNING) {
+//        std::cout << "\nDEVICE SPRINGS: " << std::endl;
+//        int threadsPerBlock = 1024;
+//        int springBlocksPerGrid = (springs.size() + threadsPerBlock - 1) / threadsPerBlock;
+//        printSpringForce<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size());
+//        cudaDeviceSynchronize();
+//    }
+//    else {
+//        std::cout << "\nHOST SPRINGS: " << std::endl;
+//        for (Spring * s : springs) {
+//            std::cout << s->_left->getForce() << s->_right->getForce() << std::endl;
+//        }
+//    }
+//
+//    std::cout << std::endl;
+//}
 
 void Simulation::printForces() {
     if (RUNNING) {
