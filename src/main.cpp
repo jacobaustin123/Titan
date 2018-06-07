@@ -16,8 +16,6 @@ static Simulation sim;
 
 int main()
 {
-//    Simulation sim; // initialize simulation object
-
 //    Cube * c1 = sim.createCube(Vec(2, -2, 5), 2); // create Cube object centered at (0, 0, 10) with side length 2.0
 //    Cube * c2 = sim.createCube(Vec(-2, 2, 5), 2); // create Cube object centered at (0, 0, 10) with side length 2.0
 //    Cube * c3 = sim.createCube(Vec(2, 2, 5), 2); // create Cube object centered at (0, 0, 10) with side length 2.0
