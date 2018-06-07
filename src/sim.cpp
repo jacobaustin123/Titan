@@ -15,10 +15,10 @@ Simulation::~Simulation() {
     for (Constraint * c : constraints)
         delete c;
 
-    for (ContainerObject * o : objs)
-        delete o;
-
 #ifdef GRAPHICS
+    glDeleteBuffers(1, &vertices);
+    glDeleteBuffers(1, &colors);
+    glDeleteBuffers(1, &indices);
     glDeleteProgram(programID);
     glDeleteVertexArrays(1, &VertexArrayID);
 
@@ -193,14 +193,15 @@ void Simulation::resume() {
 
 #ifdef GRAPHICS
         if (fmod(T, 250 * dt) < dt) {
-            fromArray();
-
             clearScreen();
 
-            for (ContainerObject * c : objs) {
-                c -> updateBuffers();
-                c -> draw();
-            }
+            updateBuffers();
+            draw();
+
+//            for (ContainerObject * c : objs) {
+//                c -> updateBuffers();
+//                c -> draw();
+//            }
 
             for (Constraint * c : constraints) {
                 c -> draw();
@@ -212,8 +213,6 @@ void Simulation::resume() {
                 RUNNING = 0;
                 break;
             }
-
-            toArray();
         }
 #endif
     }
@@ -242,9 +241,11 @@ void Simulation::run() { // repeatedly run next
 
     this -> MVP = getProjection();
 
-    for (ContainerObject * c : objs) {
-        c -> generateBuffers();
-    }
+    generateBuffers();
+
+//    for (ContainerObject * c : objs) {
+//        c -> generateBuffers();
+//    }
 
     for (Constraint * c : constraints) {
         c -> generateBuffers();
@@ -253,6 +254,103 @@ void Simulation::run() { // repeatedly run next
 
     resume();
 }
+
+#ifdef GRAPHICS
+
+void Simulation::generateBuffers() {
+    {
+        GLuint colorbuffer; // bind colors to buffer colorbuffer
+        glGenBuffers(1, &colorbuffer);
+        this -> colors = colorbuffer;
+    }
+
+    {
+        GLuint elementbuffer; // create buffer for main cube object
+        glGenBuffers(1, &elementbuffer);
+        this -> indices = elementbuffer;
+    }
+
+    {
+        GLuint vertexbuffer;
+        glGenBuffers(1, &vertexbuffer); // bind cube vertex buffer
+        this -> vertices = vertexbuffer;
+    }
+}
+
+void Simulation::updateBuffers() {
+    {
+        GLfloat color_buffer_data[3 * masses.size()];
+
+        for (int i = 0; i < masses.size(); i++) {
+            color_buffer_data[3 * i] = (GLfloat) mass_arr[i].color[0];
+            color_buffer_data[3 * i + 1] = (GLfloat) mass_arr[i].color[1];
+            color_buffer_data[3 * i + 2] = (GLfloat) mass_arr[i].color[2];
+        }
+
+        glBindBuffer(GL_ARRAY_BUFFER, colors);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(color_buffer_data), color_buffer_data, GL_STATIC_DRAW);
+    }
+
+    {
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->indices);
+
+        GLuint indices[2 * springs.size()]; // this contains the order in which to draw the lines between points
+        for (int i = 0; i < springs.size(); i++) {
+            indices[2 * i] = (springs[i]->_left) -> arrayptr - mass_arr;
+            indices[2 * i + 1] = (springs[i]->_right)->arrayptr - mass_arr;
+        }
+
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * springs.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW); // second argument is number of bytes
+    }
+
+    {
+        GLfloat vertex_data[3 * masses.size()];
+
+        for (int i = 0; i < masses.size(); i++) {
+            vertex_data[3 * i] = (GLfloat) mass_arr[i].getPosition()[0];
+            vertex_data[3 * i + 1] = (GLfloat) mass_arr[i].getPosition()[1];
+            vertex_data[3 * i + 2] = (GLfloat) mass_arr[i].getPosition()[2];
+        }
+
+        glBindBuffer(GL_ARRAY_BUFFER, vertices);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+    }
+}
+
+void Simulation::draw() {
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, this -> vertices);
+    glPointSize(10);
+    glLineWidth(10);
+    glVertexAttribPointer(
+            0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
+            3,                  // size
+            GL_FLOAT,           // type
+            GL_FALSE,           // normalized?
+            0,                  // stride
+            (void*)0            // array buffer offset
+    );
+
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, this -> colors);
+    glVertexAttribPointer(
+            1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
+            3,                                // size
+            GL_FLOAT,                         // type
+            GL_FALSE,                         // normalized?
+            0,                                // stride
+            (void*)0                          // array buffer offset
+    );
+
+    glDrawArrays(GL_POINTS, 0, masses.size()); // 3 indices starting at 0 -> 1 triangle
+    glDrawElements(GL_LINES, 2 * springs.size(), GL_UNSIGNED_INT, (void*) 0); // 3 indices starting at 0 -> 1 triangle
+
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(0);
+}
+
+#endif
 
 Cube * Simulation::createCube(const Vec & center, double side_length) { // creates half-space ax + by + cz < d
     Cube * cube = new Cube(center, side_length);
@@ -272,6 +370,26 @@ Cube * Simulation::createCube(const Vec & center, double side_length) { // creat
 
     return cube;
 }
+
+//Lattice * Simulation::createLattice(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
+//    Lattice * l = new Lattice(center, dims, nx, ny, nz);
+//
+//    for (Mass * m : l -> masses) {
+//        masses.push_back(m);
+//    }
+//
+//    for (Spring * s : l -> springs) {
+//        springs.push_back(s);
+//    }
+//
+//    objs.push_back(l);
+//
+//    for (Spring * s : l -> springs) {
+//        s -> setRestLength((s -> _right -> getPosition() - s -> _left -> getPosition()).norm());
+//    }
+//
+//    return l;
+//}
 
 void Simulation::printPositions() {
     for (Mass * m : masses) {

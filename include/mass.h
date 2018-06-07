@@ -12,7 +12,7 @@ public:
     Mass() { m = 1.0; fixed = 0; dt = 0.01; T = 0; }
 
     Mass(double mass, const Vec & position, int fixed = 0, double dt = 0.01) :
-            m(mass), pos(position), fixed(fixed), dt(dt), T(0) {}; // defaults everything
+            m(mass), pos(position), fixed(fixed), dt(dt), T(0), color(Vec(1.0, 0.2, 0.2)) {}; // defaults everything
 
     void setMass(double m) { this -> m = m; };
     void setPos(const Vec & pos) { this -> pos = pos; }
@@ -20,6 +20,8 @@ public:
     void setAcc(const Vec & acc) { this -> acc = acc; }
     void setForce(const Vec & force) { this -> force = force; }
     void setDeltaT(double dt) { this -> dt = dt; }
+    void setColor(const Vec & color) { this -> color = color; }
+
     void translate(const Vec & displ) { this -> pos += displ; }
 
     void makeFixed() { fixed = 1; }
@@ -40,7 +42,7 @@ public:
     void resetForce(); // set force = 0;
 
     Mass * arrayptr;
-private:
+
     double m; // mass in kg
     double dt; // update interval
     double T; // local time
@@ -48,6 +50,7 @@ private:
     Vec vel; // velocity in m/s
     Vec acc; // acceleration in m/s^2
     Vec force; // force in kg m / s^2
+    Vec color; // color of mass
 
     int fixed; // is the mass position fixed?
 };
