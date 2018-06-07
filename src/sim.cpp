@@ -279,7 +279,7 @@ void Simulation::generateBuffers() {
 
 void Simulation::updateBuffers() {
     {
-        GLfloat color_buffer_data[3 * masses.size()];
+        GLfloat *color_buffer_data = new GLfloat[3 * masses.size()];
 
         for (int i = 0; i < masses.size(); i++) {
             color_buffer_data[3 * i] = (GLfloat) mass_arr[i].color[0];
@@ -288,23 +288,28 @@ void Simulation::updateBuffers() {
         }
 
         glBindBuffer(GL_ARRAY_BUFFER, colors);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(color_buffer_data), color_buffer_data, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, 3 * masses.size() * sizeof(GLfloat), color_buffer_data, GL_STATIC_DRAW);
+
+        delete [] color_buffer_data;
     }
 
     {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->indices);
 
-        GLuint indices[2 * springs.size()]; // this contains the order in which to draw the lines between points
+        GLuint *indices = new GLuint[2 * springs.size()]; // this contains the order in which to draw the lines between points
+
         for (int i = 0; i < springs.size(); i++) {
             indices[2 * i] = (springs[i]->_left) -> arrayptr - mass_arr;
             indices[2 * i + 1] = (springs[i]->_right)->arrayptr - mass_arr;
         }
 
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * springs.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW); // second argument is number of bytes
+
+        delete [] indices;
     }
 
     {
-        GLfloat vertex_data[3 * masses.size()];
+        GLfloat *vertex_data = new GLfloat[3 * masses.size()];
 
         for (int i = 0; i < masses.size(); i++) {
             vertex_data[3 * i] = (GLfloat) mass_arr[i].getPosition()[0];
@@ -313,7 +318,9 @@ void Simulation::updateBuffers() {
         }
 
         glBindBuffer(GL_ARRAY_BUFFER, vertices);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, 3 * masses.size() * sizeof(GLfloat), vertex_data, GL_STATIC_DRAW);
+
+        delete [] vertex_data;
     }
 }
 
