@@ -9,7 +9,7 @@
 
 class Mass {
 public:
-    Mass() { m = 1.0; fixed = 0; dt = 0.01; T = 0; }
+    Mass() { m = 1.0; fixed = 0; dt = 0.01; T = 0; color = Vec(1.0, 0.2, 0.2); }
 
     Mass(double mass, const Vec & position, int fixed = 0, double dt = 0.01) :
             m(mass), pos(position), fixed(fixed), dt(dt), T(0), color(Vec(1.0, 0.2, 0.2)) {}; // defaults everything

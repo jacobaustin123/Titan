@@ -51,7 +51,7 @@ public:
 
     Plane * createPlane(const Vec & abc, double d ); // creates half-space ax + by + cz < d
     Cube * createCube(const Vec & center, double side_length); // creates cube
-//    Lattice * createLattice(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
+    Lattice * createLattice(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
 
     void setSpringConstant(double k);
     void defaultRestLength();

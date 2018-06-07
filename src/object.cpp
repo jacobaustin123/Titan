@@ -83,36 +83,53 @@ void Cube::translate(const Vec & displ) {
     }
 }
 
-//Lattice::Lattice(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
-//    _center = center;
-//    _dims = dims;
-//    this -> nx = nx;
-//    this -> ny = ny;
-//    this -> nz = nz;
-//
-//    for (int i = 0; i < nx; i++) {
-//        for (int j = 0; j < ny; j++) {
-//            for (int k = 0; k < nz; k++) {
-//                masses.push_back(new Mass(1.0, Vec(i / (nx - 1.0) - 0.5, j / (ny - 1.0) - 0.5, k / (nz - 1.0) - 0.5) * dims - center));
-//            }
-//        }
-//    }
-//
-//    for (int i = 0; i < nx; i++) {
-//        for (int j = 0; j < ny; j++) {
-//            for (int k = 0; k < nz; k++) {
-//                for (int l = 0; l < (i != nx - 1) ? 2 : 1; l++) {
-//                    for (int m = 0; m < (j != ny - 1) ? 2 : 1; m++) {
-//                        for (int n = 0; n < (k != nz - 1) ? 2 : 1; n++) {
-//                            if (l != 0 && m != 0 && n != 0)
-//                                springs.push_back(new Spring(masses[k + j * nz + i * ny * nz], masses[(k + n) + (j + m) * nz + (i + l) * ny * nz]));
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}
+Lattice::Lattice(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
+    _center = center;
+    _dims = dims;
+    this -> nx = nx;
+    this -> ny = ny;
+    this -> nz = nz;
+
+    std::cout << "creating masses" << std::endl;
+
+    for (int i = 0; i < nx; i++) {
+        for (int j = 0; j < ny; j++) {
+            for (int k = 0; k < nz; k++) {
+                masses.push_back(new Mass(1.0, Vec((double) i / (nx - 1.0) - 0.5, j / (ny - 1.0) - 0.5, k / (nz - 1.0) - 0.5) * dims + center));
+            }
+        }
+    }
+
+    std::cout << "creating springs" << std::endl;
+
+    for (int i = 0; i < nx; i++) {
+        for (int j = 0; j < ny; j++) {
+            for (int k = 0; k < nz; k++) {
+                for (int l = 0; l < ((i != nx - 1) ? 2 : 1); l++) {
+                    for (int m = 0; m < ((j != ny - 1) ? 2 : 1); m++) {
+                        for (int n = 0; n < ((k != nz - 1) ? 2 : 1); n++) {
+                            if (l != 0 || m != 0 || n != 0) {
+                                springs.push_back(new Spring(masses[k + j * nz + i * ny * nz],
+                                                             masses[(k + n) + (j + m) * nz + (i + l) * ny * nz]));
+                                std::cout << k + j * nz + i * ny * nz << " "
+                                          << (k + n) + (j + m) * nz + (i + l) * ny * nz << std::endl;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    std::cout << "done" << std::endl;
+
+}
+
+void Lattice::translate(const Vec &displ) {
+    for (Mass * m : masses) {
+        m -> pos += displ;
+    }
+}
 
 //Vec Ball::getForce(const Vec & position) {
 //    double dist = (position - _center).norm();

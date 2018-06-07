@@ -104,30 +104,14 @@ public:
     Vec _center;
 };
 
-//class Lattice : public ContainerObject {
-//public:
-//    Lattice(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
-//
-//    void translate(const Vec & displ);
-//
-//    int nx, ny, nz;
-//    Vec _center, _dims;
-//
-//#ifdef GRAPHICS
-//    virtual ~Lattice() {
-//        glDeleteBuffers(1, &colors);
-//        glDeleteBuffers(1, &indices);
-//        glDeleteBuffers(1, &vertices);
-//    };
-//
-//    void generateBuffers();
-//    void updateBuffers();
-//    void draw();
-//
-//    GLuint colors;
-//    GLuint vertices;
-//    GLuint indices;
-//#endif
-//};
+class Lattice : public ContainerObject {
+public:
+    Lattice(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
+
+    void translate(const Vec & displ);
+
+    int nx, ny, nz;
+    Vec _center, _dims;
+};
 
 #endif //LOCH_OBJECT_H
