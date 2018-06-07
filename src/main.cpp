@@ -9,42 +9,49 @@
 
 static Simulation sim;
 
-void translateMass() {
-    ContainerObject * o = sim.getObject(0);
-    o->translate(Vec(cos(sim.time()), sin(sim.time()), 0));
-}
+//void translateMass() {
+//    ContainerObject * o = sim.getObject(0);
+//    o->translate(Vec(cos(sim.time()), sin(sim.time()), 0));
+//}
 
 int main()
 {
 //    Simulation sim; // initialize simulation object
 
-    Cube * c = sim.createCube(Vec(0, 0, 5), 0.5); // create Cube object centered at (0, 0, 10) with side length 2.0
-    c -> setKValue(1000); // set the spring constant for all springs to 10
-    c -> setMassValue(1.0); // set all masses to 2.0
-    c -> setDeltaTValue(0.00001); // set the dt value for all masses in the cube to 0.00001
+//    Cube * c1 = sim.createCube(Vec(2, -2, 5), 2); // create Cube object centered at (0, 0, 10) with side length 2.0
+//    Cube * c2 = sim.createCube(Vec(-2, 2, 5), 2); // create Cube object centered at (0, 0, 10) with side length 2.0
+//    Cube * c3 = sim.createCube(Vec(2, 2, 5), 2); // create Cube object centered at (0, 0, 10) with side length 2.0
+//    Cube * c4 = sim.createCube(Vec(-2, -2, 5), 2); // create Cube object centered at (0, 0, 10) with side length 2.0
 
-    for (Spring * s : c -> springs) {
-        s -> setRestLength((s -> _right->getPosition() - s -> _left->getPosition()).norm());
-    }
+    std::cout << "Generating Lattice" << std::endl;
+
+    Lattice * l1 = sim.createLattice(Vec(0, 0, 5), Vec(5, 5, 2), 10, 10, 4);
+
+    std::cout << "Finished generating Lattice" << std::endl;
+
+    sim.setSpringConstant(10000);
+    sim.setMassDeltaT(0.0001);
+
     sim.createPlane(Vec(0, 0, 1), 0);
 
-    sim.setBreakpoint(0.01);
-    sim.runFunc(translateMass, 1.0);
-//    sim.setBreakpoint(0.1);
+    std::cout << sim.masses.size() << " " << sim.springs.size() << std::endl;
 
-//    sim.runFunc(translateMass, 2.0);
-//    sim.runFunc(translateMass, 3.0);
-
-//    for (Event e : sim.bpts)
-//        std::cout << e.time << " ";
+#ifdef GRAPHICS
+    sim.setBreakpoint(40);
+//    sim.runFunc(translateMass, 1.0);
 
     sim.run();
+#else
+    sim.setBreakpoint(0.01);
+//    sim.runFunc(translateMass, 1.0);
+    sim.run();
 
-    while ( sim.time() < 10.0 ) {
+    while (sim.time() < 1) {
         sim.printPositions();
-        sim.setBreakpoint(sim.time() + 0.5);
+        sim.setBreakpoint(sim.time() + 0.01);
         sim.resume();
     }
+#endif
 
     return 0;
 }
