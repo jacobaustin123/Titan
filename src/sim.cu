@@ -244,11 +244,6 @@ void Simulation::resume() {
     RUNNING = 1;
     toArray();
 
-//    printSprings();
-//    printSpringForces();
-//
-//    printPositions();
-
     while (1) {
         T += dt;
 
@@ -332,7 +327,7 @@ void Simulation::generateBuffers() {
         GLuint colorbuffer; // bind colors to buffer colorbuffer
         glGenBuffers(1, &colorbuffer);
         glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-        glBufferData(GL_ARRAY_BUFFER, 3 * masses.size() * sizeof(GLfloat), NULL, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, 3 * masses.size() * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
         cudaGLRegisterBufferObject(colorbuffer);
         this -> colors = colorbuffer;
     }
@@ -341,7 +336,7 @@ void Simulation::generateBuffers() {
         GLuint elementbuffer; // create buffer for main cube object
         glGenBuffers(1, &elementbuffer);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * springs.size() * sizeof(GLuint), NULL, GL_STATIC_DRAW); // second argument is number of bytes
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * springs.size() * sizeof(GLuint), NULL, GL_DYNAMIC_DRAW); // second argument is number of bytes
         cudaGLRegisterBufferObject(elementbuffer);
         this -> indices = elementbuffer;
     }
@@ -350,56 +345,66 @@ void Simulation::generateBuffers() {
         GLuint vertexbuffer;
         glGenBuffers(1, &vertexbuffer); // bind cube vertex buffer
         glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-        glBufferData(GL_ARRAY_BUFFER, 3 * masses.size() * sizeof(GLfloat), NULL, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, 3 * masses.size() * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
         cudaGLRegisterBufferObject(vertexbuffer);
         this -> vertices = vertexbuffer;
     }
 }
 
+__global__ void updateVertices(float * gl_ptr, CUDA_MASS * d_mass, int num_masses) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+
+    if (i < num_masses) {
+        gl_ptr[3 * i] = (float) d_mass[i].pos[0];
+        gl_ptr[3 * i + 1] = (float) d_mass[i].pos[1];
+        gl_ptr[3 * i + 2] = (float) d_mass[i].pos[2];
+    }
+}
+
+__global__ void updateIndices(unsigned int * gl_ptr, CUDA_SPRING * d_spring, CUDA_MASS * d_mass, int num_springs) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+
+    if (i < num_springs) {
+        gl_ptr[2*i] = (d_spring[i]._left) - d_mass;
+        gl_ptr[2*i + 1] = (d_spring[i]._right) - d_mass;
+    }
+}
+
+__global__ void updateColors(unsigned float * gl_ptr, CUDA_MASS * d_mass, int num_masses) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+
+    if (i < num_masses) {
+        gl_ptr[3 * i] = (float) d_mass[i].color[0];
+        gl_ptr[3 * i + 1] = (float) d_mass[i].color[1];
+        gl_ptr[3 * i + 2] = (float) d_mass[i].color[2];
+    }
+}
+
 void Simulation::updateBuffers() {
+    int threadsPerBlock = 1024;
+
+    int massBlocksPerGrid = (masses.size() + threadsPerBlock - 1) / threadsPerBlock;
+    int springBlocksPerGrid = (springs.size() + threadsPerBlock - 1) / threadsPerBlock;
+
     {
-        GLfloat *color_buffer_data = new GLfloat[3 * masses.size()];
-
-        for (int i = 0; i < masses.size(); i++) {
-            color_buffer_data[3 * i] = (GLfloat) d_mass[i].color[0];
-            color_buffer_data[3 * i + 1] = (GLfloat) d_mass[i].color[1];
-            color_buffer_data[3 * i + 2] = (GLfloat) d_mass[i].color[2];
-        }
-
-        glBindBuffer(GL_ARRAY_BUFFER, colors);
-        glBufferData(GL_ARRAY_BUFFER, 3 * masses.size() * sizeof(GLfloat), color_buffer_data, GL_STATIC_DRAW);
-
-        delete [] color_buffer_data;
+        void *vertexPointer;
+        cudaGLMapBufferObject(&vertexPointer, vertices);
+        updateVertices<<<massBlocksPerGrid, threadsPerBlock>>>((float *) vertexPointer, d_mass, masses.size());
+        cudaGLUnmapbufferObject(&vertexPointer);
     }
 
     {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->indices);
-
-        GLuint *indices = new GLuint[2 * springs.size()]; // this contains the order in which to draw the lines between points
-
-        for (int i = 0; i < springs.size(); i++) {
-            indices[2 * i] = (springs[i]->_left) -> arrayptr - d_mass;
-            indices[2 * i + 1] = (springs[i]->_right)->arrayptr - d_mass;
-        }
-
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * springs.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW); // second argument is number of bytes
-
-        delete [] indices;
+        void *indexPointer; // if no masses or springs are deleted, this can be run only once
+        cudaGLMapBufferObject(&indexPointer, indices);
+        updateIndices<<<springBlocksPerGrid, threadsPerBlock>>>((unsigned int *) indexPointer, d_spring, d_mass, springs.size());
+        cudaGLUnmapbufferObject(&indexPointer);
     }
 
     {
-        GLfloat *vertex_data = new GLfloat[3 * masses.size()];
-
-        for (int i = 0; i < masses.size(); i++) {
-            vertex_data[3 * i] = (GLfloat) d_mass[i].getPosition()[0];
-            vertex_data[3 * i + 1] = (GLfloat) d_mass[i].getPosition()[1];
-            vertex_data[3 * i + 2] = (GLfloat) d_mass[i].getPosition()[2];
-        }
-
-        glBindBuffer(GL_ARRAY_BUFFER, vertices);
-        glBufferData(GL_ARRAY_BUFFER, 3 * masses.size() * sizeof(GLfloat), vertex_data, GL_STATIC_DRAW);
-
-        delete [] vertex_data;
+        void *colorPointer; // if no masses, springs, or colors are changed/deleted, this can be run only once
+        cudaGLMapBufferObject(&colorPointer, vertices);
+        updateColors<<<massBlocksPerGrid, threadsPerBlock>>>((float *) colorPointer, d_mass, masses.size());
+        cudaGLUnmapbufferObject(&colorPointer);
     }
 }
 

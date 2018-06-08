@@ -111,10 +111,35 @@ Lattice::Lattice(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
                         }
                     }
                 }
+
+                if (k != nz - 1) {
+                    if (j != ny - 1) {
+                        springs.push_back(new Spring(masses[(k + 1) + j * nz + i * ny * nz], // get the full triangle
+                                                     masses[k + (j + 1) * nz + i * ny * nz]));
+                    }
+
+                    if (i != nx - 1) {
+                        springs.push_back(new Spring(masses[(k + 1) + j * nz + i * ny * nz],
+                                                     masses[k + j * nz + (i + 1) * ny * nz]));
+                    }
+
+                    if (j != ny - 1 && i != nx - 1) {
+                        springs.push_back(new Spring(masses[(k + 1) + j * nz + i * ny * nz],
+                                                     masses[k + (j + 1) * nz + (i + 1) * ny * nz]));
+                        springs.push_back(new Spring(masses[(k + 1) + j * nz + (i + 1) * ny * nz],
+                                                     masses[k + (j + 1) * nz + i * ny * nz]));
+                        springs.push_back(new Spring(masses[(k + 1) + (j + 1) * nz + i * ny * nz],
+                                                     masses[k + j * nz + (i + 1) * ny * nz]));
+                    }
+                }
+
+                if (j != ny - 1 && i != nx - 1) {
+                    springs.push_back(new Spring(masses[k + (j + 1) * nz + i * ny * nz],
+                                                 masses[k + j * nz + (i + 1) * ny * nz]));
+                }
             }
         }
     }
-
 }
 
 void Lattice::translate(const Vec &displ) {
