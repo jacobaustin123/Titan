@@ -22,7 +22,6 @@ PS> .\bootstrap-vckpg.bat
 PS> .\vcpkg integrate install # Keep the output showing `CMAKE_TOOLCHAIN_FILE` variable
 PS> .\vcpkg integrate powershell # You may need to 
 PS> Set-ExecutionPolicy Unrestricted -Scope CurrentUser # May need to run this to allow the vcpkg powershell integration to work
-
 ```
 
 Then to install the dependencies run
