@@ -387,12 +387,13 @@ void Simulation::updateBuffers() {
     int springBlocksPerGrid = (springs.size() + threadsPerBlock - 1) / threadsPerBlock;
 
     {
-        glBindBuffer(GL_ARRAY_BUFFER, vertices);
-        void *vertexPointer;
-        cudaGLMapBufferObject(&vertexPointer, vertices);
-        updateVertices<<<massBlocksPerGrid, threadsPerBlock>>>((float *) vertexPointer, d_mass, masses.size());
-        cudaGLUnmapBufferObject(vertices);
+        glBindBuffer(GL_ARRAY_BUFFER, colors);
+        void *colorPointer; // if no masses, springs, or colors are changed/deleted, this can be run only once
+        cudaGLMapBufferObject(&colorPointer, colors);
+        updateColors<<<massBlocksPerGrid, threadsPerBlock>>>((float *) colorPointer, d_mass, masses.size());
+        cudaGLUnmapBufferObject(colors);
     }
+
 
     {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices);
@@ -403,11 +404,11 @@ void Simulation::updateBuffers() {
     }
 
     {
-        glBindBuffer(GL_ARRAY_BUFFER, colors);
-        void *colorPointer; // if no masses, springs, or colors are changed/deleted, this can be run only once
-        cudaGLMapBufferObject(&colorPointer, colors);
-        updateColors<<<massBlocksPerGrid, threadsPerBlock>>>((float *) colorPointer, d_mass, masses.size());
-        cudaGLUnmapBufferObject(colors);
+        glBindBuffer(GL_ARRAY_BUFFER, vertices);
+        void *vertexPointer;
+        cudaGLMapBufferObject(&vertexPointer, vertices);
+        updateVertices<<<massBlocksPerGrid, threadsPerBlock>>>((float *) vertexPointer, d_mass, masses.size());
+        cudaGLUnmapBufferObject(vertices);
     }
 }
 
