@@ -1,9 +1,8 @@
 cmake_minimum_required(VERSION 3.9)
 project(Loch LANGUAGES CXX CUDA) # use CXX, CUDA by default (since CUDA is a language, don't need cuda_add_executable)
 
-set(CMAKE_CXX_STANDARD 11) # set C++ standard to C++11
-SET(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++11") # same thing, may be unnecessary
-
+set(CMAKE_CXX_STANDARD 14) # set C++ standard to C++11
+SET(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++14") # same thing, may be unnecessary
 
 set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src") # set SOURCE_DIR to src directory
 include_directories(include) # include the include directory (can find headers there)

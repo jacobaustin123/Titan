@@ -75,7 +75,8 @@ public:
 //    void printSprings();
 //    void printSpringForces();
 
-private:
+
+// private from here
     double dt; // set to 0 by default, when run is called will be set to min(mass dt) unless previously set
     double T; // global simulation time
 
