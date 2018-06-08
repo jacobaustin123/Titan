@@ -40,7 +40,6 @@ public:
         lineWidth = 1;
         pointSize = 1;
 #endif
-
     }
 
     ~Simulation();
@@ -126,5 +125,7 @@ private:
 
 __global__ void computeSpringForces(CUDA_SPRING * device_springs, int num_springs);
 __global__ void computeMassForces(CUDA_MASS * device_masses, int num_masses);
+__global__ void massForcesAndUpdate(CUDA_SPRING * device_springs, int num_springs);
+__global__ void update(CUDA_MASS * d_mass, int num_masses);
 
 #endif //LOCH_SIM_H
