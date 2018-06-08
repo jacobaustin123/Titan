@@ -30,7 +30,19 @@ static double G = 9.81;
 
 class Simulation {
 public:
-    Simulation() { dt = 0; RUNNING = 0; }
+    Simulation() {
+        dt = 0;
+        RUNNING = 0;
+
+#ifdef GRAPHICS
+        update_colors = true;
+        update_indices = true;
+        lineWidth = 1;
+        pointSize = 1;
+#endif
+
+    }
+
     ~Simulation();
 
     //Create
@@ -104,6 +116,11 @@ private:
     void generateBuffers();
     void draw();
 
+    bool update_indices;
+    bool update_colors;
+
+    int lineWidth;
+    int pointSize;
 #endif
 };
 

@@ -11,7 +11,7 @@ static Simulation sim;
 
 int main()
 {
-    Lattice * l1 = sim.createLattice(Vec(0, 0, 5), Vec(5, 5, 2), 5, 5, 3);
+    Lattice * l1 = sim.createLattice(Vec(0, 0, 20), Vec(15, 15, 15), 20, 20, 20);
 
     sim.setSpringConstant(10000);
     sim.setMassDeltaT(0.0001);

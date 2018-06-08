@@ -386,21 +386,23 @@ void Simulation::updateBuffers() {
     int massBlocksPerGrid = (masses.size() + threadsPerBlock - 1) / threadsPerBlock;
     int springBlocksPerGrid = (springs.size() + threadsPerBlock - 1) / threadsPerBlock;
 
-    {
+    if (update_colors) {
         glBindBuffer(GL_ARRAY_BUFFER, colors);
         void *colorPointer; // if no masses, springs, or colors are changed/deleted, this can be run only once
         cudaGLMapBufferObject(&colorPointer, colors);
         updateColors<<<massBlocksPerGrid, threadsPerBlock>>>((float *) colorPointer, d_mass, masses.size());
         cudaGLUnmapBufferObject(colors);
+        update_colors = 0;
     }
 
 
-    {
+    if (update_indices) {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices);
         void *indexPointer; // if no masses or springs are deleted, this can be run only once
         cudaGLMapBufferObject(&indexPointer, indices);
         updateIndices<<<springBlocksPerGrid, threadsPerBlock>>>((unsigned int *) indexPointer, d_spring, d_mass, springs.size());
         cudaGLUnmapBufferObject(indices);
+        update_indices = 0;
     }
 
     {
@@ -416,8 +418,8 @@ void Simulation::draw() {
     glEnableVertexAttribArray(0);
 
     glBindBuffer(GL_ARRAY_BUFFER, this -> vertices);
-    glPointSize(10);
-    glLineWidth(10);
+    glPointSize(this -> pointSize);
+    glLineWidth(this -> lineWidth);
     glVertexAttribPointer(
             0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
             3,                  // size
