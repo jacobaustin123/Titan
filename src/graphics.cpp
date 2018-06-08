@@ -18,6 +18,11 @@ using namespace glm;
 
 #include "graphics.h"
 
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
+
 GLFWwindow * createGLFWWindow() {
 
     GLFWwindow* window;
@@ -34,7 +39,7 @@ GLFWwindow * createGLFWWindow() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); //We don't want the old OpenGL
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // We don't want the old OpenGL
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
     glfwSwapInterval(0);
@@ -51,6 +56,7 @@ GLFWwindow * createGLFWWindow() {
     }
 
     glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     glEnable(GL_DEPTH_TEST);
     //    // Accept fragment if it closer to the camera than the former one
