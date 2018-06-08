@@ -61,13 +61,18 @@ void ContainerObject::makeFixed() {
     }
 }
 
+void ContainerObject::makeMovable() {
+    for (Mass * mass : masses) {
+        mass -> makeMovable();
+    }
+}
 
 Cube::Cube(const Vec & center, double side_length) {
     _center = center;
     _side_length = side_length;
 
     for (int i = 0; i < 8; i++) {
-        masses.push_back(new Mass(1.0, side_length * (Vec(i & 1, (i >> 1) & 1, (i >> 2) & 1) - Vec(0.5, 0.5, 0.5)) + center));
+        masses.push_back(new Mass(side_length * (Vec(i & 1, (i >> 1) & 1, (i >> 2) & 1) - Vec(0.5, 0.5, 0.5)) + center));
     }
 
     for (int i = 0; i < 8; i++) { // add the appropriate springs
@@ -93,7 +98,7 @@ Lattice::Lattice(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
     for (int i = 0; i < nx; i++) {
         for (int j = 0; j < ny; j++) {
             for (int k = 0; k < nz; k++) {
-                masses.push_back(new Mass(1.0, Vec((double) i / (nx - 1.0) - 0.5, j / (ny - 1.0) - 0.5, k / (nz - 1.0) - 0.5) * dims + center));
+                masses.push_back(new Mass(Vec((double) i / (nx - 1.0) - 0.5, j / (ny - 1.0) - 0.5, k / (nz - 1.0) - 0.5) * dims + center));
             }
         }
     }

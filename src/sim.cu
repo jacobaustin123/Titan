@@ -32,6 +32,12 @@ Mass * Simulation::createMass() {
     return m;
 }
 
+Mass * Simulation::createMass(const Vec & pos) {
+    Mass * m = new Mass(pos);
+    masses.push_back(m);
+    return m;
+}
+
 Spring * Simulation::createSpring() {
     Spring * s = new Spring();
     springs.push_back(s);
@@ -52,7 +58,7 @@ void Simulation::setSpringConstant(double k) {
 
 void Simulation::defaultRestLength() {
     for (Spring * s : springs) {
-        s -> setRestLength((s ->_left->getPosition() - s -> _right->getPosition()).norm());
+        s -> defaultLength();
     }
 }
 

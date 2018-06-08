@@ -32,7 +32,8 @@ public:
 
     void setForce(); // w
     void setK(double k) { _k = k; } //sets K
-    void setRestLength(double rest_length) { _rest = rest_length; } //sets Rest Lenght
+    void setRestLength(double rest_length) { _rest = rest_length; } //sets Rest length
+    void defaultLength() { _rest = (_left -> pos - _right -> pos).norm() ; } //sets Rest Lenght
     void setLeft(Mass * left) { _left = left; } // sets left mass (attaches spring to mass 1)
     void setRight(Mass * right) { _right = right; } //sets right mass (attaches spring to mass 2)
     void setMasses(Mass * left, Mass * right) { _left = left; _right = right; } //sets both right and left masses

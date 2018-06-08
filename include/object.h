@@ -43,6 +43,8 @@ public:
     void setDeltaTValue(double m); // set masses for all Mass objects
     void setRestLengthValue(double len); // set masses for all Mass objects
     void makeFixed();
+    void makeMovable();
+
 
     // we can have more of these
     std::vector<Mass *> masses;

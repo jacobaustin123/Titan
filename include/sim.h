@@ -38,7 +38,7 @@ public:
         update_colors = true;
         update_indices = true;
         lineWidth = 1;
-        pointSize = 1;
+        pointSize = 10;
 #endif
     }
 
@@ -46,6 +46,8 @@ public:
 
     //Create
     Mass * createMass();
+    Mass * createMass(const Vec & pos);
+
     Spring * createSpring();
     Spring * createSpring(Mass * m1, Mass * m2, double k = 1.0, double len = 1.0);
 
