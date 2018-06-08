@@ -179,7 +179,7 @@ __global__ void printSpring(CUDA_SPRING * d_springs, int num_springs) {
 //    }
 //}
 
-__global__ void computeSpringForces(CUDA_SPRING * device_springs, int num_springs) {
+__global__ void computeSpringForces(CUDA_SPRING * d_spring, int num_springs) {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
 
     if ( i < num_springs ) {
@@ -370,7 +370,7 @@ __global__ void updateIndices(unsigned int * gl_ptr, CUDA_SPRING * d_spring, CUD
     }
 }
 
-__global__ void updateColors(unsigned float * gl_ptr, CUDA_MASS * d_mass, int num_masses) {
+__global__ void updateColors(float * gl_ptr, CUDA_MASS * d_mass, int num_masses) {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
 
     if (i < num_masses) {
@@ -390,21 +390,21 @@ void Simulation::updateBuffers() {
         void *vertexPointer;
         cudaGLMapBufferObject(&vertexPointer, vertices);
         updateVertices<<<massBlocksPerGrid, threadsPerBlock>>>((float *) vertexPointer, d_mass, masses.size());
-        cudaGLUnmapbufferObject(&vertexPointer);
+        cudaGLUnmapBufferObject(vertices);
     }
 
     {
         void *indexPointer; // if no masses or springs are deleted, this can be run only once
         cudaGLMapBufferObject(&indexPointer, indices);
         updateIndices<<<springBlocksPerGrid, threadsPerBlock>>>((unsigned int *) indexPointer, d_spring, d_mass, springs.size());
-        cudaGLUnmapbufferObject(&indexPointer);
+        cudaGLUnmapBufferObject(indices);
     }
 
     {
         void *colorPointer; // if no masses, springs, or colors are changed/deleted, this can be run only once
         cudaGLMapBufferObject(&colorPointer, vertices);
         updateColors<<<massBlocksPerGrid, threadsPerBlock>>>((float *) colorPointer, d_mass, masses.size());
-        cudaGLUnmapbufferObject(&colorPointer);
+        cudaGLUnmapBufferObject(vertices);
     }
 }
 
