@@ -16,16 +16,8 @@ static Simulation sim;
 
 int main()
 {
-//    Cube * c1 = sim.createCube(Vec(2, -2, 5), 2); // create Cube object centered at (0, 0, 10) with side length 2.0
-//    Cube * c2 = sim.createCube(Vec(-2, 2, 5), 2); // create Cube object centered at (0, 0, 10) with side length 2.0
-//    Cube * c3 = sim.createCube(Vec(2, 2, 5), 2); // create Cube object centered at (0, 0, 10) with side length 2.0
-//    Cube * c4 = sim.createCube(Vec(-2, -2, 5), 2); // create Cube object centered at (0, 0, 10) with side length 2.0
 
-    Lattice * l1 = sim.createLattice(Vec(0, 0, 5), Vec(4, 4, 2), 2, 2, 2);
-
-    sim.printPositions();
-
-    std::cout << l1 -> springs.size() << std::endl;
+    Lattice * l1 = sim.createLattice(Vec(0, 0, 5), Vec(4, 4, 2), 3, 3, 2);
 
     sim.setSpringConstant(1000);
     sim.setMassDeltaT(0.0001);

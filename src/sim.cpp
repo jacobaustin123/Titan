@@ -240,19 +240,17 @@ void Simulation::run() { // repeatedly run next
     // Create and compile our GLSL program from the shaders
     this -> programID = LoadShaders("shaders/TransformVertexShader.vertexshader", "shaders/ColorFragmentShader.fragmentshader");
     // Get a handle for our "MVP" uniform
-    this -> MatrixID = glGetUniformLocation(programID, "MVP");
 
-    this -> MVP = getProjection();
+    this -> MVP = getProjection(); // compute perspective projection matrix
 
-    generateBuffers();
+    // this -> MatrixID = glGetUniformLocation(programID, "MVP"); // doesn't seem to be necessary
 
-//    for (ContainerObject * c : objs) {
-//        c -> generateBuffers();
-//    }
+    generateBuffers(); // generate buffers for all masses and springs
 
-    for (Constraint * c : constraints) {
+    for (Constraint * c : constraints) { // generate buffers for constraint objects
         c -> generateBuffers();
     }
+
 #endif
 
     resume();
