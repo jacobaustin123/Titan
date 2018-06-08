@@ -30,7 +30,7 @@ public:
     Spring(double k, double rest_length, Mass * left, Mass * right) :
             _k(k), _rest(rest_length), _left(left), _right(right) {};
 
-    void setForce(); // adds force to both right and left elements
+    void setForce(); // w
     void setK(double k) { _k = k; } //sets K
     void setRestLength(double rest_length) { _rest = rest_length; } //sets Rest Lenght
     void setLeft(Mass * left) { _left = left; } // sets left mass (attaches spring to mass 1)

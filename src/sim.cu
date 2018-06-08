@@ -226,6 +226,24 @@ __global__ void update(CUDA_MASS * d_mass, int num_masses) {
     }
 }
 
+__global__ void massForcesAndUpdate(CUDA_MASS * d_mass, int num_masses) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+
+    if (i < num_masses) {
+        CUDA_MASS &mass = d_mass[i];
+        mass.force.atomicVecAdd(Vec(0, 0, -9.81 * mass.m));
+
+        if (mass.pos[2] < 0)
+            mass.force.atomicVecAdd(Vec(0, 0, -10000 * mass.pos[2]));
+
+        mass.acc = mass.force / mass.m;
+        mass.vel = mass.vel + mass.acc * mass.dt;
+        mass.pos = mass.pos + mass.vel * mass.dt;
+
+        mass.force = Vec(0, 0, 0);
+    }
+}
+
 #ifdef GRAPHICS
 void Simulation::clearScreen() {
     // Clear the screen
@@ -265,12 +283,16 @@ void Simulation::resume() {
         int massBlocksPerGrid = (masses.size() + threadsPerBlock - 1) / threadsPerBlock;
         int springBlocksPerGrid = (springs.size() + threadsPerBlock - 1) / threadsPerBlock;
 
-        computeSpringForces<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size()); // KERNEL
-        computeMassForces<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size()); // KERNEL
-        cudaDeviceSynchronize(); /*Necessary? Why halt CPU until end of compute Sprinf and MAss if we nee to call
-        another kernel afterwards*/
+//        computeSpringForces<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size()); // compute mass forces before syncing
+//        computeMassForces<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size()); // KERNEL
+//        cudaDeviceSynchronize(); // synchronize before updating the springs and mass positions
+//
+//        update<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size());
 
-        update<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size());
+        computeSpringForces<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size()); // compute mass forces after syncing
+        cudaDeviceSynchronize(); // synchronize before updating the springs and mass positions
+
+        massForcesAndUpdate<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size());
 
 #ifdef GRAPHICS
         if (fmod(T, 250 * dt) < dt) {
