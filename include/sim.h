@@ -45,7 +45,7 @@ public:
     Simulation() { dt = 0; RUNNING = 0; } // constructors;
     ~Simulation();
 
-    Mass * createMass(); // creat objects
+    Mass * createMass(); // create objects
     Spring * createSpring();
     Spring * createSpring(Mass * m1, Mass * m2, double k = 1.0, double len = 1.0);
 

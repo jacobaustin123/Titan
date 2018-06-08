@@ -89,11 +89,11 @@ Lattice::Lattice(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
     this -> nx = nx;
     this -> ny = ny;
     this -> nz = nz;
-    
+
     for (int i = 0; i < nx; i++) {
         for (int j = 0; j < ny; j++) {
             for (int k = 0; k < nz; k++) {
-                masses.push_back(new Mass(1.0, Vec((double) i / (nx - 1.0) - 0.5, j / (ny - 1.0) - 0.5, k / (nz - 1.0) - 0.5) * dims + center));
+                masses.push_back(new Mass(1.0, Vec((nx > 1) ? (double) i / (nx - 1.0) - 0.5 : 0, (ny > 1) ? j / (ny - 1.0) - 0.5 : 0, (nz > 1) ? k / (nz - 1.0) - 0.5 : 0) * dims + center));
             }
         }
     }
@@ -111,10 +111,35 @@ Lattice::Lattice(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
                         }
                     }
                 }
+
+                if (k != nz - 1) {
+                    if (j != ny - 1) {
+                        springs.push_back(new Spring(masses[(k + 1) + j * nz + i * ny * nz], // get the full triangle
+                                                     masses[k + (j + 1) * nz + i * ny * nz]));
+                    }
+
+                    if (i != nx - 1) {
+                        springs.push_back(new Spring(masses[(k + 1) + j * nz + i * ny * nz],
+                                                     masses[k + j * nz + (i + 1) * ny * nz]));
+                    }
+
+                    if (j != ny - 1 && i != nx - 1) {
+                        springs.push_back(new Spring(masses[(k + 1) + j * nz + i * ny * nz],
+                                                     masses[k + (j + 1) * nz + (i + 1) * ny * nz]));
+                        springs.push_back(new Spring(masses[(k + 1) + j * nz + (i + 1) * ny * nz],
+                                                     masses[k + (j + 1) * nz + i * ny * nz]));
+                        springs.push_back(new Spring(masses[(k + 1) + (j + 1) * nz + i * ny * nz],
+                                                     masses[k + j * nz + (i + 1) * ny * nz]));
+                    }
+                }
+
+                if (j != ny - 1 && i != nx - 1) {
+                    springs.push_back(new Spring(masses[k + (j + 1) * nz + i * ny * nz],
+                                                 masses[k + j * nz + (i + 1) * ny * nz]));
+                }
             }
         }
     }
-
 }
 
 void Lattice::translate(const Vec &displ) {
@@ -151,93 +176,6 @@ void Lattice::translate(const Vec &displ) {
 //#endif
 
 #ifdef GRAPHICS
-
-//void Cube::updateBuffers() {
-//    GLfloat vertex_data[24];
-//
-//    for (int i = 0; i < 8; i++) { // populate buffer with position data for cube vertices
-//        vertex_data[3 * i] = (GLfloat) masses[i] -> getPosition()[0];
-//        vertex_data[3 * i + 1] = (GLfloat) masses[i]->getPosition()[1];
-//        vertex_data[3 * i + 2] = (GLfloat) masses[i]->getPosition()[2];
-//    }
-//    glBindBuffer(GL_ARRAY_BUFFER, vertices);
-//    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-//}
-//
-//void Cube::generateBuffers() {
-//    GLfloat g_color_buffer_data[] = { // colors for the cube
-//            1.0f, 0.2f, 0.2f,
-//            1.0f, 0.2f, 0.2f,
-//            1.0f, 0.2f, 0.2f,
-//            1.0f, 0.2f, 0.2f,
-//            1.0f, 0.2f, 0.2f,
-//            1.0f, 0.2f, 0.2f,
-//            1.0f, 0.2f, 0.2f,
-//            1.0f, 0.2f, 0.2f,
-//    };
-//
-//    GLuint colorbuffer; // bind cube colors to buffer colorbuffer2
-//    glGenBuffers(1, &colorbuffer);
-//    glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-//    glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
-//
-//    this -> colors = colorbuffer;
-//
-//    GLuint elementbuffer; // create buffer for main cube object
-//    glGenBuffers(1, &elementbuffer);
-//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
-//
-//    std::vector<GLubyte> indices; // this contains the order in which to draw the lines between points
-//    for (int i = 0; i < 8; i++) {
-//        for (int j = i + 1; j < 8; j++) {
-//            indices.push_back(i);
-//            indices.push_back(j);
-//        }
-//    }
-//
-//    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size(), &indices[0], GL_STATIC_DRAW);
-//
-//    this -> indices = elementbuffer;
-//
-//    GLuint vertexbuffer;
-//    glGenBuffers(1, &vertexbuffer); // bind cube vertex buffer
-//
-//    this -> vertices = vertexbuffer;
-//}
-//
-//
-//void Cube::draw() {
-//    glEnableVertexAttribArray(0);
-//
-//    glBindBuffer(GL_ARRAY_BUFFER, this -> vertices);
-//    glPointSize(10);
-//    glLineWidth(10);
-//    glVertexAttribPointer(
-//            0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
-//            3,                  // size
-//            GL_FLOAT,           // type
-//            GL_FALSE,           // normalized?
-//            0,                  // stride
-//            (void*)0            // array buffer offset
-//    );
-//
-//    glEnableVertexAttribArray(1);
-//    glBindBuffer(GL_ARRAY_BUFFER, this -> colors);
-//    glVertexAttribPointer(
-//            1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
-//            3,                                // size
-//            GL_FLOAT,                         // type
-//            GL_FALSE,                         // normalized?
-//            0,                                // stride
-//            (void*)0                          // array buffer offset
-//    );
-//
-//    glDrawArrays(GL_POINTS, 0, 8); // 3 indices starting at 0 -> 1 triangle
-//    glDrawElements(GL_LINES, 2 * springs.size(), GL_UNSIGNED_BYTE, (void*) 0); // 3 indices starting at 0 -> 1 triangle
-//
-//    glDisableVertexAttribArray(1);
-//    glDisableVertexAttribArray(0);
-//}
 
 void Plane::generateBuffers() {
 

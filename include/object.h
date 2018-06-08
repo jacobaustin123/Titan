@@ -38,6 +38,8 @@ public:
 
 class ContainerObject : public BaseObject { // contains and manipulates groups of masses and springs
 public:
+    virtual ~ContainerObject() {};
+
     void setMassValue(double m); // set masses for all Mass objects
     void setKValue(double k); // set k for all Spring objects
     void setDeltaTValue(double m); // set masses for all Mass objects
