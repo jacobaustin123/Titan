@@ -187,10 +187,10 @@ __global__ void computeSpringForces(CUDA_SPRING * d_spring, int num_springs) {
         Vec temp = (spring._right -> pos) - (spring._left -> pos);
         Vec force = spring._k * (spring._rest - temp.norm()) * (temp / temp.norm());
 
-        if (spring._right.fixed == false) {
+        if (spring._right -> fixed == 0) {
             spring._right->force.atomicVecAdd(force);
         }
-        if (spring._left.fixed == false) {
+        if (spring._left -> fixed == 0) {
             spring._left->force.atomicVecAdd(-force);
         }
     }
@@ -201,7 +201,7 @@ __global__ void computeMassForces(CUDA_MASS * d_mass, int num_masses) {
 
     if (i < num_masses) {
         CUDA_MASS & mass = d_mass[i];
-        if (mass.fixed == false) {
+        if (mass.fixed == 0) {
             mass.force.atomicVecAdd(Vec(0, 0, -9.81 * mass.m));
 
             if (mass.pos[2] < 0)
@@ -216,7 +216,7 @@ __global__ void update(CUDA_MASS * d_mass, int num_masses) {
 
     if (i < num_masses) {
         CUDA_MASS & mass = d_mass[i];
-        if (mass.fixed == false) {
+        if (mass.fixed == 0) {
             mass.acc = mass.force / mass.m;
             mass.vel = mass.vel + mass.acc * mass.dt;
             mass.pos = mass.pos + mass.vel * mass.dt;
@@ -231,6 +231,10 @@ __global__ void massForcesAndUpdate(CUDA_MASS * d_mass, int num_masses) {
 
     if (i < num_masses) {
         CUDA_MASS &mass = d_mass[i];
+
+        if (mass.fixed == 1)
+            return;
+
         mass.force.atomicVecAdd(Vec(0, 0, -9.81 * mass.m));
 
         if (mass.pos[2] < 0)
@@ -540,42 +544,6 @@ void Simulation::printPositions() {
 
     std::cout << std::endl;
 }
-
-//void Simulation::printSprings() {
-//    if (RUNNING) {
-//        std::cout << "\nDEVICE SPRINGS: " << std::endl;
-//        int threadsPerBlock = 1024;
-//        int springBlocksPerGrid = (springs.size() + threadsPerBlock - 1) / threadsPerBlock;
-//        printSpring<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size());
-//        cudaDeviceSynchronize();
-//    }
-//    else {
-//        std::cout << "\nHOST SPRINGS: " << std::endl;
-//        for (Spring * s : springs) {
-//            std::cout << s->_left->getPosition() << s->_right->getPosition() << std::endl;
-//        }
-//    }
-//
-//    std::cout << std::endl;
-//}
-
-//void Simulation::printSpringForces() {
-//    if (RUNNING) {
-//        std::cout << "\nDEVICE SPRINGS: " << std::endl;
-//        int threadsPerBlock = 1024;
-//        int springBlocksPerGrid = (springs.size() + threadsPerBlock - 1) / threadsPerBlock;
-//        printSpringForce<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size());
-//        cudaDeviceSynchronize();
-//    }
-//    else {
-//        std::cout << "\nHOST SPRINGS: " << std::endl;
-//        for (Spring * s : springs) {
-//            std::cout << s->_left->getForce() << s->_right->getForce() << std::endl;
-//        }
-//    }
-//
-//    std::cout << std::endl;
-//}
 
 void Simulation::printForces() {
     if (RUNNING) {

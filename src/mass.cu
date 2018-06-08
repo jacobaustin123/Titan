@@ -26,6 +26,7 @@ CUDA_MASS::CUDA_MASS(Mass &mass) {
     vel = mass.getVelocity();
     acc = mass.getAcceleration();
     force = mass.getForce();
+    fixed = mass.fixed;
 #ifdef GRAPHICS
     color = mass.color;
 #endif
