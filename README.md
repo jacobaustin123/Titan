@@ -1,15 +1,19 @@
 # Loch
-CUDA-based physics simulation sandbox using springs and masses to simulate flexible robots and other mechanical objects. Built in C++ but with a future Python wrapper.
+A CUDA-based physics simulation sandbox written in C++ which uses springs and masses to simulate flexible robots and other mechanical objects. 
 
 ## To compile and run
 
-The project has 3 main branches right now - the master/newAPI branch, the graphics/newAPIgraphics branch, and the CUDA branch. Each has their own dependency requirements. 
+The project currently has two branches, the master branch (CPU based) and the CUDA branch (GPU based). While both branches have graphics-free executables, they currently still depend on graphics packages, namely glfw3, glm, and GLEW. On Mac OS and Linux, dependencies should be handled using homebrew and apt-get respectively. For Mac OS, run
 
-The master branch has no dependencies, and can be compiled and run using cmake by creating a build directory inside the repo, and running ```cmake ..``` and then ```make``` from that folder. This will produce a ```main``` executable which can be run using ```./main```.
+```$ brew install glm glfw3 GLEW```
 
-The graphics branch requires OpenGL, glm, GLEW, and glfw3, which can be installed using vcpkg, apt-get, or brew on Windows/Linux/Mac OS respectively. To use vcpkg, run
+and for Linux run
 
-```S> cd ~
+```$ sudo apt-get install glm glfw3 GLEW```
+
+On Windows, these dependencies should be installed using Microsoft vcpkg. To set up vcpkg, run the following from Microsoft Powershell.
+
+```PS> cd ~
 PS> mkdir tools
 PS> cd tools
 PS> git clone https://github.com/Microsoft/vcpkg.git
@@ -21,14 +25,27 @@ PS> Set-ExecutionPolicy Unrestricted -Scope CurrentUser # May need to run this t
 
 ```
 
-to install vcpkg, and then run
+Then to install the dependencies run
 
-```PS> vcpkg --triplet x64-windows install glfw3 GLEW glm```
+```PS>./vcpkg --triplet x64-windows install glfw3 GLEW glm```
 
-then when compiling with CMake from the build directory, run CMake using ```cmake .. -G Ninja -DCMAKE_TOOLCHAIN_FILE=[path to vcpkg root]/scripts/buildsystems/vcpkg.cmake```
+from the vcpkg directory. Then build and install Loch as follows:
 
-For the CUDA branch (and future CUDA/graphics branch), CUDA 9.2 also must be installed, as well as the Windows VS compiler. The CUDAgraphics branch has the same requirements as above.
+```$ git clone https://github.com/ja3067/Loch.git
+$ cd Loch
+$ mkdir build
+$ cd build
+$ cmake .. -G Ninja -DCMAKE_TOOLCHAIN_FILE=[path to vcpkg root]/scripts/buildsystems/vcpkg.cmake
+$ make
+$ ./graphics
+```
 
-## Debug notes
+For the CUDA branch, CUDA 9.2 also must be installed, as well as the Windows VS compiler. The CUDAgraphics branch has the same requirements as above.
 
-For CLion, need to have the compiler set to Visual Studio in Windows. Make sure to use the right link_library names given by vcpkg.
+## Troubleshooting
+
+### Using with CLion
+
+To build and run with CLion, several settings changes need to be made. First, in Settings/Build, Execution, Deployment/CMake, make sure CMake Options is set to "-DCMAKE_TOOLCHAIN_FILE=[path to vcpkg root]/scripts/buildsystems/vcpkg.cmake" (no quotes). Also, make sure the compiler in Settings/Build, Execution, Deployment/Toolchains is set to Visual Studio 2015 or 2017 (14.0). 
+
+Also, to run in CLion, you need to edit the configuration in Run/Edit Configurations by setting the working directory to the \[Loch root\]/src. Note that there is a bug in CLion with CUDA support that causes it to run the wrong executable - if CLion is unable to run the executable, manually run the graphics or nographics executables in .../Loch/cmake-build-debug. If the program is unable to find the shaders, manually copy the Loch/src/shaders directory to cmake-build-debug.
