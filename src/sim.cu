@@ -187,8 +187,12 @@ __global__ void computeSpringForces(CUDA_SPRING * d_spring, int num_springs) {
         Vec temp = (spring._right -> pos) - (spring._left -> pos);
         Vec force = spring._k * (spring._rest - temp.norm()) * (temp / temp.norm());
 
-        spring._right -> force.atomicVecAdd(force);
-        spring._left -> force.atomicVecAdd(-force);
+        if (spring._right.fixed == false) {
+            spring._right->force.atomicVecAdd(force);
+        }
+        if (spring._left.fixed == false) {
+            spring._left->force.atomicVecAdd(-force);
+        }
     }
 }
 
@@ -197,10 +201,12 @@ __global__ void computeMassForces(CUDA_MASS * d_mass, int num_masses) {
 
     if (i < num_masses) {
         CUDA_MASS & mass = d_mass[i];
-        mass.force.atomicVecAdd(Vec(0, 0, - 9.81 * mass.m));
+        if (mass.fixed == false) {
+            mass.force.atomicVecAdd(Vec(0, 0, -9.81 * mass.m));
 
-        if (mass.pos[2] < 0)
-            mass.force.atomicVecAdd(Vec(0, 0, - 10000 * mass.pos[2]));
+            if (mass.pos[2] < 0)
+                mass.force.atomicVecAdd(Vec(0, 0, -10000 * mass.pos[2]));
+        }
     }
 }
 
@@ -210,10 +216,11 @@ __global__ void update(CUDA_MASS * d_mass, int num_masses) {
 
     if (i < num_masses) {
         CUDA_MASS & mass = d_mass[i];
-        mass.acc = mass.force / mass.m;
-        mass.vel = mass.vel + mass.acc * mass.dt;
-        mass.pos = mass.pos + mass.vel * mass.dt;
-
+        if (mass.fixed == false) {
+            mass.acc = mass.force / mass.m;
+            mass.vel = mass.vel + mass.acc * mass.dt;
+            mass.pos = mass.pos + mass.vel * mass.dt;
+        }
 //        mass.T += mass.dt;
         mass.force = Vec(0, 0, 0);
     }
