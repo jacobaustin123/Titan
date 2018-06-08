@@ -17,6 +17,11 @@ using namespace glm;
 
 #include "graphics.h"
 
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
+
 GLFWwindow * createGLFWWindow() {
 
     GLFWwindow* window;
@@ -50,6 +55,7 @@ GLFWwindow * createGLFWWindow() {
     }
 
     glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     glEnable(GL_DEPTH_TEST);
     //    // Accept fragment if it closer to the camera than the former one

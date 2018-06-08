@@ -16,6 +16,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 using namespace glm;
 
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 GLFWwindow * createGLFWWindow();
 glm::mat4 getProjection();
 
