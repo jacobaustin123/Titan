@@ -15,6 +15,9 @@ Simulation::~Simulation() {
     for (Constraint * c : constraints)
         delete c;
 
+    for (ContainerObject * o : objs)
+        delete o;
+
 #ifdef GRAPHICS
     glDeleteBuffers(1, &vertices);
     glDeleteBuffers(1, &colors);
@@ -237,19 +240,17 @@ void Simulation::run() { // repeatedly run next
     // Create and compile our GLSL program from the shaders
     this -> programID = LoadShaders("shaders/TransformVertexShader.vertexshader", "shaders/ColorFragmentShader.fragmentshader");
     // Get a handle for our "MVP" uniform
-    this -> MatrixID = glGetUniformLocation(programID, "MVP");
 
-    this -> MVP = getProjection();
+    this -> MVP = getProjection(); // compute perspective projection matrix
 
-    generateBuffers();
+    // this -> MatrixID = glGetUniformLocation(programID, "MVP"); // doesn't seem to be necessary
 
-//    for (ContainerObject * c : objs) {
-//        c -> generateBuffers();
-//    }
+    generateBuffers(); // generate buffers for all masses and springs
 
-    for (Constraint * c : constraints) {
+    for (Constraint * c : constraints) { // generate buffers for constraint objects
         c -> generateBuffers();
     }
+
 #endif
 
     resume();
@@ -261,25 +262,32 @@ void Simulation::generateBuffers() {
     {
         GLuint colorbuffer; // bind colors to buffer colorbuffer
         glGenBuffers(1, &colorbuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+        glBufferData(GL_ARRAY_BUFFER, 3 * masses.size() * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
         this -> colors = colorbuffer;
     }
 
     {
         GLuint elementbuffer; // create buffer for main cube object
         glGenBuffers(1, &elementbuffer);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * springs.size() * sizeof(GLuint), NULL, GL_DYNAMIC_DRAW); // second argument is number of bytes
         this -> indices = elementbuffer;
     }
 
     {
         GLuint vertexbuffer;
         glGenBuffers(1, &vertexbuffer); // bind cube vertex buffer
+        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+        glBufferData(GL_ARRAY_BUFFER, 3 * masses.size() * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
         this -> vertices = vertexbuffer;
     }
 }
 
 void Simulation::updateBuffers() {
     {
-        GLfloat *color_buffer_data = new GLfloat[3 * masses.size()];
+        glBindBuffer(GL_ARRAY_BUFFER, this->colors);
+        GLfloat *color_buffer_data = (GLfloat *) glMapBufferRange(GL_ARRAY_BUFFER, 0, 3 * masses.size() * sizeof(GLfloat), GL_MAP_WRITE_BIT); // new GLfloat[3 * masses.size()];
 
         for (int i = 0; i < masses.size(); i++) {
             color_buffer_data[3 * i] = (GLfloat) mass_arr[i].color[0];
@@ -287,29 +295,25 @@ void Simulation::updateBuffers() {
             color_buffer_data[3 * i + 2] = (GLfloat) mass_arr[i].color[2];
         }
 
-        glBindBuffer(GL_ARRAY_BUFFER, colors);
-        glBufferData(GL_ARRAY_BUFFER, 3 * masses.size() * sizeof(GLfloat), color_buffer_data, GL_STATIC_DRAW);
-
-        delete [] color_buffer_data;
+        glUnmapBuffer(GL_ARRAY_BUFFER);
     }
 
     {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->indices);
 
-        GLuint *indices = new GLuint[2 * springs.size()]; // this contains the order in which to draw the lines between points
+        GLuint *indices = (GLuint *) glMapBufferRange(GL_ELEMENT_ARRAY_BUFFER, 0, 2 * springs.size() * sizeof(GLuint), GL_MAP_WRITE_BIT); // new GLfloat[3 * masses.size()];
 
         for (int i = 0; i < springs.size(); i++) {
             indices[2 * i] = (springs[i]->_left) -> arrayptr - mass_arr;
             indices[2 * i + 1] = (springs[i]->_right)->arrayptr - mass_arr;
         }
 
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * springs.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW); // second argument is number of bytes
-
-        delete [] indices;
+        glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
     }
 
     {
-        GLfloat *vertex_data = new GLfloat[3 * masses.size()];
+        glBindBuffer(GL_ARRAY_BUFFER, this->vertices);
+        GLfloat *vertex_data = (GLfloat *) glMapBufferRange(GL_ARRAY_BUFFER, 0, 3 * masses.size() * sizeof(GLfloat), GL_MAP_WRITE_BIT); // new GLfloat[3 * masses.size()];
 
         for (int i = 0; i < masses.size(); i++) {
             vertex_data[3 * i] = (GLfloat) mass_arr[i].getPosition()[0];
@@ -317,10 +321,7 @@ void Simulation::updateBuffers() {
             vertex_data[3 * i + 2] = (GLfloat) mass_arr[i].getPosition()[2];
         }
 
-        glBindBuffer(GL_ARRAY_BUFFER, vertices);
-        glBufferData(GL_ARRAY_BUFFER, 3 * masses.size() * sizeof(GLfloat), vertex_data, GL_STATIC_DRAW);
-
-        delete [] vertex_data;
+        glUnmapBuffer(GL_ARRAY_BUFFER);
     }
 }
 
