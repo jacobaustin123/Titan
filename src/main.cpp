@@ -15,7 +15,7 @@ static Simulation sim;
 
 int main()
 {
-    Lattice * l1 = sim.createLattice(Vec(0, 0, 20), Vec(15, 15, 15), 40, 40, 20);
+    Lattice * l1 = sim.createLattice(Vec(0, 0, 20), Vec(15, 15, 15), 10, 10, 10);
 
 //    Mass * m1 = sim.createMass(Vec(0, 0, 20));
 //    Mass * m2 = sim.createMass(Vec(0, 10, 20));
@@ -34,10 +34,12 @@ int main()
 
     std::cout << "running simulation with " << sim.masses.size() << " masses and " << sim.springs.size() << " springs." << std::endl;
 
+#ifndef GRAPHICS
     std::clock_t start;
     double duration;
-
     start = std::clock();
+#endif
+
     double runtime = 10.0;
 
 #ifdef GRAPHICS
@@ -53,15 +55,14 @@ int main()
 //        sim.resume();
 //    }
 
-#endif
-
     duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 
     std::cout<<"wall time for " << runtime << " second run with " << sim.masses.size()
              << " masses and " << sim.springs.size() << " springs is " << duration << "!" << std::endl;
 
 
-    std::this_thread::sleep_for(20s);
+    std::this_thread::sleep_for(5s);
+#endif
 
     return 0;
 }
