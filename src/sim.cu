@@ -293,6 +293,14 @@ void Simulation::resume() {
         int massBlocksPerGrid = (masses.size() + threadsPerBlock - 1) / threadsPerBlock;
         int springBlocksPerGrid = (springs.size() + threadsPerBlock - 1) / threadsPerBlock;
 
+        if (massBlocksPerGrid > MAX_BLOCKS) {
+            massBlocksPerGrid = MAX_BLOCKS;
+        }
+
+        if (springBlocksPerGrid > MAX_BLOCKS) {
+            springBlocksPerGrid = MAX_BLOCKS;
+        }
+
 //        cudaDeviceSynchronize(); // synchronize before updating the springs and mass positions
 //        computeSpringForces<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size()); // compute mass forces before syncing
 //        computeMassForces<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size()); // KERNEL

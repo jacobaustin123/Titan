@@ -10,6 +10,8 @@
 #include "object.h"
 #include "vec.h"
 
+#define MAX_BLOCKS 65535
+
 #ifdef GRAPHICS
 
 #include "graphics.h"

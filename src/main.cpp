@@ -15,7 +15,7 @@ static Simulation sim;
 
 int main()
 {
-    Lattice * l1 = sim.createLattice(Vec(0, 0, 20), Vec(15, 15, 15), 20, 20, 20);
+    Lattice * l1 = sim.createLattice(Vec(0, 0, 20), Vec(15, 15, 15), 40, 40, 20);
 
 //    Mass * m1 = sim.createMass(Vec(0, 0, 20));
 //    Mass * m2 = sim.createMass(Vec(0, 10, 20));
@@ -61,7 +61,7 @@ int main()
              << " masses and " << sim.springs.size() << " springs is " << duration << "!" << std::endl;
 
 
-    std::this_thread::sleep_for(5s);
+    std::this_thread::sleep_for(20s);
 
     return 0;
 }
