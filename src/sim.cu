@@ -131,8 +131,13 @@ CUDA_SPRING * Simulation::springToArray() {
 Constraint * Simulation::constraintsToArray() {
     d_constraints.reserve(constraints.size());
 
+    Constraint * d_temp;
+
+    cudaMalloc((void **)& d_temp, sizeof(Constraint));
+
     for (Constraint * c : constraints) {
-        d_constraints.push_back(*c);
+        cudaMemcpy(d_temp, c, sizeof(Constraint), cudaMemcpyHostToDevice);
+        d_constraints.push_back(d_temp);
     }
 
     return d_constraints.data();

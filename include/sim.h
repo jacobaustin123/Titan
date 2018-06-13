@@ -97,7 +97,7 @@ public:
     std::vector<Constraint *> constraints;
     std::vector<ContainerObject *> objs;
 
-    thrust::device_vector<Constraint> d_constraints;
+    thrust::device_vector<Constraint *> d_constraints;
 
     CUDA_MASS * d_mass;
     CUDA_SPRING * d_spring;
