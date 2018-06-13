@@ -14,6 +14,9 @@ Simulation::~Simulation() {
     for (Constraint * c : constraints)
         delete c;
 
+    cudaFree(d_spring);
+    cudaFree(d_mass);
+
 #ifdef GRAPHICS
     glDeleteBuffers(1, &vertices);
     glDeleteBuffers(1, &colors);
@@ -140,11 +143,11 @@ void Simulation::massFromArray() {
 
     delete [] h_mass;
 
-    cudaFree(d_mass);
+//    cudaFree(d_mass);
 }
 
 void Simulation::springFromArray() {
-    cudaFree(d_spring);
+//    cudaFree(d_spring);
 }
 
 
