@@ -18,7 +18,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #endif
 
-static double DISPL_CONST = 10000;
+static double NORMAL = 100000;
 
 class BaseObject { // base class for larger objects like Cubes, etc.
 public:
@@ -38,36 +38,49 @@ public:
 
 class ContainerObject : public BaseObject { // contains and manipulates groups of masses and springs
 public:
+    virtual ~ContainerObject() {};
+
     void setMassValue(double m); // set masses for all Mass objects
     void setKValue(double k); // set k for all Spring objects
     void setDeltaTValue(double m); // set masses for all Mass objects
     void setRestLengthValue(double len); // set masses for all Mass objects
     void makeFixed();
-    void makeMovable();
-
 
     // we can have more of these
     std::vector<Mass *> masses;
     std::vector<Spring *> springs;
 };
 
-//class Ball : public Constraint { // ball constraint, force is inversely proportional to distance
-//public:
-//    void setRadius(double r) { _radius = r; }
-//    void setCenter(const Vec & center) { _center = center; }
-//    Vec getForce(const Vec & position);
-//
-//#ifdef GRAPHICS
-//    void generateBuffers();
-//    void draw();
-//
-//    GLuint vertices;
-//    GLuint colors;
-//#endif
-//
-//    double _radius;
-//    Vec _center;
-//};
+class Ball : public Constraint { // ball constraint, force is inversely proportional to distance
+public:
+    Ball(const Vec & center, double r);
+    void setRadius(double r) { _radius = r; }
+    void setCenter(const Vec & center) { _center = center; }
+    Vec getForce(const Vec & position);
+    void translate(const Vec & displ);
+
+#ifdef GRAPHICS
+    virtual ~Ball() {
+        glDeleteBuffers(1, &vertices);
+        glDeleteBuffers(1, &colors);
+    }
+
+    void generateBuffers();
+    void draw();
+
+    void subdivide(GLfloat * arr, GLfloat *v1, GLfloat *v2, GLfloat *v3, int depth);
+    void writeTriangle(GLfloat * arr, GLfloat *v1, GLfloat *v2, GLfloat *v3);
+    void normalize(GLfloat * v);
+
+    int depth = 2;
+
+    GLuint vertices;
+    GLuint colors;
+#endif
+
+    double _radius;
+    Vec _center;
+};
 
 class Plane : public Constraint { // plane constraint, force is proportional to negative distance wrt plane
 public:
