@@ -10,7 +10,11 @@
 #include "object.h"
 #include "vec.h"
 
-#define MAX_BLOCKS 65535
+#define MAX_BLOCKS 65535 // max number of CUDA blocks
+
+#ifndef GRAPHICS
+#define NUM_QUEUED_KERNELS 4 // number of kernels to queue at a given time (this will reduce the frequency of updates from the CPU by this factor
+#endif
 
 #ifdef GRAPHICS
 

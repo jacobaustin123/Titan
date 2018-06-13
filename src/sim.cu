@@ -277,21 +277,19 @@ void Simulation::renderScreen() {
 #endif
 
 void Simulation::resume() {
-    int threadsPerBlock = 1024;
+    int threadsPerBlock = 256;
 
     RUNNING = 1;
     toArray();
 
     while (1) {
-        T += dt;
-
         if (!bpts.empty() && *bpts.begin() <= T) {
+            cudaDeviceSynchronize(); // synchronize before updating the springs and mass positions
             bpts.erase(bpts.begin());
             fromArray();
             RUNNING = 0;
             break;
         }
-
 
         int massBlocksPerGrid = (masses.size() + threadsPerBlock - 1) / threadsPerBlock;
         int springBlocksPerGrid = (springs.size() + threadsPerBlock - 1) / threadsPerBlock;
@@ -304,16 +302,19 @@ void Simulation::resume() {
             springBlocksPerGrid = MAX_BLOCKS;
         }
 
-//        cudaDeviceSynchronize(); // synchronize before updating the springs and mass positions
-//        computeSpringForces<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size()); // compute mass forces before syncing
-//        computeMassForces<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size()); // KERNEL
-//        cudaDeviceSynchronize(); // synchronize before updating the springs and mass positions
-//
-//        update<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size());
-
         cudaDeviceSynchronize(); // synchronize before updating the springs and mass positions
+
+#ifdef GRAPHICS
         computeSpringForces<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size()); // compute mass forces after syncing
-        massForcesAndUpdate<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size());
+        massForcesAndUpdate<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size());//        T += dt;
+        T += dt;
+#else
+        for (int i = 0; i < NUM_QUEUED_KERNELS; i++) {
+            computeSpringForces<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size()); // compute mass forces after syncing
+            massForcesAndUpdate<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size());//        T += dt;
+            T += dt;
+        }
+#endif
 
 #ifdef GRAPHICS
         if (fmod(T, 250 * dt) < dt) {
