@@ -132,6 +132,5 @@ __global__ void computeSpringForces(CUDA_SPRING * device_springs, int num_spring
 __global__ void computeMassForces(CUDA_MASS * device_masses, int num_masses);
 __global__ void massForcesAndUpdate(CUDA_SPRING * device_springs, int num_springs);
 __global__ void update(CUDA_MASS * d_mass, int num_masses);
-__global__ void unifiedUpdateKernel(CUDA_MASS * d_mass, CUDA_SPRING * d_spring, int num_masses, int num_springs);
 
 #endif //LOCH_SIM_H

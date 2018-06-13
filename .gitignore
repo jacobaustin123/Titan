@@ -4,6 +4,7 @@
 
 # CMake Files
 cmake-build-debug
+cmake-build-release
 .idea
 
 # Compiled Object files
