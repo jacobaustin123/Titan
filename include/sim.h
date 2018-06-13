@@ -106,7 +106,7 @@ public:
 
     CUDA_MASS * massToArray();
     CUDA_SPRING * springToArray();
-    Constraint * constraintsToArray();
+    void constraintsToArray();
     void toArray();
 
     void massFromArray();
@@ -142,7 +142,7 @@ public:
 
 __global__ void computeSpringForces(CUDA_SPRING * device_springs, int num_springs);
 __global__ void computeMassForces(CUDA_MASS * device_masses, int num_masses);
-__global__ void massForcesAndUpdate(CUDA_SPRING * device_springs, int num_springs);
+__global__ void massForcesAndUpdate(CUDA_SPRING * device_springs, Constraint ** d_constraints, int num_springs, int num_constraints);
 __global__ void update(CUDA_MASS * d_mass, int num_masses);
 
 #endif //LOCH_SIM_H

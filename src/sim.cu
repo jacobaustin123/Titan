@@ -128,25 +128,21 @@ CUDA_SPRING * Simulation::springToArray() {
     return d_spring;
 }
 
-Constraint * Simulation::constraintsToArray() {
+void Simulation::constraintsToArray() {
     d_constraints.reserve(constraints.size());
 
-    Constraint * d_temp;
-
-    cudaMalloc((void **)& d_temp, sizeof(Constraint));
-
     for (Constraint * c : constraints) {
+        Constraint * d_temp;
+        cudaMalloc((void **)& d_temp, sizeof(Constraint));
         cudaMemcpy(d_temp, c, sizeof(Constraint), cudaMemcpyHostToDevice);
         d_constraints.push_back(d_temp);
     }
-
-    return d_constraints.data();
 }
 
 void Simulation::toArray() {
     CUDA_MASS * d_mass = massToArray(); // must come first
     CUDA_SPRING * d_spring = springToArray();
-    Constraint * d_constraints = constraintsToArray();
+    constraintsToArray();
 }
 
 void Simulation::massFromArray() {
@@ -255,7 +251,7 @@ __global__ void update(CUDA_MASS * d_mass, int num_masses) {
     }
 }
 
-__global__ void massForcesAndUpdate(CUDA_MASS * d_mass, int num_masses) {
+__global__ void massForcesAndUpdate(CUDA_MASS * d_mass, Constraint ** d_constraints, int num_masses, int num_constraints) {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
 
     if (i < num_masses) {
@@ -264,11 +260,19 @@ __global__ void massForcesAndUpdate(CUDA_MASS * d_mass, int num_masses) {
         if (mass.fixed == 1)
             return;
 
-        for (Constraint c : d_constraints) {
-            mass.force += c.getForce(mass.pos);
+        for (int j = 0; j < num_constraints; j++) {
+            if (i == 0) {
+                printf("(%f, %f, %f)\n", d_constraints[j] -> getForce(mass.pos)[0], d_constraints[j] -> getForce(mass.pos)[1], d_constraints[j] -> getForce(mass.pos)[2]);
+            }
+
+            mass.force += d_constraints[j] -> getForce(mass.pos);
         }
 
         mass.force += Vec(0, 0, -9.81 * mass.m); // don't need atomics
+
+        if (i == 0) {
+            printf("num constraints: %d\n", num_constraints);
+        }
 
 //        if (mass.pos[2] < 0)
 //            mass.force += Vec(0, 0, -10000 * mass.pos[2]); // don't need atomics
@@ -330,12 +334,12 @@ void Simulation::resume() {
 
 #ifdef GRAPHICS
         computeSpringForces<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size()); // compute mass forces after syncing
-        massForcesAndUpdate<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size());//        T += dt;
+        massForcesAndUpdate<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, thrust::raw_pointer_cast(&d_constraints[0]), masses.size(), d_constraints.size());//        T += dt;
         T += dt;
 #else
         for (int i = 0; i < NUM_QUEUED_KERNELS; i++) {
             computeSpringForces<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size()); // compute mass forces after syncing
-            massForcesAndUpdate<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size());//        T += dt;
+            massForcesAndUpdate<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, thrust::raw_pointer_cast(&d_constraints[0]), masses.size(), d_constraints.size());//        T += dt;
             T += dt;
         }
 #endif

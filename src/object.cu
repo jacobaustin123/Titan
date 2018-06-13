@@ -8,7 +8,7 @@
 
 CUDA_CALLABLE_MEMBER Vec Plane::getForce(const Vec & position) { // returns force on an object based on its position, e.g. plane or
     double disp = dot(position, _normal) - _offset;
-    return (disp < 0) ? - disp * NORMAL * _normal : 0 * _normal; // - disp
+    return (disp < 0) ? - disp * NORMAL * _normal : 0 * _normal; // TODO fix this for the host
 }
 
 Plane::Plane(const Vec & normal, double d) {

@@ -140,6 +140,6 @@ atomicDoubleAdd(&data[2], (double) v.data[2]);
 //    return data[0] + data[1] + data[2];
 //}
 
-double dot(const Vec & a, const Vec & b) {
+CUDA_CALLABLE_MEMBER double dot(const Vec & a, const Vec & b) {
     return (a * b).sum();
 }

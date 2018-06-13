@@ -31,11 +31,11 @@
 #endif
 
 
-static double NORMAL = 100000;
+__device__ const double NORMAL = 100000;
 
 class BaseObject { // base class for larger objects like Cubes, etc.
 public:
-    virtual void translate(const Vec & displ) = 0; // translate all masses by fixed amount
+    CUDA_CALLABLE_MEMBER virtual void translate(const Vec & displ) = 0; // translate all masses by fixed amount
 };
 
 class Constraint : public BaseObject { // constraint like plane or sphere which applies force to masses
@@ -66,11 +66,11 @@ public:
 
 class Ball : public Constraint { // ball constraint, force is inversely proportional to distance
 public:
-    Ball(const Vec & center, double r);
-    void setRadius(double r) { _radius = r; }
-    void setCenter(const Vec & center) { _center = center; }
+    CUDA_CALLABLE_MEMBER Ball(const Vec & center, double r);
+    CUDA_CALLABLE_MEMBER void setRadius(double r) { _radius = r; }
+    CUDA_CALLABLE_MEMBER void setCenter(const Vec & center) { _center = center; }
     CUDA_CALLABLE_MEMBER Vec getForce(const Vec & position);
-    void translate(const Vec & displ);
+    CUDA_CALLABLE_MEMBER void translate(const Vec & displ);
 
 #ifdef GRAPHICS
     virtual ~Ball() {
@@ -97,10 +97,10 @@ public:
 
 class Plane : public Constraint { // plane constraint, force is proportional to negative distance wrt plane
 public:
-    Plane(const Vec & normal, double d);
+    CUDA_CALLABLE_MEMBER Plane(const Vec & normal, double d);
 
     CUDA_CALLABLE_MEMBER Vec getForce(const Vec & position);
-    void translate(const Vec & displ);
+    CUDA_CALLABLE_MEMBER void translate(const Vec & displ);
 
     void setNormal(const Vec & normal) { _normal = normal; }; // normal is (a, b, c)
     void setOffset(double d) { _offset = d; }; // ax + by + cz < d

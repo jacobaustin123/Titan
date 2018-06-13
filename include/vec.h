@@ -141,6 +141,6 @@ private:
     double data[3] = { 0 }; // initialize data to 0
 };
 
-double dot(const Vec & a, const Vec & b);
+CUDA_CALLABLE_MEMBER double dot(const Vec & a, const Vec & b);
 #endif
 
