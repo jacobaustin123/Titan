@@ -257,23 +257,6 @@ __global__ void massForcesAndUpdate(CUDA_MASS * d_mass, int num_masses) {
     }
 }
 
-__global__ void computeSpringForces(CUDA_SPRING * d_spring, int num_springs) {
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
-
-    if ( i < num_springs ) {
-        CUDA_SPRING & spring = d_spring[i];
-        Vec temp = (spring._right -> pos) - (spring._left -> pos);
-        Vec force = spring._k * (spring._rest - temp.norm()) * (temp / temp.norm());
-
-        if (spring._right -> fixed == 0) {
-            spring._right->force.atomicVecAdd(force); // need atomics
-        }
-        if (spring._left -> fixed == 0) {
-            spring._left->force.atomicVecAdd(-force);
-        }
-    }
-}
-
 __global__ void unifiedUpdateKernel(CUDA_MASS * d_mass, CUDA_SPRING * d_spring, int num_masses, int num_springs) {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
 
