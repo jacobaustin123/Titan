@@ -18,6 +18,19 @@
 #include <glm/gtc/matrix_transform.hpp>
 #endif
 
+#ifdef __CUDACC__
+#define CUDA_CALLABLE_MEMBER __host__ __device__
+#else
+#define CUDA_CALLABLE_MEMBER
+#endif
+
+#ifdef __CUDACC__
+#define CUDA_DEVICE __device__
+#else
+#define CUDA_DEVICE
+#endif
+
+
 static double NORMAL = 100000;
 
 class BaseObject { // base class for larger objects like Cubes, etc.
@@ -29,7 +42,7 @@ class Constraint : public BaseObject { // constraint like plane or sphere which 
 public:
     virtual ~Constraint() {};
 
-    virtual Vec getForce(const Vec & position) = 0; // returns force on an object based on its position, e.g. plane or
+    CUDA_CALLABLE_MEMBER virtual Vec getForce(const Vec & position) = 0; // returns force on an object based on its position, e.g. plane or
 #ifdef GRAPHICS
     virtual void generateBuffers() = 0;
     virtual void draw() = 0;
@@ -56,7 +69,7 @@ public:
     Ball(const Vec & center, double r);
     void setRadius(double r) { _radius = r; }
     void setCenter(const Vec & center) { _center = center; }
-    Vec getForce(const Vec & position);
+    CUDA_CALLABLE_MEMBER Vec getForce(const Vec & position);
     void translate(const Vec & displ);
 
 #ifdef GRAPHICS
@@ -86,7 +99,7 @@ class Plane : public Constraint { // plane constraint, force is proportional to 
 public:
     Plane(const Vec & normal, double d);
 
-    Vec getForce(const Vec & position);
+    CUDA_CALLABLE_MEMBER Vec getForce(const Vec & position);
     void translate(const Vec & displ);
 
     void setNormal(const Vec & normal) { _normal = normal; }; // normal is (a, b, c)

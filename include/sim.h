@@ -10,6 +10,9 @@
 #include "object.h"
 #include "vec.h"
 
+#include <thrust/host_vector.h>
+#include <thrust/device_vector.h>
+
 #define MAX_BLOCKS 65535 // max number of CUDA blocks
 
 #ifndef GRAPHICS
@@ -60,6 +63,7 @@ public:
     Plane * createPlane(const Vec & abc, double d ); // creates half-space ax + by + cz < d
     Cube * createCube(const Vec & center, double side_length); // creates cube
     Lattice * createLattice(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
+    Ball * createBall(const Vec & center, double r ); // creates ball with radius r at position center
 
     void setSpringConstant(double k);
     void defaultRestLength();
@@ -93,6 +97,8 @@ public:
     std::vector<Constraint *> constraints;
     std::vector<ContainerObject *> objs;
 
+    thrust::device_vector<Constraint> d_constraints;
+
     CUDA_MASS * d_mass;
     CUDA_SPRING * d_spring;
 
@@ -100,10 +106,12 @@ public:
 
     CUDA_MASS * massToArray();
     CUDA_SPRING * springToArray();
+    Constraint * constraintsToArray();
     void toArray();
 
     void massFromArray();
     void springFromArray();
+    void constraintsFromArray();
     void fromArray();
 
 #ifdef GRAPHICS

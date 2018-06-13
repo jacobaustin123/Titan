@@ -128,9 +128,20 @@ CUDA_SPRING * Simulation::springToArray() {
     return d_spring;
 }
 
+Constraint * Simulation::constraintsToArray() {
+    d_constraints.reserve(constraints.size());
+
+    for (Constraint * c : constraints) {
+        d_constraints.push_back(*c);
+    }
+
+    return d_constraints.data();
+}
+
 void Simulation::toArray() {
     CUDA_MASS * d_mass = massToArray(); // must come first
     CUDA_SPRING * d_spring = springToArray();
+    Constraint * d_constraints = constraintsToArray();
 }
 
 void Simulation::massFromArray() {
@@ -150,10 +161,14 @@ void Simulation::springFromArray() {
 //    cudaFree(d_spring);
 }
 
+void Simulation::constraintsFromArray() {
+    //
+}
 
 void Simulation::fromArray() {
     massFromArray();
     springFromArray();
+    constraintsFromArray();
 }
 
 __global__ void printMasses(CUDA_MASS * d_masses, int num_masses) {
@@ -244,10 +259,14 @@ __global__ void massForcesAndUpdate(CUDA_MASS * d_mass, int num_masses) {
         if (mass.fixed == 1)
             return;
 
+        for (Constraint c : d_constraints) {
+            mass.force += c.getForce(mass.pos);
+        }
+
         mass.force += Vec(0, 0, -9.81 * mass.m); // don't need atomics
 
-        if (mass.pos[2] < 0)
-            mass.force += Vec(0, 0, -10000 * mass.pos[2]); // don't need atomics
+//        if (mass.pos[2] < 0)
+//            mass.force += Vec(0, 0, -10000 * mass.pos[2]); // don't need atomics
 
         mass.acc = mass.force / mass.m;
         mass.vel = mass.vel + mass.acc * mass.dt;
@@ -543,6 +562,12 @@ Lattice * Simulation::createLattice(const Vec & center, const Vec & dims, int nx
     }
 
     return l;
+}
+
+Ball * Simulation::createBall(const Vec & center, double r ) { // creates ball with radius r at position center
+    Ball * new_ball = new Ball(center, r);
+    constraints.push_back(new_ball);
+    return new_ball;
 }
 
 void Simulation::printPositions() {
