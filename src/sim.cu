@@ -197,7 +197,7 @@ __global__ void computeSpringForces(CUDA_SPRING * d_spring, int num_springs) {
         Vec force = spring._k * (spring._rest - temp.norm()) * (temp / temp.norm());
 
         if (spring._right -> fixed == 0) {
-            spring._right->force.atomicVecAdd(force);
+            spring._right->force.atomicVecAdd(force); // need atomics here
         }
         if (spring._left -> fixed == 0) {
             spring._left->force.atomicVecAdd(-force);
@@ -211,10 +211,10 @@ __global__ void computeMassForces(CUDA_MASS * d_mass, int num_masses) {
     if (i < num_masses) {
         CUDA_MASS & mass = d_mass[i];
         if (mass.fixed == 0) {
-            mass.force.atomicVecAdd(Vec(0, 0, -9.81 * mass.m));
+            mass.force += Vec(0, 0, -9.81 * mass.m); // can use += since executed after springs
 
             if (mass.pos[2] < 0)
-                mass.force.atomicVecAdd(Vec(0, 0, -10000 * mass.pos[2]));
+                mass.force += Vec(0, 0, -10000 * mass.pos[2]);
         }
     }
 }
@@ -244,7 +244,59 @@ __global__ void massForcesAndUpdate(CUDA_MASS * d_mass, int num_masses) {
         if (mass.fixed == 1)
             return;
 
-        mass.force.atomicVecAdd(Vec(0, 0, -9.81 * mass.m));
+        mass.force += Vec(0, 0, -9.81 * mass.m); // don't need atomics
+
+        if (mass.pos[2] < 0)
+            mass.force += Vec(0, 0, -10000 * mass.pos[2]); // don't need atomics
+
+        mass.acc = mass.force / mass.m;
+        mass.vel = mass.vel + mass.acc * mass.dt;
+        mass.pos = mass.pos + mass.vel * mass.dt;
+
+        mass.force = Vec(0, 0, 0);
+    }
+}
+
+__global__ void computeSpringForces(CUDA_SPRING * d_spring, int num_springs) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+
+    if ( i < num_springs ) {
+        CUDA_SPRING & spring = d_spring[i];
+        Vec temp = (spring._right -> pos) - (spring._left -> pos);
+        Vec force = spring._k * (spring._rest - temp.norm()) * (temp / temp.norm());
+
+        if (spring._right -> fixed == 0) {
+            spring._right->force.atomicVecAdd(force); // need atomics
+        }
+        if (spring._left -> fixed == 0) {
+            spring._left->force.atomicVecAdd(-force);
+        }
+    }
+}
+
+__global__ void unifiedUpdateKernel(CUDA_MASS * d_mass, CUDA_SPRING * d_spring, int num_masses, int num_springs) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+
+    if ( i < num_springs ) {
+        CUDA_SPRING & spring = d_spring[i];
+        Vec temp = (spring._right -> pos) - (spring._left -> pos);
+        Vec force = spring._k * (spring._rest - temp.norm()) * (temp / temp.norm());
+
+        if (spring._right -> fixed == 0) {
+            spring._right->force.atomicVecAdd(force);
+        }
+        if (spring._left -> fixed == 0) {
+            spring._left->force.atomicVecAdd(-force);
+        }
+    }
+
+    if (i < num_masses) {
+        CUDA_MASS &mass = d_mass[i];
+
+        if (mass.fixed == 1)
+            return;
+
+        mass.force.atomicVecAdd(Vec(0, 0, -9.81 * mass.m)); // need atomics here
 
         if (mass.pos[2] < 0)
             mass.force.atomicVecAdd(Vec(0, 0, -10000 * mass.pos[2]));
@@ -295,6 +347,7 @@ void Simulation::resume() {
 
         int massBlocksPerGrid = (masses.size() + threadsPerBlock - 1) / threadsPerBlock;
         int springBlocksPerGrid = (springs.size() + threadsPerBlock - 1) / threadsPerBlock;
+        int maxBlocksPerGrid = (springBlocksPerGrid > massBlocksPerGrid) ? springBlocksPerGrid : massBlocksPerGrid;
 
         if (massBlocksPerGrid > MAX_BLOCKS) {
             massBlocksPerGrid = MAX_BLOCKS;
@@ -311,10 +364,12 @@ void Simulation::resume() {
 //
 //        update<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size());
 
-        cudaDeviceSynchronize(); // synchronize before computing forces
-        computeSpringForces<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size()); // compute mass forces after syncing
+//        computeSpringForces<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size()); // compute mass forces after syncing
+//        massForcesAndUpdate<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size());
+//        cudaDeviceSynchronize(); // synchronize before updating the springs and mass positions
+
+        unifiedUpdateKernel<<<maxBlocksPerGrid, threadsPerBlock>>>(d_mass, d_spring, masses.size(), springs.size());
         cudaDeviceSynchronize(); // synchronize before updating the springs and mass positions
-        massForcesAndUpdate<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, masses.size());
 
 #ifdef GRAPHICS
         if (fmod(T, 250 * dt) < dt) {
