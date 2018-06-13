@@ -41,7 +41,7 @@ GLFWwindow * createGLFWWindow() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); //We don't want the old OpenGL
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
-    glfwSwapInterval(0);
+    glfwSwapInterval(1);
 
     // Open a window and create its OpenGL context
     window = glfwCreateWindow(1024, 768, "CUDA Physics Simulation", NULL, NULL);
