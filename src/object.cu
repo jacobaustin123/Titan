@@ -6,7 +6,7 @@
 #include <cmath>
 #include "sim.h"
 
-CUDA_CALLABLE_MEMBER Vec Plane::getForce(const Vec & position) { // returns force on an object based on its position, e.g. plane or
+Vec Plane::getForce(const Vec & position) { // returns force on an object based on its position, e.g. plane or
     double disp = dot(position, _normal) - _offset;
     return (disp < 0) ? - disp * NORMAL * _normal : 0 * _normal; // TODO fix this for the host
 }
@@ -146,7 +146,7 @@ void Lattice::translate(const Vec &displ) {
     }
 }
 
-CUDA_CALLABLE_MEMBER Vec Ball::getForce(const Vec & position) {
+Vec Ball::getForce(const Vec & position) {
     double dist = (position - _center).norm();
 //    std::cout << dist << std::endl;
     return (dist <= _radius) ? NORMAL * (position - _center) / dist : Vec(0, 0, 0);

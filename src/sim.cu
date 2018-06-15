@@ -4,6 +4,9 @@
 
 #include "sim.h"
 
+thrust::device_vector<CUDA_PLANE> d_planes; // used for constraints
+thrust::device_vector<CUDA_BALL> d_balls; // used for constraints
+
 Simulation::~Simulation() {
     for (Mass * m : masses)
         delete m;
@@ -128,21 +131,20 @@ CUDA_SPRING * Simulation::springToArray() {
     return d_spring;
 }
 
-void Simulation::constraintsToArray() {
-    d_constraints.reserve(constraints.size());
-
-    for (Constraint * c : constraints) {
-        Constraint * d_temp;
-        cudaMalloc((void **)& d_temp, sizeof(Constraint));
-        cudaMemcpy(d_temp, c, sizeof(Constraint), cudaMemcpyHostToDevice);
-        d_constraints.push_back(d_temp);
-    }
-}
+//void Simulation::constraintsToArray() {
+//    d_constraints.reserve(constraints.size());
+//
+//    for (Constraint * c : constraints) {
+//        Constraint * d_temp;
+//        cudaMalloc((void **)& d_temp, sizeof(Constraint));
+//        cudaMemcpy(d_temp, c, sizeof(Constraint), cudaMemcpyHostToDevice);
+//        d_constraints.push_back(d_temp);
+//    }
+//}
 
 void Simulation::toArray() {
     CUDA_MASS * d_mass = massToArray(); // must come first
     CUDA_SPRING * d_spring = springToArray();
-    constraintsToArray();
 }
 
 void Simulation::massFromArray() {
@@ -376,7 +378,7 @@ void Simulation::resume() {
 #else
         for (int i = 0; i < NUM_QUEUED_KERNELS; i++) {
             computeSpringForces<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size()); // compute mass forces after syncing
-            massForcesAndUpdate<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, thrust::raw_pointer_cast(&d_constraints[0]), masses.size(), d_constraints.size());//        T += dt;
+            massForcesAndUpdate<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, d_constraints, masses.size());//        T += dt;
             T += dt;
         }
 #endif
@@ -575,14 +577,14 @@ Lattice * Simulation::createLattice(const Vec & center, const Vec & dims, int nx
 Plane * Simulation::createPlane(const Vec & abc, double d ) { // creates half-space ax + by + cz < d
     Plane * new_plane = new Plane(abc, d);
     constraints.push_back(new_plane);
-    d_planes.push_back(new_plane);
+    d_planes.push_back(CUDA_PLANE(*new_plane));
     return new_plane;
 }
 
 Ball * Simulation::createBall(const Vec & center, double r ) { // creates ball with radius r at position center
     Ball * new_ball = new Ball(center, r);
     constraints.push_back(new_ball);
-    d_balls.push_back(new_ball);
+    d_balls.push_back(CUDA_BALL(*new_ball));
     return new_ball;
 }
 

@@ -7,7 +7,7 @@ SET(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++14") # same thing, may be unnece
 set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src") # set SOURCE_DIR to src directory
 include_directories(include) # include the include directory (can find headers there)
 
-set(SOURCE_FILES src/vec.cu src/sim.cu src/sim.cu src/mass.cu src/spring.cu src/object.cu src/graphics.cpp src/common/shader.cpp) # add all of the .cu/.cpp files to SOURCE_FILES target
+set(SOURCE_FILES src/vec.cu src/sim.cu src/sim.cu src/mass.cu src/spring.cu src/object.cu src/graphics.cpp src/common/shader.cpp include/graphics.h include/mass.h include/object.h include/sim.h include/spring.h include/vec.h) # add all of the .cu/.cpp files to SOURCE_FILES target
 
 find_package(CUDA REQUIRED) # find and include CUDA
 if (CUDA_FOUND)
@@ -45,8 +45,6 @@ if (glm_FOUND)
     include_directories(${glm_INCLUDE_DIRS})
     link_libraries(${glm_LIBRARIES})
 endif()
-
-file(GLOB HEADERS "include/*.h") # add all headers to the project
 
 add_executable(nographics src/main.cpp ${SOURCE_FILES} ${HEADERS}) # create nographics target
 target_compile_features(nographics PUBLIC cxx_std_11)

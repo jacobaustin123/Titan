@@ -35,14 +35,14 @@ __device__ const double NORMAL = 100000;
 
 class BaseObject { // base class for larger objects like Cubes, etc.
 public:
-    CUDA_CALLABLE_MEMBER virtual void translate(const Vec & displ) = 0; // translate all masses by fixed amount
+    virtual void translate(const Vec & displ) = 0; // translate all masses by fixed amount
 };
 
 class Constraint : public BaseObject { // constraint like plane or sphere which applies force to masses
 public:
     virtual ~Constraint() {};
 
-    CUDA_CALLABLE_MEMBER virtual Vec getForce(const Vec & position) = 0; // returns force on an object based on its position, e.g. plane or
+    virtual Vec getForce(const Vec & position) = 0; // returns force on an object based on its position, e.g. plane or
 #ifdef GRAPHICS
     virtual void generateBuffers() = 0;
     virtual void draw() = 0;
@@ -66,16 +66,16 @@ public:
 
 class Ball : public Constraint { // ball constraint, force is inversely proportional to distance
 public:
-    CUDA_CALLABLE_MEMBER Ball(const Vec & center, double r);
-    CUDA_CALLABLE_MEMBER void setRadius(double r) { _radius = r; }
-    CUDA_CALLABLE_MEMBER void setCenter(const Vec & center) { _center = center; }
-    CUDA_CALLABLE_MEMBER Vec getForce(const Vec & position);
-    CUDA_CALLABLE_MEMBER void translate(const Vec & displ);
+    Ball(const Vec & center, double r);
+    void setRadius(double r) { _radius = r; }
+    void setCenter(const Vec & center) { _center = center; }
+    Vec getForce(const Vec & position);
+    void translate(const Vec & displ);
 
 #ifdef GRAPHICS
     virtual ~Ball() {
-        glDeleteBuffers(1, &vertices);
-        glDeleteBuffers(1, &colors);
+        //glDeleteBuffers(1, &vertices);
+        //glDeleteBuffers(1, &colors);
     }
 
     void generateBuffers();
@@ -95,12 +95,26 @@ public:
     Vec _center;
 };
 
+
+struct CUDA_BALL {
+    CUDA_CALLABLE_MEMBER CUDA_BALL() = default;
+    CUDA_CALLABLE_MEMBER CUDA_BALL(const Ball & b) { _radius = b._radius; _center = b._center; }
+    CUDA_CALLABLE_MEMBER Vec getForce(const Vec & position) {
+        double dist = (position - _center).norm();
+        return (dist <= _radius) ? NORMAL * (position - _center) / dist : Vec(0, 0, 0);
+    }
+
+    double _radius;
+    Vec _center;
+};
+
 class Plane : public Constraint { // plane constraint, force is proportional to negative distance wrt plane
 public:
-    CUDA_CALLABLE_MEMBER Plane(const Vec & normal, double d);
+    Plane() {};
+    Plane(const Vec & normal, double d);
 
-    CUDA_CALLABLE_MEMBER Vec getForce(const Vec & position);
-    CUDA_CALLABLE_MEMBER void translate(const Vec & displ);
+    Vec getForce(const Vec & position);
+    void translate(const Vec & displ);
 
     void setNormal(const Vec & normal) { _normal = normal; }; // normal is (a, b, c)
     void setOffset(double d) { _offset = d; }; // ax + by + cz < d
@@ -120,6 +134,19 @@ public:
     GLuint vertices;
     GLuint colors;
 #endif
+};
+
+struct CUDA_PLANE {
+    CUDA_CALLABLE_MEMBER CUDA_PLANE() = default;
+    CUDA_CALLABLE_MEMBER CUDA_PLANE(const Plane & p) { _normal = p._normal; _offset = p._offset; }
+
+    CUDA_CALLABLE_MEMBER Vec getForce(const Vec & position) {
+        double disp = dot(position, _normal) - _offset;
+        return (disp < 0) ? - disp * NORMAL * _normal : 0 * _normal; // TODO fix this for the host
+    }
+
+    Vec _normal;
+    double _offset;
 };
 
 class Cube : public ContainerObject {
