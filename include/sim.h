@@ -37,11 +37,21 @@
 
 static double G = 9.81;
 
+
+struct AllConstraints {
+    Plane * d_planes;
+    Ball * d_balls;
+
+    int num_planes;
+    int num_balls;
+};
+
 class Simulation {
 public:
     Simulation() {
         dt = 0;
         RUNNING = 0;
+        update_constraints = false;
 
 #ifdef GRAPHICS
         update_colors = true;
@@ -97,11 +107,11 @@ public:
     std::vector<Constraint *> constraints;
     std::vector<ContainerObject *> objs;
 
-    thrust::device_vector<Constraint *> d_constraints;
     thrust::device_vector<Plane> d_planes; // used for constraints
-    thrust::device_vector<Plane> d_balls; // used for constraints
-    thrust::device_vector<Vec> d_vecs; // used for constraints
-    thrust::device_vector<double> d_doubles;
+    thrust::device_vector<Ball> d_balls; // used for constraints
+
+    AllConstraints d_constraints;
+    bool update_constraints;
 
     CUDA_MASS * d_mass;
     CUDA_SPRING * d_spring;

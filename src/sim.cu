@@ -251,7 +251,7 @@ __global__ void update(CUDA_MASS * d_mass, int num_masses) {
     }
 }
 
-__global__ void massForcesAndUpdate(CUDA_MASS * d_mass, Constraint ** d_constraints, int num_masses, int num_constraints) {
+__global__ void massForcesAndUpdate(CUDA_MASS * d_mass, AllConstraints c, int num_masses) {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
 
     if (i < num_masses) {
@@ -260,19 +260,15 @@ __global__ void massForcesAndUpdate(CUDA_MASS * d_mass, Constraint ** d_constrai
         if (mass.fixed == 1)
             return;
 
-        for (int j = 0; j < num_constraints; j++) {
-            if (i == 0) {
-                printf("(%f, %f, %f)\n", d_constraints[j] -> getForce(mass.pos)[0], d_constraints[j] -> getForce(mass.pos)[1], d_constraints[j] -> getForce(mass.pos)[2]);
-            }
+        for (int j = 0; j < c.num_planes; j++) {
+            mass.force += c.d_planes[j].getForce(mass.pos);
+        }
 
-            mass.force += d_constraints[j] -> getForce(mass.pos);
+        for (int j = 0; j < c.num_balls; j++) {
+            mass.force += c.d_balls[j].getForce(mass.pos);
         }
 
         mass.force += Vec(0, 0, -9.81 * mass.m); // don't need atomics
-
-        if (i == 0) {
-            printf("num constraints: %d\n", num_constraints);
-        }
 
 //        if (mass.pos[2] < 0)
 //            mass.force += Vec(0, 0, -10000 * mass.pos[2]); // don't need atomics
@@ -304,69 +300,6 @@ void Simulation::renderScreen() {
 }
 #endif
 
-void Simulation::resume() {
-    int threadsPerBlock = 256;
-
-    RUNNING = 1;
-    toArray();
-
-    while (1) {
-        if (!bpts.empty() && *bpts.begin() <= T) {
-            cudaDeviceSynchronize(); // synchronize before updating the springs and mass positions
-            bpts.erase(bpts.begin());
-            fromArray();
-            RUNNING = 0;
-            break;
-        }
-
-        int massBlocksPerGrid = (masses.size() + threadsPerBlock - 1) / threadsPerBlock;
-        int springBlocksPerGrid = (springs.size() + threadsPerBlock - 1) / threadsPerBlock;
-
-        if (massBlocksPerGrid > MAX_BLOCKS) {
-            massBlocksPerGrid = MAX_BLOCKS;
-        }
-
-        if (springBlocksPerGrid > MAX_BLOCKS) {
-            springBlocksPerGrid = MAX_BLOCKS;
-        }
-
-        cudaDeviceSynchronize(); // synchronize before updating the springs and mass positions
-
-#ifdef GRAPHICS
-        computeSpringForces<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size()); // compute mass forces after syncing
-        massForcesAndUpdate<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, thrust::raw_pointer_cast(&d_constraints[0]), masses.size(), d_constraints.size());//        T += dt;
-        T += dt;
-#else
-        for (int i = 0; i < NUM_QUEUED_KERNELS; i++) {
-            computeSpringForces<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size()); // compute mass forces after syncing
-            massForcesAndUpdate<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, thrust::raw_pointer_cast(&d_constraints[0]), masses.size(), d_constraints.size());//        T += dt;
-            T += dt;
-        }
-#endif
-
-#ifdef GRAPHICS
-        if (fmod(T, 250 * dt) < dt) {
-            clearScreen();
-
-            updateBuffers();
-            draw();
-
-            for (Constraint * c : constraints) {
-                c -> draw();
-            }
-
-            renderScreen();
-
-            if (glfwGetKey(window, GLFW_KEY_ESCAPE ) == GLFW_PRESS || glfwWindowShouldClose(window) != 0) {
-                RUNNING = 0;
-                break;
-            }
-        }
-#endif
-
-    }
-}
-
 void Simulation::run() { // repeatedly run next
     T = 0;
     dt = 1000000;
@@ -397,6 +330,78 @@ void Simulation::run() { // repeatedly run next
 #endif
 
     resume();
+}
+
+void Simulation::resume() {
+    int threadsPerBlock = 256;
+
+    RUNNING = 1;
+    toArray();
+
+    while (1) {
+
+        if (update_constraints) {
+            d_constraints.d_balls = thrust::raw_pointer_cast(&d_balls[0]);
+            d_constraints.d_planes = thrust::raw_pointer_cast(&d_planes[0]);
+            d_constraints.num_balls = d_balls.size();
+            d_constraints.num_planes = d_planes.size();
+            update_constraints = false;
+        }
+
+        if (!bpts.empty() && *bpts.begin() <= T) {
+            cudaDeviceSynchronize(); // synchronize before updating the springs and mass positions
+            bpts.erase(bpts.begin());
+            fromArray();
+            RUNNING = 0;
+            break;
+        }
+
+        int massBlocksPerGrid = (masses.size() + threadsPerBlock - 1) / threadsPerBlock;
+        int springBlocksPerGrid = (springs.size() + threadsPerBlock - 1) / threadsPerBlock;
+
+        if (massBlocksPerGrid > MAX_BLOCKS) {
+            massBlocksPerGrid = MAX_BLOCKS;
+        }
+
+        if (springBlocksPerGrid > MAX_BLOCKS) {
+            springBlocksPerGrid = MAX_BLOCKS;
+        }
+
+        cudaDeviceSynchronize(); // synchronize before updating the springs and mass positions
+
+#ifdef GRAPHICS
+        computeSpringForces<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size()); // compute mass forces after syncing
+        massForcesAndUpdate<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, d_constraints, masses.size());
+        T += dt;
+#else
+        for (int i = 0; i < NUM_QUEUED_KERNELS; i++) {
+            computeSpringForces<<<springBlocksPerGrid, threadsPerBlock>>>(d_spring, springs.size()); // compute mass forces after syncing
+            massForcesAndUpdate<<<massBlocksPerGrid, threadsPerBlock>>>(d_mass, thrust::raw_pointer_cast(&d_constraints[0]), masses.size(), d_constraints.size());//        T += dt;
+            T += dt;
+        }
+#endif
+
+#ifdef GRAPHICS
+        if (fmod(T, 250 * dt) < dt) {
+            clearScreen();
+
+            updateBuffers();
+            draw();
+
+            for (Constraint * c : constraints) {
+                c -> draw();
+            }
+
+            renderScreen();
+
+            if (glfwGetKey(window, GLFW_KEY_ESCAPE ) == GLFW_PRESS || glfwWindowShouldClose(window) != 0) {
+                RUNNING = 0;
+                break;
+            }
+        }
+#endif
+
+    }
 }
 
 #ifdef GRAPHICS
@@ -528,24 +533,6 @@ void Simulation::draw() {
 
 #endif
 
-struct setup {
-    template <typename Tuple>
-    __host__ __device__ void operator()(const Tuple &arg) {
-        (thrust::get<0>(arg)).set_values(thrust::get<1>(arg), thrust::get<2>(arg));
-        (thrust::get<3>(arg)).set_values(&thrust::get<0>(arg));
-    }
-};
-
-
-Plane * Simulation::createPlane(const Vec & abc, double d ) { // creates half-space ax + by + cz < d
-    d_vecs.push_back(abc);
-    d_doubles.push_back(d);
-    thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(d_planes.begin(), d_vecs.begin(), d_doubles.begin(), d_constraints.begin())), thrust::make_zip_iterator(thrust::make_tuple(d_planes.end(), d_vecs.end(), d_doubles.end(), d_constraints.end())), setup());
-    Plane * new_plane = new Plane(abc, d);
-    constraints.push_back(new_plane);
-    return new_plane;
-}
-
 Cube * Simulation::createCube(const Vec & center, double side_length) { // creates half-space ax + by + cz < d
     Cube * cube = new Cube(center, side_length);
     for (Mass * m : cube -> masses) {
@@ -585,12 +572,17 @@ Lattice * Simulation::createLattice(const Vec & center, const Vec & dims, int nx
     return l;
 }
 
+Plane * Simulation::createPlane(const Vec & abc, double d ) { // creates half-space ax + by + cz < d
+    Plane * new_plane = new Plane(abc, d);
+    constraints.push_back(new_plane);
+    d_planes.push_back(new_plane);
+    return new_plane;
+}
+
 Ball * Simulation::createBall(const Vec & center, double r ) { // creates ball with radius r at position center
-    d_vecs.push_back(center);
-    d_doubles.push_back(r);
-    thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(d_balls.begin(), d_vecs.begin(), d_doubles.begin(), d_constraints.begin())), thrust::make_zip_iterator(thrust::make_tuple(d_balls.end(), d_vecs.end(), d_doubles.end(), d_constraints.end())), setup());
     Ball * new_ball = new Ball(center, r);
     constraints.push_back(new_ball);
+    d_balls.push_back(new_ball);
     return new_ball;
 }
 
