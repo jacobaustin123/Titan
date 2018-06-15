@@ -98,6 +98,10 @@ public:
     std::vector<ContainerObject *> objs;
 
     thrust::device_vector<Constraint *> d_constraints;
+    thrust::device_vector<Plane> d_planes; // used for constraints
+    thrust::device_vector<Plane> d_balls; // used for constraints
+    thrust::device_vector<Vec> d_vecs; // used for constraints
+    thrust::device_vector<double> d_doubles;
 
     CUDA_MASS * d_mass;
     CUDA_SPRING * d_spring;

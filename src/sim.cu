@@ -528,7 +528,19 @@ void Simulation::draw() {
 
 #endif
 
+struct setup {
+    template <typename Tuple>
+    __host__ __device__ void operator()(const Tuple &arg) {
+        (thrust::get<0>(arg)).set_values(thrust::get<1>(arg), thrust::get<2>(arg));
+        (thrust::get<3>(arg)).set_values(&thrust::get<0>(arg));
+    }
+};
+
+
 Plane * Simulation::createPlane(const Vec & abc, double d ) { // creates half-space ax + by + cz < d
+    d_vecs.push_back(abc);
+    d_doubles.push_back(d);
+    thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(d_planes.begin(), d_vecs.begin(), d_doubles.begin(), d_constraints.begin())), thrust::make_zip_iterator(thrust::make_tuple(d_planes.end(), d_vecs.end(), d_doubles.end(), d_constraints.end())), setup());
     Plane * new_plane = new Plane(abc, d);
     constraints.push_back(new_plane);
     return new_plane;
@@ -574,6 +586,9 @@ Lattice * Simulation::createLattice(const Vec & center, const Vec & dims, int nx
 }
 
 Ball * Simulation::createBall(const Vec & center, double r ) { // creates ball with radius r at position center
+    d_vecs.push_back(center);
+    d_doubles.push_back(r);
+    thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(d_balls.begin(), d_vecs.begin(), d_doubles.begin(), d_constraints.begin())), thrust::make_zip_iterator(thrust::make_tuple(d_balls.end(), d_vecs.end(), d_doubles.end(), d_constraints.end())), setup());
     Ball * new_ball = new Ball(center, r);
     constraints.push_back(new_ball);
     return new_ball;

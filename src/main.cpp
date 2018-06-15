@@ -17,14 +17,6 @@ int main()
 {
     Lattice * l1 = sim.createLattice(Vec(0, 0, 20), Vec(15, 15, 15), 20, 20, 20);
 
-//    Mass * m1 = sim.createMass(Vec(0, 0, 20));
-//    Mass * m2 = sim.createMass(Vec(0, 10, 20));
-//    m1 -> makeFixed();
-//    Spring * s1 = sim.createSpring(m1, m2);
-//    s1 -> defaultLength();
-//
-//    sim.setSpringConstant(10);
-
     sim.setSpringConstant(1000);
     sim.setMassDeltaT(0.0001);
 
