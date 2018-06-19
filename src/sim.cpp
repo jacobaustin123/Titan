@@ -201,11 +201,6 @@ void Simulation::resume() {
             updateBuffers();
             draw();
 
-//            for (ContainerObject * c : objs) {
-//                c -> updateBuffers();
-//                c -> draw();
-//            }
-
             for (Constraint * c : constraints) {
                 c -> draw();
             }
@@ -226,8 +221,8 @@ void Simulation::run() { // repeatedly run next
 
     dt = 1000000;
     for (Mass * m : masses) {
-        if (m -> deltat() < dt)
-            dt = m -> deltat();
+        if (m -> dt() < dt)
+            dt = m -> dt();
     }
 
 #ifdef GRAPHICS
@@ -419,6 +414,13 @@ Plane * Simulation::createPlane(const Vec & abc, double d ) { // creates half-sp
     Plane * new_plane = new Plane(abc, d);
     constraints.push_back(new_plane);
     return new_plane;
+}
+
+Ball * Simulation::createBall(const Vec & center, double r ) { // creates ball with radius r at position center
+    Ball * new_ball = new Ball(center, r);
+    constraints.push_back(new_ball);
+    return new_ball;
+
 }
 
 #ifdef GRAPHICS

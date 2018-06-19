@@ -9,34 +9,40 @@
 
 class Mass {
 public:
-    Mass() { m = 1.0; fixed = 0; dt = 0.01; T = 0; color = Vec(1.0, 0.2, 0.2); }
+    // constructors
 
-    Mass(double mass, const Vec & position, int fixed = 0, double dt = 0.01) :
-            m(mass), pos(position), fixed(fixed), dt(dt), T(0), color(Vec(1.0, 0.2, 0.2)) {}; // defaults everything
+    Mass() { m = 1.0; fixed = 0; delta_t = 0.01; t = 0; color = Vec(1.0, 0.2, 0.2); arrayptr = nullptr; }
+    Mass(const Vec & position, double mass = 1.0, int fixed = 0, double dt = 0.0001) :
+            m(mass), pos(position), fixed(fixed), delta_t(dt), t(0), color(Vec(1.0, 0.2, 0.2)), arrayptr(nullptr) {}; // defaults everything
 
+    // setters
     void setMass(double m) { this -> m = m; };
     void setPos(const Vec & pos) { this -> pos = pos; }
     void setVel(const Vec & vel) { this -> vel = vel; }
     void setAcc(const Vec & acc) { this -> acc = acc; }
     void setForce(const Vec & force) { this -> force = force; }
-    void setDeltaT(double dt) { this -> dt = dt; }
+    void setDeltaT(double dt) { this -> delta_t = dt; }
     void setColor(const Vec & color) { this -> color = color; }
 
-    void translate(const Vec & displ) { this -> pos += displ; }
+    void stepTime() { t += delta_t; }
 
+    // manipulate
+    void translate(const Vec & displ) { this -> pos += displ; }
     void makeFixed() { fixed = 1; }
     void makeMovable() { fixed = 0; }
 
-    int isFixed() { return (fixed == 1); }
+    // getters
     double getMass() { return m; }
     const Vec & getPosition() { return pos; }
     const Vec & getVelocity() { return vel; }
     const Vec & getAcceleration() { return acc; }
     const Vec & getForce() { return force; }
-    double time() { return T; }
-    double deltat() const { return dt; }
-    void stepTime() { T += dt; }
+    double time() { return t; }
+    double dt() const { return delta_t; }
 
+    int isFixed() { return (fixed == 1); }
+
+    // private methods
     void update(); // update pos, vel, and acc based on force
     void addForce(const Vec &); // add force vector to current force
     void resetForce(); // set force = 0;
@@ -44,8 +50,8 @@ public:
     Mass * arrayptr;
 
     double m; // mass in kg
-    double dt; // update interval
-    double T; // local time
+    double delta_t; // update interval
+    double t; // local time
     Vec pos; // position in m
     Vec vel; // velocity in m/s
     Vec acc; // acceleration in m/s^2

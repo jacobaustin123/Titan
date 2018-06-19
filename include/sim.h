@@ -50,6 +50,8 @@ public:
     Spring * createSpring(Mass * m1, Mass * m2, double k = 1.0, double len = 1.0);
 
     Plane * createPlane(const Vec & abc, double d ); // creates half-space ax + by + cz < d
+    Ball * createBall(const Vec & center, double r ); // creates ball with radius r at position center
+
     Cube * createCube(const Vec & center, double side_length); // creates cube
     Lattice * createLattice(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
 
