@@ -14,6 +14,7 @@
 #include <thrust/device_vector.h>
 
 #define MAX_BLOCKS 65535 // max number of CUDA blocks
+#define THREADS_PER_BLOCK 1024
 
 #ifndef GRAPHICS
 #define NUM_QUEUED_KERNELS 4 // number of kernels to queue at a given time (this will reduce the frequency of updates from the CPU by this factor
@@ -96,7 +97,6 @@ public:
 //    void printSpringForces();
 
 
-// private from here
     double dt; // set to 0 by default, when run is called will be set to min(mass dt) unless previously set
     double T; // global simulation time
 
@@ -110,13 +110,13 @@ public:
     AllConstraints d_constraints;
     bool update_constraints;
 
-    CUDA_MASS * d_mass;
-    CUDA_SPRING * d_spring;
+    CUDA_MASS ** d_mass;
+    CUDA_SPRING ** d_spring;
 
     std::set<double> bpts; // list of breakpoints
 
-    CUDA_MASS * massToArray();
-    CUDA_SPRING * springToArray();
+    CUDA_MASS ** massToArray();
+    CUDA_SPRING ** springToArray();
     void constraintsToArray();
     void toArray();
 

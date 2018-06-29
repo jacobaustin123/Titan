@@ -33,8 +33,8 @@ int main()
     double runtime = 10.0;
 
 #ifdef GRAPHICS
-        sim.setBreakpoint(runtime); // set breakpoint (could be end of program or just time to check for updates)
-        sim.run();
+    sim.setBreakpoint(runtime); // set breakpoint (could be end of program or just time to check for updates)
+    sim.run();
 #else
     sim.setBreakpoint(runtime); // set breakpoint (could be end of program or just time to check for updates)
     sim.run();
