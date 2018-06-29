@@ -161,6 +161,8 @@ CUDA_MASS ** Simulation::massToArray() {
 
     this -> d_mass = d_mass;
 
+    d_masses = thrust::device_vector<CUDA_MASS *>(this -> d_mass, this -> d_mass + masses.size());
+
     return d_mass;
 }
 
@@ -210,6 +212,8 @@ CUDA_SPRING ** Simulation::springToArray() {
     delete [] h_ptrs;
 
     this -> d_spring = ptrs;
+
+    d_springs = thrust::device_vector<CUDA_SPRING *>(this -> d_spring, this -> d_spring + springs.size());
 
     return ptrs;
 }
@@ -511,6 +515,10 @@ void Simulation::resume() {
                 RUNNING = 0;
                 break;
             }
+        }
+#else
+        if (fmod(T, 1000 * dt) <= dt) {
+            std::cout <<"time: " << T <<"." << std::endl;
         }
 #endif
 

@@ -71,6 +71,9 @@ public:
     Spring * createSpring();
     Spring * createSpring(Mass * m1, Mass * m2, double k = 1.0, double len = 1.0);
 
+    void deleteMass(Mass * m);
+    void deleteSpring(Spring * s);
+
     Plane * createPlane(const Vec & abc, double d ); // creates half-space ax + by + cz < d
     Cube * createCube(const Vec & center, double side_length); // creates cube
     Lattice * createLattice(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
@@ -106,6 +109,9 @@ public:
     std::vector<Spring *> springs;
     std::vector<Constraint *> constraints;
     std::vector<ContainerObject *> objs;
+
+    thrust::device_vector<CUDA_MASS *> d_masses;
+    thrust::device_vector<CUDA_SPRING *> d_springs;
 
     AllConstraints d_constraints;
     bool update_constraints;
