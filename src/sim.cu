@@ -118,17 +118,31 @@ __global__ void createMassPointers(CUDA_MASS ** ptrs, CUDA_MASS * data, int size
     int i = blockDim.x * blockIdx.x + threadIdx.x;
 
     if (i < size) {
-        ptrs[i] = (CUDA_MASS *) malloc(sizeof(CUDA_MASS));
+//        ptrs[i] = (CUDA_MASS *) malloc(sizeof(CUDA_MASS));
         *ptrs[i] = data[i];
     }
 }
 
 CUDA_MASS ** Simulation::massToArray() {
-    CUDA_MASS * h_data = new CUDA_MASS[masses.size()]; // copy masses into single array for copying to the GPU
+    CUDA_MASS ** d_ptrs = new CUDA_MASS * [masses.size()]; // array of pointers
+    for (int i = 0; i < masses.size(); i++) { // potentially slow
+        cudaMalloc((void **) d_ptrs + i, sizeof(CUDA_MASS *));
+    }
+
+    d_masses = thrust::device_vector<CUDA_MASS *>(d_ptrs, d_ptrs + masses.size());
+
+
+
+    CUDA_MASS * h_data = new CUDA_MASS[masses.size()]; // copy masses into single array for copying to the GPU, set GPU pointers
 
     for (int i = 0; i < masses.size(); i++) {
+        masses[i] -> arrayptr = d_ptrs[i];
         h_data[i] = CUDA_MASS(*masses[i]);
     }
+
+    delete [] d_ptrs;
+
+
 
     CUDA_MASS * d_data; // copy to the GPU
     cudaMalloc((void **)&d_data, sizeof(CUDA_MASS) * masses.size());
@@ -138,60 +152,66 @@ CUDA_MASS ** Simulation::massToArray() {
 
 
 
-    CUDA_MASS ** d_mass; // array of points
-    cudaMalloc((void **) &d_mass, masses.size() * sizeof(CUDA_MASS *));
-
     int massBlocksPerGrid = (masses.size() + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK;
 
     if (massBlocksPerGrid > MAX_BLOCKS) {
         massBlocksPerGrid = MAX_BLOCKS;
     }
 
-    createMassPointers<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, d_data, masses.size());
+    createMassPointers<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(thrust::raw_pointer_cast(d_masses.data()), d_data, masses.size());
     cudaFree(d_data);
+//
+//    CUDA_MASS ** h_mass = new CUDA_MASS * [masses.size()];
+//    cudaMemcpy(h_mass, d_mass, masses.size() * sizeof(CUDA_MASS *), cudaMemcpyDeviceToHost);
+//
+//    for (int i = 0; i < masses.size(); i++) {
+//        masses[i] -> arrayptr = h_mass[i];
+//    }
 
-    CUDA_MASS ** h_mass = new CUDA_MASS * [masses.size()];
-    cudaMemcpy(h_mass, d_mass, masses.size() * sizeof(CUDA_MASS *), cudaMemcpyDeviceToHost);
+//    delete [] h_mass;
 
-    for (int i = 0; i < masses.size(); i++) {
-        masses[i] -> arrayptr = h_mass[i];
-    }
+    this -> d_mass = thrust::raw_pointer_cast(d_masses.data());
 
-    delete [] h_mass;
+//    d_masses = thrust::device_vector<CUDA_MASS *>(this -> d_mass, this -> d_mass + masses.size());
 
-    this -> d_mass = d_mass;
-
-    d_masses = thrust::device_vector<CUDA_MASS *>(this -> d_mass, this -> d_mass + masses.size());
-
-    return d_mass;
+    return thrust::raw_pointer_cast(d_masses.data());
 }
 
 __global__ void createSpringPointers(CUDA_SPRING ** ptrs, CUDA_SPRING * data, int size) {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
 
     if (i < size) {
-        ptrs[i] = (CUDA_SPRING *) malloc(sizeof(CUDA_SPRING));
+//        ptrs[i] = (CUDA_SPRING *) malloc(sizeof(CUDA_SPRING));
         *ptrs[i] = data[i];
     }
 }
 
 CUDA_SPRING ** Simulation::springToArray() {
+    CUDA_SPRING ** d_ptrs = new CUDA_SPRING * [springs.size()]; // array of pointers
+    for (int i = 0; i < springs.size(); i++) { // potentially slow
+        cudaMalloc((void **) d_ptrs + i, sizeof(CUDA_SPRING *));
+    }
+
+    d_springs = thrust::device_vector<CUDA_SPRING *>(d_ptrs, d_ptrs + springs.size());
+
+
+
     CUDA_SPRING * h_spring = new CUDA_SPRING[springs.size()];
 
     for (int i = 0; i < springs.size(); i++) {
         Spring & s = *springs[i];
+        s.arrayptr = d_ptrs[i];
         h_spring[i] = CUDA_SPRING(s, s._left -> arrayptr, s._right -> arrayptr);
     }
 
-    CUDA_SPRING * d_spring;
-    cudaMalloc((void **)& d_spring, sizeof(CUDA_SPRING) * springs.size());
-    cudaMemcpy(d_spring, h_spring, sizeof(CUDA_SPRING) * springs.size(), cudaMemcpyHostToDevice);
+    delete [] d_ptrs;
+
+    CUDA_SPRING * d_data;
+    cudaMalloc((void **)& d_data, sizeof(CUDA_SPRING) * springs.size());
+    cudaMemcpy(d_data, h_spring, sizeof(CUDA_SPRING) * springs.size(), cudaMemcpyHostToDevice);
 
     delete [] h_spring;
 
-
-    CUDA_SPRING ** ptrs;
-    cudaMalloc((void **) &ptrs, springs.size() * sizeof(CUDA_SPRING *));
 
     int springBlocksPerGrid = (springs.size() + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK;
 
@@ -199,23 +219,12 @@ CUDA_SPRING ** Simulation::springToArray() {
         springBlocksPerGrid = MAX_BLOCKS;
     }
 
-    createSpringPointers<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(ptrs, d_spring, springs.size());
-    cudaFree(d_spring);
+    createSpringPointers<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(thrust::raw_pointer_cast(d_springs.data()), d_data, springs.size());
+    cudaFree(d_data);
 
-    CUDA_SPRING ** h_ptrs = new CUDA_SPRING * [springs.size()];
-    cudaMemcpy(h_ptrs, ptrs, springs.size() * sizeof(CUDA_SPRING *), cudaMemcpyDeviceToHost);
+    this -> d_spring = thrust::raw_pointer_cast(d_springs.data());
 
-    for (int i = 0; i < springs.size(); i++) {
-        springs[i] -> arrayptr = h_ptrs[i];
-    }
-
-    delete [] h_ptrs;
-
-    this -> d_spring = ptrs;
-
-    d_springs = thrust::device_vector<CUDA_SPRING *>(this -> d_spring, this -> d_spring + springs.size());
-
-    return ptrs;
+    return thrust::raw_pointer_cast(d_springs.data());
 }
 
 //void Simulation::constraintsToArray() {
@@ -480,8 +489,8 @@ void Simulation::resume() {
         cudaDeviceSynchronize(); // synchronize before updating the springs and mass positions
 
 #ifdef GRAPHICS
-        computeSpringForces<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(d_spring, springs.size()); // compute mass forces after syncing
-        massForcesAndUpdate<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, d_constraints, masses.size());
+        computeSpringForces<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(thrust::raw_pointer_cast(d_springs.data()), springs.size()); // compute mass forces after syncing
+        massForcesAndUpdate<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(thrust::raw_pointer_cast(d_masses.data()), d_constraints, masses.size());
         T += dt;
 #else
 //        std::cout << "Time is " << T << "!" << std::endl;
