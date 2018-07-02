@@ -3,6 +3,8 @@
 //
 
 #include "sim.h"
+#include <thrust/remove.h>
+#include <thrust/execution_policy.h>
 
 thrust::device_vector<CUDA_PLANE> d_planes; // used for constraints
 thrust::device_vector<CUDA_BALL> d_balls; // used for constraints
@@ -24,6 +26,12 @@ __global__ void freeSprings(CUDA_SPRING ** ptr, int size) {
 }
 
 Simulation::~Simulation() {
+    if (gpu_thread.joinable()) {
+        gpu_thread.join();
+    } else {
+        std::cout << "could not join GPU thread." << std::endl;
+    }
+
     for (Mass * m : masses)
         delete m;
 
@@ -55,36 +63,123 @@ Simulation::~Simulation() {
     glDeleteBuffers(1, &vertices);
     glDeleteBuffers(1, &colors);
     glDeleteBuffers(1, &indices);
-
     glDeleteProgram(programID);
     glDeleteVertexArrays(1, &VertexArrayID);
 
+//     Close OpenGL window and terminate GLFW
+#ifdef SDL2
+    SDL_GL_DeleteContext(context);
+    SDL_DestroyWindow(window);
+
+    SDL_Quit();
+#else
     glfwTerminate();
 #endif
+#endif
+}
+
+Mass * Simulation::createMass(Mass * m) {
+    if (!STARTED) {
+        masses.push_back(m);
+        return m;
+    } else {
+        if (RUNNING) {
+            assert(false);
+        }
+
+        masses.push_back(m);
+
+        CUDA_MASS * d_mass;
+        cudaMalloc((void **) &d_mass, sizeof(CUDA_MASS));
+        m -> arrayptr = d_mass;
+        
+        d_masses.push_back(d_mass);
+
+        CUDA_MASS temp = *m;
+        cudaMemcpy(d_mass, &temp, sizeof(CUDA_MASS), cudaMemcpyHostToDevice);
+#ifdef GRAPHICS
+        resize_buffers = true;
+#endif
+        return m;
+    }
 }
 
 Mass * Simulation::createMass() {
     Mass * m = new Mass();
-    masses.push_back(m);
-    return m;
+    return createMass(m);
 }
 
 Mass * Simulation::createMass(const Vec & pos) {
     Mass * m = new Mass(pos);
-    masses.push_back(m);
-    return m;
+    return createMass(m);
+}
+
+Spring * Simulation::createSpring(Spring * s) {
+    if (!STARTED) {
+        springs.push_back(s);
+        return s;
+    } else {
+        if (RUNNING) {
+            assert(false);
+        }
+
+        springs.push_back(s);
+
+        CUDA_SPRING * d_spring;
+        cudaMalloc((void **) &d_spring, sizeof(CUDA_SPRING));
+        s -> arrayptr = d_spring;
+        d_springs.push_back(d_spring);
+
+        CUDA_SPRING temp = CUDA_SPRING(*s, (s -> _left == nullptr) ? nullptr : s -> _left -> arrayptr, (s -> _right == nullptr) ? nullptr : s -> _right -> arrayptr);
+        cudaMemcpy(d_spring, &temp, sizeof(CUDA_SPRING), cudaMemcpyHostToDevice);
+
+#ifdef GRAPHICS
+        resize_buffers = true;
+#endif
+        return s;
+    }
 }
 
 Spring * Simulation::createSpring() {
     Spring * s = new Spring();
-    springs.push_back(s);
-    return s;
+    return createSpring(s);
 }
 
-Spring * Simulation::createSpring(Mass * m1, Mass * m2, double k, double len) {
-    Spring * s = new Spring(m1, m2, k, len);
-    springs.push_back(s);
-    return s;
+Spring * Simulation::createSpring(Mass * m1, Mass * m2) {
+    Spring * s = new Spring(m1, m2);
+    return createSpring(s);
+}
+
+void Simulation::deleteMass(Mass * m) {
+    if (!STARTED) {
+        masses.remove(m);
+    } else {
+        if (RUNNING) {
+            assert(false);
+        }
+
+        thrust::remove(d_masses.begin(), d_masses.end(), m ->arrayptr);
+        masses.remove(m);
+#ifdef GRAPHICS
+        resize_buffers = true;
+#endif
+    }
+}
+
+void Simulation::deleteSpring(Spring * s) {
+    if (!STARTED) {
+        springs.remove(s);
+    } else {
+        if (RUNNING) {
+            assert(false);
+        }
+
+        thrust::remove(d_springs.begin(), d_springs.end(), s ->arrayptr);
+        springs.remove(s);
+#ifdef GRAPHICS
+        resize_buffers = true;
+#endif
+    }
 }
 
 void Simulation::setSpringConstant(double k) {
@@ -135,9 +230,14 @@ CUDA_MASS ** Simulation::massToArray() {
 
     CUDA_MASS * h_data = new CUDA_MASS[masses.size()]; // copy masses into single array for copying to the GPU, set GPU pointers
 
-    for (int i = 0; i < masses.size(); i++) {
-        masses[i] -> arrayptr = d_ptrs[i];
-        h_data[i] = CUDA_MASS(*masses[i]);
+
+    int count = 0;
+
+    for (Mass * m : masses) {
+        m -> arrayptr = d_ptrs[count];
+        h_data[count] = CUDA_MASS(*m);
+
+        count++;
     }
 
     delete [] d_ptrs;
@@ -198,10 +298,11 @@ CUDA_SPRING ** Simulation::springToArray() {
 
     CUDA_SPRING * h_spring = new CUDA_SPRING[springs.size()];
 
-    for (int i = 0; i < springs.size(); i++) {
-        Spring & s = *springs[i];
-        s.arrayptr = d_ptrs[i];
-        h_spring[i] = CUDA_SPRING(s, s._left -> arrayptr, s._right -> arrayptr);
+    int count = 0;
+    for (Spring * s : springs) {
+        s -> arrayptr = d_ptrs[count];
+        h_spring[count] = CUDA_SPRING(*s, s -> _left -> arrayptr, s -> _right -> arrayptr);
+        count++;
     }
 
     delete [] d_ptrs;
@@ -267,8 +368,11 @@ void Simulation::massFromArray() {
     cudaMemcpy(h_mass, temp, sizeof(CUDA_MASS) * masses.size(), cudaMemcpyDeviceToHost);
     cudaFree(temp);
 
-    for (int i = 0; i < masses.size(); i++) {
-        *masses[i] = Mass(h_mass[i]);
+    int count = 0;
+
+    for (Mass * m : masses) {
+        *m = Mass(h_mass[count]);
+        count++;
     }
 
     delete [] h_mass;
@@ -413,49 +517,211 @@ void Simulation::clearScreen() {
 
 void Simulation::renderScreen() {
     // Swap buffers
-    glfwSwapBuffers(window);
+#ifdef SDL2
+    SDL_GL_SwapWindow(window);
+#else
     glfwPollEvents();
-}
+    glfwSwapBuffers(window);
 #endif
+}
 
-void Simulation::run() { // repeatedly run next
-    T = 0;
-    dt = 1000000;
-    for (Mass * m : masses) {
-        if (m -> deltat() < dt)
-            dt = m -> deltat();
+#ifdef SDL2
+
+void Simulation::createSDLWindow() {
+
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+    {
+        std::cout << "Failed to init SDL\n";
+        return;
     }
 
-#ifdef GRAPHICS
-    this -> window = createGLFWWindow();
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 
+    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+
+    // Turn on double buffering with a 24bit Z buffer.
+    // You may need to change this to 16 or 32 for your system
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+
+    SDL_GL_SetSwapInterval(1);
+
+    // Open a window and create its OpenGL context
+
+    window = SDL_CreateWindow("CUDA Physics Simulation", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 768, SDL_WINDOW_OPENGL);
+    SDL_SetWindowResizable(window, SDL_TRUE);
+
+    if (window == NULL) {
+        fprintf(stderr,
+                "Failed to open SDL window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n");
+        getchar();
+        SDL_Quit();
+        return;
+    }
+
+    context = SDL_GL_CreateContext(window);
+
+    // Initialize GLEW
+    glewExperimental = true; // Needed for core profile
+    if (glewInit() != GLEW_OK) {
+        fprintf(stderr, "Failed to initialize GLEW\n");
+        getchar();
+        SDL_Quit();
+        return;
+    }
+
+    glEnable(GL_DEPTH_TEST);
+    //    // Accept fragment if it closer to the camera than the former one
+    glDepthFunc(GL_LESS);
+
+    // Dark blue background
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+    glEnable(GL_MULTISAMPLE);
+
+}
+
+#else
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
+
+void Simulation::createGLFWWindow() {
+    // Initialise GLFW
+    if( !glfwInit() ) // TODO throw errors here
+    {
+        fprintf( stderr, "Failed to initialize GLFW\n" );
+        getchar();
+    }
+
+    glfwWindowHint(GLFW_SAMPLES, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); //We don't want the old OpenGL
+    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+
+    glfwSwapInterval(1);
+
+    // Open a window and create its OpenGL context
+    window = glfwCreateWindow(1024, 768, "CUDA Physics Simulation", NULL, NULL);
+
+    if (window == NULL) {
+        fprintf(stderr,
+                "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n");
+        getchar();
+        glfwTerminate();
+    }
+
+    glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+    glEnable(GL_DEPTH_TEST);
+    //    // Accept fragment if it closer to the camera than the former one
+    glDepthFunc(GL_LESS);
+
+    // Initialize GLEW
+    glewExperimental = true; // Needed for core profile
+    if (glewInit() != GLEW_OK) {
+        fprintf(stderr, "Failed to initialize GLEW\n");
+        getchar();
+        glfwTerminate();
+    }
+
+    // Ensure we can capture the escape key being pressed below
+    glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+
+    // Dark blue background
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+}
+
+#endif
+#endif
+
+void Simulation::start() {
+    RUNNING = true;
+    STARTED = true;
+
+    T = 0;
+
+    dt = 1000000;
+    for (Mass * m : masses) {
+        if (m -> dt < dt)
+            dt = m -> dt;
+    }
+
+#ifdef GRAPHICS // SDL2 window needs to be created here for Mac OS
+#ifdef SDL2
+    createSDLWindow();
+#endif
+#endif
+
+    cudaDeviceSetLimit(cudaLimitMallocHeapSize, 5 * (masses.size() * sizeof(CUDA_MASS) + springs.size() * sizeof(CUDA_SPRING)));
+    toArray();
+
+    gpu_thread = std::thread(&Simulation::_run, this);
+}
+
+void Simulation::_run() { // repeatedly start next
+
+#ifdef GRAPHICS
+
+#ifndef SDL2 // GLFW window needs to be created here for Windows
+    createGLFWWindow();
+#endif
+
+#ifdef SDL2
+    SDL_GL_MakeCurrent(window, context);
+#endif
     GLuint VertexArrayID;
     glGenVertexArrays(1, &VertexArrayID);
     glBindVertexArray(VertexArrayID);
 
+//    glEnable(GL_LIGHTING);
+//    glEnable(GL_LIGHT0);
+
     // Create and compile our GLSL program from the shaders
-    this -> programID = LoadShaders("shaders/TransformVertexShader.vertexshader", "shaders/ColorFragmentShader.fragmentshader");
+    this -> programID = LoadShaders("shaders/TransformVertexShader.vertexshader", "shaders/ColorFragmentShader.fragmentshader"); // ("shaders/StandardShading.vertexshader", "shaders/StandardShading.fragmentshader"); //
     // Get a handle for our "MVP" uniform
-    this -> MatrixID = glGetUniformLocation(programID, "MVP");
 
-    this -> MVP = getProjection();
+    this -> MVP = getProjection(); // compute perspective projection matrix
 
-    generateBuffers();
+    this -> MatrixID = glGetUniformLocation(programID, "MVP"); // doesn't seem to be necessary
 
-    for (Constraint * c : constraints) {
+    generateBuffers(); // generate buffers for all masses and springs
+
+    for (Constraint * c : constraints) { // generate buffers for constraint objects
         c -> generateBuffers();
     }
+
 #endif
 
-    resume();
+    execute();
 }
 
 void Simulation::resume() {
-    RUNNING = 1;
-    cudaDeviceSetLimit(cudaLimitMallocHeapSize, 5 * (masses.size() * sizeof(CUDA_MASS) + springs.size() * sizeof(CUDA_SPRING)));
+#ifdef GRAPHICS
+    if (resize_buffers) {
+        resizeBuffers();
+        resize_buffers = false;
+        update_colors = true;
+        update_indices = true;
+    }
+#endif
 
-    toArray();
+    RUNNING = true;
+}
 
+void Simulation::execute() {
     while (1) {
 
         if (update_constraints) {
@@ -470,9 +736,13 @@ void Simulation::resume() {
             cudaDeviceSynchronize(); // synchronize before updating the springs and mass positions
             std::cout << "Exiting program at breakpoint time " << *bpts.begin() << "! Current time is " << T << "!" << std::endl;
             bpts.erase(bpts.begin());
-            fromArray();
-            RUNNING = 0;
-            break;
+            RUNNING = false;
+
+            while (!RUNNING) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            }
+
+            continue;
         }
 
         int massBlocksPerGrid = (masses.size() + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK;
@@ -507,8 +777,6 @@ void Simulation::resume() {
 
 #ifdef GRAPHICS
         if (fmod(T, 250 * dt) < dt) {
-//            printPositions();
-
             clearScreen();
 
             updateBuffers();
@@ -520,10 +788,12 @@ void Simulation::resume() {
 
             renderScreen();
 
+#ifndef SDL2
             if (glfwGetKey(window, GLFW_KEY_ESCAPE ) == GLFW_PRESS || glfwWindowShouldClose(window) != 0) {
                 RUNNING = 0;
                 break;
             }
+#endif
         }
 #else
         if (fmod(T, 1000 * dt) <= dt) {
@@ -534,7 +804,54 @@ void Simulation::resume() {
     }
 }
 
+void Simulation::pause(double t) {
+    setBreakpoint(t);
+    waitForEvent();
+}
+
+void Simulation::wait(double t) {
+    double current_time = time();
+    while (RUNNING && time() <= current_time + t) {
+        std::this_thread::sleep_for(std::chrono::microseconds(10));
+    }
+}
+
+void Simulation::waitUntil(double t) {
+    while (RUNNING && time() <= t) {
+        std::this_thread::sleep_for(std::chrono::microseconds(10));
+    }
+}
+
+void Simulation::waitForEvent() {
+    while (RUNNING) {
+        std::this_thread::sleep_for(std::chrono::microseconds(10));
+    }
+}
+
 #ifdef GRAPHICS
+
+void Simulation::resizeBuffers() {
+    {
+        cudaGLUnregisterBufferObject(this -> colors);
+        glBindBuffer(GL_ARRAY_BUFFER, this -> colors);
+        glBufferData(GL_ARRAY_BUFFER, 3 * masses.size() * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
+        cudaGLRegisterBufferObject(this -> colors);
+    }
+
+    {
+        cudaGLUnregisterBufferObject(this -> indices);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this -> indices);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * springs.size() * sizeof(GLuint), NULL, GL_DYNAMIC_DRAW); // second argument is number of bytes
+        cudaGLRegisterBufferObject(this -> indices);
+    }
+
+    {
+        cudaGLUnregisterBufferObject(this -> vertices);
+        glBindBuffer(GL_ARRAY_BUFFER, vertices);
+        glBufferData(GL_ARRAY_BUFFER, 3 * masses.size() * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
+        cudaGLRegisterBufferObject(this -> vertices);
+    }
+}
 
 void Simulation::generateBuffers() {
     {
@@ -612,21 +929,21 @@ void Simulation::updateBuffers() {
 
     if (update_colors) {
         glBindBuffer(GL_ARRAY_BUFFER, colors);
-        void *colorPointer; // if no masses, springs, or colors are changed/deleted, this can be run only once
+        void *colorPointer; // if no masses, springs, or colors are changed/deleted, this can be start only once
         cudaGLMapBufferObject(&colorPointer, colors);
         updateColors<<<massBlocksPerGrid, threadsPerBlock>>>((float *) colorPointer, d_mass, masses.size());
         cudaGLUnmapBufferObject(colors);
-        update_colors = 0;
+        update_colors = false;
     }
 
 
     if (update_indices) {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices);
-        void *indexPointer; // if no masses or springs are deleted, this can be run only once
+        void *indexPointer; // if no masses or springs are deleted, this can be start only once
         cudaGLMapBufferObject(&indexPointer, indices);
         updateIndices<<<springBlocksPerGrid, threadsPerBlock>>>((unsigned int *) indexPointer, d_spring, d_mass, springs.size(), masses.size());
         cudaGLUnmapBufferObject(indices);
-        update_indices = 0;
+        update_indices = false;
     }
 
     {
@@ -676,18 +993,14 @@ void Simulation::draw() {
 Cube * Simulation::createCube(const Vec & center, double side_length) { // creates half-space ax + by + cz < d
     Cube * cube = new Cube(center, side_length);
     for (Mass * m : cube -> masses) {
-        masses.push_back(m);
+        createMass(m);
     }
 
     for (Spring * s : cube -> springs) {
-        springs.push_back(s);
+        createSpring(s);
     }
 
     objs.push_back(cube);
-
-    for (Spring * s : cube -> springs) {
-        s -> setRestLength((s -> _right -> getPosition() - s -> _left -> getPosition()).norm());
-    }
 
     return cube;
 }
@@ -696,18 +1009,14 @@ Lattice * Simulation::createLattice(const Vec & center, const Vec & dims, int nx
     Lattice * l = new Lattice(center, dims, nx, ny, nz);
 
     for (Mass * m : l -> masses) {
-        masses.push_back(m);
+        createMass(m);
     }
 
     for (Spring * s : l -> springs) {
-        springs.push_back(s);
+        createSpring(s);
     }
 
     objs.push_back(l);
-
-    for (Spring * s : l -> springs) {
-        s -> setRestLength((s -> _right -> getPosition() - s -> _left -> getPosition()).norm());
-    }
 
     return l;
 }

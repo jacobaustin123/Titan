@@ -23,7 +23,7 @@ public:
     CUDA_SPRING *arrayptr; //Pointer to struct version for GPU cudaMalloc
 
     //Set
-    Spring() {}; //Constructor
+    Spring() { _left = nullptr; _right = nullptr; }; //Constructor
     Spring(const CUDA_SPRING & spr); // Constructor
     Spring(Mass * left, Mass * right, double K = 1.0, double rest_len = 1.0) :
             _k(K), _rest(rest_len), _left(left), _right(right) {}; //

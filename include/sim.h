@@ -35,6 +35,7 @@
 #include <cuda_runtime.h>
 #include <cuda.h>
 #include <cuda_device_runtime_api.h>
+#include <thread>
 
 static double G = 9.81;
 
@@ -51,12 +52,15 @@ class Simulation {
 public:
     Simulation() {
         dt = 0;
-        RUNNING = 0;
+        RUNNING = false;
+        STARTED = false;
         update_constraints = true;
 
 #ifdef GRAPHICS
+        resize_buffers = true;
         update_colors = true;
         update_indices = true;
+
         lineWidth = 1;
         pointSize = 3;
 #endif
@@ -67,9 +71,11 @@ public:
     //Create
     Mass * createMass();
     Mass * createMass(const Vec & pos);
+    Mass * createMass(Mass * m); // utility
 
     Spring * createSpring();
-    Spring * createSpring(Mass * m1, Mass * m2, double k = 1.0, double len = 1.0);
+    Spring * createSpring(Mass * m1, Mass * m2);
+    Spring * createSpring(Spring * s); // utility
 
     void deleteMass(Mass * m);
     void deleteSpring(Spring * s);
@@ -87,11 +93,22 @@ public:
     void setBreakpoint(double time);
 
     //Control
-    void run(); // should set dt to min(mass dt) if not 0, resets everything
-    void resume(); // same as above but w/out reset
+    void start(); // should set dt to min(mass dt) if not 0, resets everything
+    void _run();
+
+    void pause(double t);
+
+    void wait(double t);
+    void waitUntil(double t);
+    void waitForEvent();
+
+    void resume();
+
+    void execute(); // same as above but w/out reset
 
     //Get
     double time() { return T; }
+    double running() { return RUNNING; }
 
     //Prints
     void printPositions();
@@ -100,15 +117,16 @@ public:
 //    void printSpringForces();
 
 
-    double dt; // set to 0 by default, when run is called will be set to min(mass dt) unless previously set
+    double dt; // set to 0 by default, when start is called will be set to min(mass dt) unless previously set
     double T; // global simulation time
 
-    int RUNNING;
+    bool RUNNING;
+    bool STARTED;
 
-    std::vector<Mass *> masses;
-    std::vector<Spring *> springs;
+    std::list<Mass *> masses;
+    std::list<Spring *> springs;
     std::vector<Constraint *> constraints;
-    std::vector<ContainerObject *> objs;
+    std::vector<Container *> objs;
 
     thrust::device_vector<CUDA_MASS *> d_masses;
     thrust::device_vector<CUDA_SPRING *> d_springs;
@@ -131,12 +149,22 @@ public:
     void constraintsFromArray();
     void fromArray();
 
+    std::thread gpu_thread;
+
 #ifdef GRAPHICS
+
+#ifdef SDL2
+    SDL_Window * window;
+    SDL_GLContext context;
+    void createSDLWindow();
+#else
+    GLFWwindow * window;
+    void createGLFWWindow();
+#endif
 
     GLuint VertexArrayID;
     GLuint programID;
     GLuint MatrixID;
-    GLFWwindow * window;
     glm::mat4 MVP;
 
     GLuint vertices;
@@ -147,15 +175,23 @@ public:
     void renderScreen();
     void updateBuffers();
     void generateBuffers();
+    void resizeBuffers();
     void draw();
 
     bool update_indices;
     bool update_colors;
+    bool resize_buffers;
 
     int lineWidth;
     int pointSize;
 #endif
 };
+
+#ifdef GRAPHICS
+#ifndef SDL2
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+#endif
+#endif
 
 __global__ void computeSpringForces(CUDA_SPRING * device_springs, int num_springs);
 __global__ void computeMassForces(CUDA_MASS * device_masses, int num_masses);

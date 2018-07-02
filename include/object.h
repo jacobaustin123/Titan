@@ -33,12 +33,12 @@
 
 __device__ const double NORMAL = 100000;
 
-class BaseObject { // base class for larger objects like Cubes, etc.
+class Base { // base class for larger objects like Cubes, etc.
 public:
     virtual void translate(const Vec & displ) = 0; // translate all masses by fixed amount
 };
 
-class Constraint : public BaseObject { // constraint like plane or sphere which applies force to masses
+class Constraint : public Base { // constraint like plane or sphere which applies force to masses
 public:
     virtual ~Constraint() {};
 
@@ -49,9 +49,9 @@ public:
 #endif
 };
 
-class ContainerObject : public BaseObject { // contains and manipulates groups of masses and springs
+class Container : public Base { // contains and manipulates groups of masses and springs
 public:
-    virtual ~ContainerObject() {};
+    virtual ~Container() {};
 
     void setMassValue(double m); // set masses for all Mass objects
     void setKValue(double k); // set k for all Spring objects
@@ -149,7 +149,7 @@ struct CUDA_PLANE {
     double _offset;
 };
 
-class Cube : public ContainerObject {
+class Cube : public Container {
 public:
     Cube(const Vec & center, double side_length = 1.0);
 
@@ -159,7 +159,7 @@ public:
     Vec _center;
 };
 
-class Lattice : public ContainerObject {
+class Lattice : public Container {
 public:
     Lattice(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
 

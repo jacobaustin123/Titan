@@ -15,7 +15,7 @@ static Simulation sim;
 
 int main()
 {
-    Lattice * l1 = sim.createLattice(Vec(0, 0, 20), Vec(15, 15, 5), 20, 20, 20);
+    Lattice * l1 = sim.createLattice(Vec(0, 0, 20), Vec(15, 15, 5), 2, 2, 2);
 
     sim.setMass(0.1);
     sim.setSpringConstant(10000);
@@ -34,15 +34,36 @@ int main()
 
 #ifdef GRAPHICS
     sim.setBreakpoint(runtime); // set breakpoint (could be end of program or just time to check for updates)
-    sim.run();
+    sim.start();
+
+    while (sim.running()) {
+        std::cout << sim.time() << std::endl;
+        sim.pause(sim.time() + 1.0);
+        std::cout << sim.running() << std::endl;
+        sim.createMass(Vec(0, 0, 5));
+//        sim.createLattice(Vec(5 * cos(sim.time()), 5 * sin(sim.time()), 20), Vec(5, 5, 5), 5, 5, 5);
+        sim.resume();
+    }
 #else
     sim.setBreakpoint(runtime); // set breakpoint (could be end of program or just time to check for updates)
-    sim.run();
+    sim.start();
+
+    while (sim.running()) {
+        std::cout << sim.time() << std::endl;
+        sim.printPositions();
+        sim.pause(sim.time() + 1.0);
+        sim.createMass(Vec(0, 0, 1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+        sim.resume();
+    }
 #endif
+
+    std::cout << "This is printing while the program is still running!" << std::endl;
 
     duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 
-    std::cout<<"wall time for " << runtime << " second run with " << sim.masses.size()
+    std::cout<<"wall time for " << runtime << " second start with " << sim.masses.size()
              << " masses and " << sim.springs.size() << " springs is " << duration << "!" << std::endl;
 
 

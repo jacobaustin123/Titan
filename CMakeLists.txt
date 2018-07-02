@@ -25,11 +25,20 @@ if (OPENGL_FOUND)
     link_libraries(${OPENGL_LIBRARIES})
 endif()
 
-find_package(glfw3 CONFIG REQUIRED) # glfw
-if (glfw3_FOUND)
-    message(STATUS "GLFW FOUND")
-    include_directories(${glfw3_INCLUDE_DIRS})
-    link_libraries(${glfw3_LIBRARIES})
+if (WIN32)
+    find_package(glfw3 CONFIG REQUIRED)
+    if (glfw3_FOUND)
+        message(STATUS "GLFW FOUND")
+        include_directories(${glfw3_INCLUDE_DIRS})
+        link_libraries(${glfw3_LIBRARIES})
+    endif()
+else()
+    find_package(sdl2 CONFIG REQUIRED)
+    if (sdl2_FOUND)
+        message(STATUS "sdl2 FOUND")
+        include_directories(${sdl2_INCLUDE_DIRS})
+        link_libraries(${sdl2_LIBRARIES})
+    endif()
 endif()
 
 find_package(GLEW REQUIRED) # GLEW
@@ -60,12 +69,14 @@ target_compile_features(graphics PUBLIC cxx_std_11) # same as above
 set_target_properties(graphics PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 target_link_libraries(graphics PRIVATE cuda)
 
-target_link_libraries(graphics PRIVATE glfw) # link graphics target with the graphics libraries
 target_link_libraries(graphics PRIVATE glm)
 
-if ( WIN32 )
+if ( WIN32 ) # use GLFW on Windows
     target_link_libraries(graphics PRIVATE GLEW::GLEW)
-else()
+    target_link_libraries(graphics PRIVATE glfw)
+else() # use SDL2 on Mac
     target_link_libraries(graphics PRIVATE GLEW)
-    target_link_libraries(graphics PRIVATE gl) # link OpenGL, seems to only matter on Mac OS
+    target_link_libraries(graphics PRIVATE gl)
+    target_link_libraries(graphics PRIVATE sdl2)
+    target_compile_definitions(graphics PRIVATE SDL2)
 endif()

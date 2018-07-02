@@ -29,31 +29,31 @@ Ball::Ball(const Vec & center, double r) {
     _radius = r;
 }
 
-void ContainerObject::setMassValue(double m) { // set masses for all Mass objects
+void Container::setMassValue(double m) { // set masses for all Mass objects
     for (Mass * mass : masses) {
         mass -> setMass(m);
     }
 }
 
-void ContainerObject::setKValue(double k) {
+void Container::setKValue(double k) {
     for (Spring * spring : springs) {
         spring -> setK(k);
     }
 }
 
-void ContainerObject::setDeltaTValue(double dt) { // set masses for all Mass objects
+void Container::setDeltaTValue(double dt) { // set masses for all Mass objects
     for (Mass * mass : masses) {
         mass -> setDeltaT(dt);
     }
 }
 
-void ContainerObject::setRestLengthValue(double len) { // set masses for all Mass objects
+void Container::setRestLengthValue(double len) { // set masses for all Mass objects
     for (Spring * spring : springs) {
         spring -> setRestLength(len);
     }
 }
 
-void ContainerObject::makeFixed() {
+void Container::makeFixed() {
     for (Mass * mass : masses) {
         mass -> makeFixed();
     }
@@ -72,6 +72,10 @@ Cube::Cube(const Vec & center, double side_length) {
         for (int j = i + 1; j < 8; j++) {
             springs.push_back(new Spring(masses[i], masses[j]));
         }
+    }
+
+    for (Spring * s : springs) {
+        s -> setRestLength((s -> _right -> getPosition() - s -> _left -> getPosition()).norm());
     }
 }
 
@@ -137,6 +141,10 @@ Lattice::Lattice(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
                 }
             }
         }
+    }
+
+    for (Spring * s : springs) {
+        s -> setRestLength((s -> _right -> getPosition() - s -> _left -> getPosition()).norm());
     }
 }
 
