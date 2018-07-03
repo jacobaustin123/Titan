@@ -27,7 +27,8 @@ struct CUDA_MASS {
     Vec color;
 #endif
 
-    int fixed; // is the mass position fixed?
+    bool fixed; // is the mass position fixed?
+    bool valid;
 };
 
 class Mass {
@@ -41,18 +42,21 @@ public:
     Vec vel; // velocity in m/s
     Vec acc; // acceleration in m/s^2
     Vec force; // force in kg m / s^2
-    int fixed; // is the mass position fixed?
+
+    bool fixed; // is the mass position fixed?
+    bool valid;
+
     struct CUDA_MASS * arrayptr; //Pointer to struct version for GPU cudaMemAlloc
 
 #ifdef GRAPHICS
     Vec color;
 
     //Set
-    Mass() { m = 1.0; fixed = 0; dt = 0.01; T = 0; color = Vec(1.0, 0.2, 0.2); } // constructor
+    Mass() { m = 1.0; fixed = 0; dt = 0.0001; T = 0; color = Vec(1.0, 0.2, 0.2); valid = true; } // constructor TODO fix timing
     Mass(struct CUDA_MASS & mass)
-            { m = mass.m; dt = mass.dt; T = mass.T; pos = mass.pos; vel = mass.vel; acc = mass.acc; force = mass.force; fixed = mass.fixed; color = mass.color; }
-    Mass(const Vec & position, double mass = 1.0, int fixed = 0, double dt = 0.01) :
-            m(mass), pos(position), fixed(fixed), dt(dt), T(0), color(Vec(1.0, 0.2, 0.2)) {}; // defaults everything
+            { m = mass.m; dt = mass.dt; T = mass.T; pos = mass.pos; vel = mass.vel; acc = mass.acc; force = mass.force; fixed = mass.fixed; color = mass.color; valid = mass.valid; }
+    Mass(const Vec & position, double mass = 0.1, bool fixed = false, double dt = 0.0001) :
+            m(mass), pos(position), fixed(fixed), dt(dt), T(0), color(Vec(1.0, 0.2, 0.2)), valid(true) {}; // defaults everything
 #else
     Mass() { m = 1.0; fixed = 0; dt = 0.01; T = 0; } // constructor
     Mass(struct CUDA_MASS & mass)

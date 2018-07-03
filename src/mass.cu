@@ -19,14 +19,16 @@ void Mass::resetForce() {
 }
 
 CUDA_MASS::CUDA_MASS(Mass &mass) {
-    m = mass.getMass();
-    dt = mass.deltat();
-    T = mass.time();
-    pos = mass.getPosition();
-    vel = mass.getVelocity();
-    acc = mass.getAcceleration();
-    force = mass.getForce();
+    m = mass.m;
+    dt = mass.dt;
+    T = mass.T;
+    pos = mass.pos;
+    vel = mass.vel;
+    acc = mass.acc;
+    force = mass.force;
     fixed = mass.fixed;
+    valid = true;
+
 #ifdef GRAPHICS
     color = mass.color;
 #endif

@@ -78,6 +78,7 @@ public:
     // Delete
     void deleteMass(Mass * m);
     void deleteSpring(Spring * s);
+    void deleteContainer(Container * c);
 
     // Constraints
     Plane * createPlane(const Vec & abc, double d ); // creates half-space ax + by + cz < d
@@ -118,7 +119,7 @@ public:
     //Prints
     void printPositions();
     void printForces();
-//    void printSprings();
+    void printSprings();
 //    void printSpringForces();
 
     Mass * createMass(Mass * m); // utility
@@ -133,8 +134,8 @@ public:
 
     std::list<Mass *> masses;
     std::list<Spring *> springs;
-    std::vector<Constraint *> constraints;
-    std::vector<Container *> objs;
+    std::list<Constraint *> constraints;
+    std::list<Container *> objs;
 
     thrust::device_vector<CUDA_MASS *> d_masses;
     thrust::device_vector<CUDA_SPRING *> d_springs;
@@ -143,6 +144,12 @@ public:
     bool update_constraints;
 
     std::set<double> bpts; // list of breakpoints
+
+    CUDA_MASS ** d_mass;
+    CUDA_SPRING ** d_spring;
+
+    int massBlocksPerGrid;
+    int springBlocksPerGrid;
 
     CUDA_MASS ** massToArray();
     CUDA_SPRING ** springToArray();

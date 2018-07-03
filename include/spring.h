@@ -23,10 +23,12 @@ public:
     CUDA_SPRING *arrayptr; //Pointer to struct version for GPU cudaMalloc
 
     //Set
-    Spring() { _left = nullptr; _right = nullptr; }; //Constructor
+    Spring() { _left = nullptr; _right = nullptr; arrayptr = nullptr; _k = 10000.0; _rest = 1.0; }; //Constructor
     Spring(const CUDA_SPRING & spr); // Constructor
-    Spring(Mass * left, Mass * right, double K = 1.0, double rest_len = 1.0) :
-            _k(K), _rest(rest_len), _left(left), _right(right) {}; //
+
+    Spring(Mass * left, Mass * right, double k = 10000.0, double rest_len = 1.0) :
+            _k(k), _rest(rest_len), _left(left), _right(right), arrayptr(nullptr) {}; //
+
     Spring(double k, double rest_length, Mass * left, Mass * right) :
             _k(k), _rest(rest_length), _left(left), _right(right) {};
 
@@ -44,7 +46,14 @@ public:
 
 struct CUDA_SPRING {
     CUDA_SPRING() {};
-    CUDA_SPRING(Spring & s, CUDA_MASS * left, CUDA_MASS * right) {
+    CUDA_SPRING(const Spring & s) {
+        _left = (s._left == nullptr) ? nullptr : s._left -> arrayptr;
+        _right = (s._right == nullptr) ? nullptr : s. _right -> arrayptr;
+        _k = s._k;
+        _rest = s._rest;
+    }
+
+    CUDA_SPRING(const Spring & s, CUDA_MASS * left, CUDA_MASS * right) {
         _left = left;
         _right = right;
         _k = s._k;

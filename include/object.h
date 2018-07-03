@@ -151,6 +151,8 @@ struct CUDA_PLANE {
 
 class Cube : public Container {
 public:
+    ~Cube() {};
+
     Cube(const Vec & center, double side_length = 1.0);
 
     void translate(const Vec & displ);
@@ -161,6 +163,8 @@ public:
 
 class Lattice : public Container {
 public:
+    ~Lattice() {};
+
     Lattice(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
 
     void translate(const Vec & displ);
