@@ -80,6 +80,12 @@ public:
     void deleteSpring(Spring * s);
     void deleteContainer(Container * c);
 
+    void get(Mass *m);
+    void get(Spring *s); // not really useful
+
+    void set(Mass * m);
+    void set(Spring *s);
+
     // Constraints
     Plane * createPlane(const Vec & abc, double d ); // creates half-space ax + by + cz < d
     Ball * createBall(const Vec & center, double r ); // creates ball with radius r at position center

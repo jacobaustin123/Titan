@@ -24,7 +24,7 @@ public:
 
     //Set
     Spring() { _left = nullptr; _right = nullptr; arrayptr = nullptr; _k = 10000.0; _rest = 1.0; }; //Constructor
-    Spring(const CUDA_SPRING & spr); // Constructor
+    Spring(const CUDA_SPRING & spr);
 
     Spring(Mass * left, Mass * right, double k = 10000.0, double rest_len = 1.0) :
             _k(k), _rest(rest_len), _left(left), _right(right), arrayptr(nullptr) {}; //

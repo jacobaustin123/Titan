@@ -15,3 +15,8 @@ void Spring::setForce() { // computes force on right object. left force is - rig
     _left -> addForce(-f);
 }
 
+Spring::Spring(const CUDA_SPRING & spr) {
+    this -> _k = spr._k;
+    this -> _rest = spr._rest;
+}
+

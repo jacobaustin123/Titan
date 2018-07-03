@@ -204,6 +204,29 @@ void Simulation::deleteContainer(Container * c) {
     delete c;
     objs.remove(c);
 }
+
+void Simulation::get(Mass * m) {
+    CUDA_MASS temp;
+    cudaMemcpy(&temp, m -> arrayptr, sizeof(CUDA_MASS), cudaMemcpyDeviceToHost);
+    *m = Mass(temp);
+}
+
+void Simulation::set(Mass * m) {
+    CUDA_MASS temp = CUDA_MASS(*m);
+    cudaMemcpy(m -> arrayptr, &temp, sizeof(CUDA_MASS), cudaMemcpyHostToDevice);
+}
+
+void Simulation::get(Spring * s) {
+    CUDA_SPRING temp;
+    cudaMemcpy(&temp, s -> arrayptr, sizeof(CUDA_SPRING), cudaMemcpyDeviceToHost);
+    *s = Spring(temp);
+}
+
+void Simulation::set(Spring * s) {
+    CUDA_SPRING temp = CUDA_SPRING(*s);
+    cudaMemcpy(s -> arrayptr, &temp, sizeof(CUDA_SPRING), cudaMemcpyHostToDevice);
+}
+
 void Simulation::setSpringConstant(double k) {
     for (Spring * s : springs) {
         s -> setK(k);
@@ -765,8 +788,6 @@ void Simulation::execute() {
 
 #ifdef GRAPHICS
         if (fmod(T, 250 * dt) < dt) {
-//            printSprings();
-
             clearScreen();
 
             updateBuffers();
