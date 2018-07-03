@@ -53,11 +53,14 @@ Simulation::~Simulation() {
         springBlocksPerGrid = MAX_BLOCKS;
     }
 
+    Mass ** d_mass = thrust::raw_pointer_cast(d_masses.data());
+    Spring ** d_spring = thrust::raw_pointer_cast(d_springs.data());
+
     freeMasses<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, masses.size());
     freeSprings<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(d_spring, springs.size());
 
-    cudaFree(d_mass);
-    cudaFree(d_spring);
+//    cudaFree(d_mass); // not necessary with thrust, I think.
+//    cudaFree(d_spring);
 
 #ifdef GRAPHICS
     glDeleteBuffers(1, &vertices);
@@ -260,21 +263,8 @@ CUDA_MASS ** Simulation::massToArray() {
 
     createMassPointers<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(thrust::raw_pointer_cast(d_masses.data()), d_data, masses.size());
     cudaFree(d_data);
-//
-//    CUDA_MASS ** h_mass = new CUDA_MASS * [masses.size()];
-//    cudaMemcpy(h_mass, d_mass, masses.size() * sizeof(CUDA_MASS *), cudaMemcpyDeviceToHost);
-//
-//    for (int i = 0; i < masses.size(); i++) {
-//        masses[i] -> arrayptr = h_mass[i];
-//    }
 
-//    delete [] h_mass;
-
-    this -> d_mass = thrust::raw_pointer_cast(d_masses.data());
-
-//    d_masses = thrust::device_vector<CUDA_MASS *>(this -> d_mass, this -> d_mass + masses.size());
-
-    return thrust::raw_pointer_cast(d_masses.data());
+    return thrust::raw_pointer_cast(d_masses.data()); // doesn't really do anything
 }
 
 __global__ void createSpringPointers(CUDA_SPRING ** ptrs, CUDA_SPRING * data, int size) {
@@ -323,8 +313,6 @@ CUDA_SPRING ** Simulation::springToArray() {
     createSpringPointers<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(thrust::raw_pointer_cast(d_springs.data()), d_data, springs.size());
     cudaFree(d_data);
 
-    this -> d_spring = thrust::raw_pointer_cast(d_springs.data());
-
     return thrust::raw_pointer_cast(d_springs.data());
 }
 
@@ -361,6 +349,8 @@ void Simulation::massFromArray() {
     if (massBlocksPerGrid > MAX_BLOCKS) {
         massBlocksPerGrid = MAX_BLOCKS;
     }
+
+    Mass ** d_mass = thrust::raw_pointer_cast(d_masses.data());
 
     fromMassPointers<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, temp, masses.size());
 
@@ -927,6 +917,9 @@ void Simulation::updateBuffers() {
     int massBlocksPerGrid = (masses.size() + threadsPerBlock - 1) / threadsPerBlock;
     int springBlocksPerGrid = (springs.size() + threadsPerBlock - 1) / threadsPerBlock;
 
+    Mass ** d_mass = thrust::raw_pointer_cast(d_masses.data());
+    Mass ** d_spring = thrust::raw_pointer_cast(d_springs.data());
+
     if (update_colors) {
         glBindBuffer(GL_ARRAY_BUFFER, colors);
         void *colorPointer; // if no masses, springs, or colors are changed/deleted, this can be start only once
@@ -1037,6 +1030,8 @@ Ball * Simulation::createBall(const Vec & center, double r ) { // creates ball w
 
 void Simulation::printPositions() {
     if (RUNNING) {
+        Mass ** d_mass = thrust::raw_pointer_cast(d_masses.data());
+
         std::cout << "\nDEVICE MASSES: " << std::endl;
         int threadsPerBlock = 512;
         int massBlocksPerGrid = (masses.size() + threadsPerBlock - 1) / threadsPerBlock;
@@ -1055,6 +1050,8 @@ void Simulation::printPositions() {
 
 void Simulation::printForces() {
     if (RUNNING) {
+        Mass ** d_mass = thrust::raw_pointer_cast(d_masses.data());
+
         std::cout << "\nDEVICE FORCES: " << std::endl;
         int threadsPerBlock = 1024;
         int massBlocksPerGrid = (masses.size() + threadsPerBlock - 1) / threadsPerBlock;

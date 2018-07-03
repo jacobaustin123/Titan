@@ -68,53 +68,61 @@ public:
 
     ~Simulation();
 
-    //Create
+    // Create
     Mass * createMass();
     Mass * createMass(const Vec & pos);
-    Mass * createMass(Mass * m); // utility
 
     Spring * createSpring();
     Spring * createSpring(Mass * m1, Mass * m2);
-    Spring * createSpring(Spring * s); // utility
 
+    // Delete
     void deleteMass(Mass * m);
     void deleteSpring(Spring * s);
 
+    // Constraints
     Plane * createPlane(const Vec & abc, double d ); // creates half-space ax + by + cz < d
-    Cube * createCube(const Vec & center, double side_length); // creates cube
-    Lattice * createLattice(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
     Ball * createBall(const Vec & center, double r ); // creates ball with radius r at position center
 
+    // Containers
+    Cube * createCube(const Vec & center, double side_length); // creates cube
+    Lattice * createLattice(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
+
+    // Bulk modifications
     void setSpringConstant(double k);
     void defaultRestLength();
     void setMass(double m);
     void setMassDeltaT(double dt);
 
-    void setBreakpoint(double time);
+    // Control
+    void start(); // start simulation
+    void pause(double t); // pause at time t
+    void resume();
 
-    //Control
-    void start(); // should set dt to min(mass dt) if not 0, resets everything
+    void wait(double t); // wait fixed time without stopping
+
+    double time() { return T; }
+    double running() { return RUNNING; }
+
+
+
+    // private
+
+    void setBreakpoint(double time);
     void _run();
 
-    void pause(double t);
-
-    void wait(double t);
     void waitUntil(double t);
     void waitForEvent();
 
-    void resume();
-
     void execute(); // same as above but w/out reset
-
-    //Get
-    double time() { return T; }
-    double running() { return RUNNING; }
 
     //Prints
     void printPositions();
     void printForces();
 //    void printSprings();
 //    void printSpringForces();
+
+    Mass * createMass(Mass * m); // utility
+    Spring * createSpring(Spring * s); // utility
 
 
     double dt; // set to 0 by default, when start is called will be set to min(mass dt) unless previously set
@@ -133,9 +141,6 @@ public:
 
     AllConstraints d_constraints;
     bool update_constraints;
-
-    CUDA_MASS ** d_mass;
-    CUDA_SPRING ** d_spring;
 
     std::set<double> bpts; // list of breakpoints
 
