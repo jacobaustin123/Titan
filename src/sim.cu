@@ -21,16 +21,39 @@ __global__ void freeSprings(CUDA_SPRING ** ptr, int size) {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
 
     if (i < size) {
+        if (ptr[i] -> _left && ! (ptr[i] -> _left -> valid)) {
+                free(ptr[i] -> _left);
+        }
+
+        if (ptr[i] -> _right && ! (ptr[i] -> _right -> valid)) {
+            free(ptr[i] -> _right);
+        }
+
         free(ptr[i]);
     }
 }
 
-Simulation::~Simulation() {
-    if (gpu_thread.joinable()) {
-        gpu_thread.join();
-    } else {
-        std::cout << "could not join GPU thread." << std::endl;
-    }
+Simulation::Simulation() {
+    dt = 0;
+    RUNNING = false;
+    STARTED = false;
+    ENDED = false;
+    FREED = false;
+
+    update_constraints = true;
+
+#ifdef GRAPHICS
+    resize_buffers = true;
+    update_colors = true;
+    update_indices = true;
+
+    lineWidth = 1;
+    pointSize = 3;
+#endif
+}
+
+void Simulation::freeGPU() {
+    std::cout << "freeing GPU resources." << std::endl;
 
     for (Mass * m : masses)
         delete m;
@@ -41,11 +64,11 @@ Simulation::~Simulation() {
     for (Constraint * c : constraints)
         delete c;
 
-    freeMasses<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, masses.size());
-    freeSprings<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(d_spring, springs.size());
+    for (Container * c : objs)
+        delete c;
 
-//    cudaFree(d_mass); // not necessary with thrust, I think.
-//    cudaFree(d_spring);
+    freeSprings<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(d_spring, springs.size()); // MUST COME BEFORE freeMasses
+    freeMasses<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, masses.size());
 
 #ifdef GRAPHICS
     glDeleteBuffers(1, &vertices);
@@ -64,9 +87,31 @@ Simulation::~Simulation() {
     glfwTerminate();
 #endif
 #endif
+
+    FREED = true;
+    ENDED = true; // just to be safe
+}
+
+Simulation::~Simulation() {
+    if (gpu_thread.joinable()) {
+        gpu_thread.join();
+    } else {
+        std::cout << "could not join GPU thread." << std::endl;
+    }
+
+    if (!FREED)
+        freeGPU();
+
+    FREED = true;
+    ENDED = true; // just to be safe
 }
 
 Mass * Simulation::createMass(Mass * m) {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     m -> ref_count++;
 
     if (!STARTED) {
@@ -95,16 +140,31 @@ Mass * Simulation::createMass(Mass * m) {
 }
 
 Mass * Simulation::createMass() {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     Mass * m = new Mass();
     return createMass(m);
 }
 
 Mass * Simulation::createMass(const Vec & pos) {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     Mass * m = new Mass(pos);
     return createMass(m);
 }
 
 Spring * Simulation::createSpring(Spring * s) {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     if (s -> _right) { s -> _right -> ref_count++; }
     if (s -> _left) { s -> _left -> ref_count++; }
 
@@ -134,11 +194,21 @@ Spring * Simulation::createSpring(Spring * s) {
 }
 
 Spring * Simulation::createSpring() {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     Spring * s = new Spring();
     return createSpring(s);
 }
 
 Spring * Simulation::createSpring(Mass * m1, Mass * m2) {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     Spring * s = new Spring(m1, m2);
     return createSpring(s);
 }
@@ -154,8 +224,14 @@ __global__ void invalidate(CUDA_MASS ** ptrs, CUDA_MASS * m, int size) {
 }
 
 void Simulation::deleteMass(Mass * m) {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     if (!STARTED) {
         masses.remove(m);
+        decrementRefCount(m);
     } else {
         if (RUNNING) {
             assert(false);
@@ -181,17 +257,26 @@ void Simulation::deleteMass(Mass * m) {
 }
 
 void Simulation::deleteSpring(Spring * s) {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     if (!STARTED) {
         springs.remove(s);
+
+        if (s -> _left) { decrementRefCount(s -> _left); }
+        if (s -> _right) { decrementRefCount(s -> _right); }
+
     } else {
         if (RUNNING) {
             assert(false);
         }
 
         cudaFree(s -> arrayptr);
-        thrust::remove(thrust::device, d_springs.begin(), d_springs.end(), s -> arrayptr);
-        springs.remove(s);
+        thrust::remove(thrust::device, d_springs.begin(), d_springs.begin() + springs.size(), s -> arrayptr);
 
+        springs.remove(s);
         d_springs.resize(springs.size());
 
         if (s -> _left) { decrementRefCount(s -> _left); }
@@ -205,33 +290,153 @@ void Simulation::deleteSpring(Spring * s) {
     }
 }
 
+struct mass_in_list {
+    __device__ __host__ mass_in_list(CUDA_MASS ** ptr, int n) : list(ptr), size(n) {};
+
+    __device__ __host__ bool operator()(CUDA_MASS * data) {
+        for (int i = 0; i < size; i++) {
+            if (list[i] == data) {
+                data -> valid = false;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    CUDA_MASS ** list;
+    int size;
+};
+
+struct spring_in_list {
+    __device__ __host__ spring_in_list(CUDA_SPRING ** ptr, int n) : list(ptr), size(n) {};
+
+    __device__ __host__ bool operator()(CUDA_SPRING * data) {
+        for (int i = 0; i < size; i++) {
+            if (list[i] == data) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    CUDA_SPRING ** list;
+    int size;
+};
+
 void Simulation::deleteContainer(Container * c) {
-    if (RUNNING) {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
         assert(false);
     }
 
-    std::cout << c -> masses.size() << " " << c -> springs.size() << std::endl;
-
-    for (Mass * m : c -> masses) {
-        deleteMass(m);
+    if (RUNNING) {
+        std::cerr << "simulation is running." << std::endl;
+        assert(false);
     }
 
-    for (Spring * s : c -> springs) {
-        deleteSpring(s);
+    if (!STARTED) {
+        for (Mass * m : c -> masses) {
+            deleteMass(m);
+        }
+
+        for (Spring * s : c -> springs) {
+            deleteSpring(s);
+        }
+
+        delete c;
+        objs.remove(c);
+
+        return;
     }
 
-//#ifdef GRAPHICS
-//    resize_buffers = true;
-//#endif
+    {
+        CUDA_MASS ** d_ptrs = new CUDA_MASS * [c -> masses.size()];
+
+        for (int i = 0; i < c -> masses.size(); i++) {
+            d_ptrs[i] = c -> masses[i] -> arrayptr;
+            masses.remove(c -> masses[i]);
+            c -> masses[i] -> valid = false;
+            decrementRefCount(c -> masses[i]);
+        }
+
+        CUDA_MASS ** temp;
+        cudaMalloc((void **) &temp, sizeof(CUDA_MASS *) * c -> masses.size());
+        cudaMemcpy(temp, d_ptrs, c -> masses.size() * sizeof(CUDA_MASS *), cudaMemcpyHostToDevice);
+        delete [] d_ptrs;
+
+        thrust::remove_if(thrust::device, d_masses.begin(), d_masses.begin() + masses.size() + c -> masses.size(), mass_in_list(temp, c -> masses.size()));
+        d_masses.resize(masses.size());
+
+        cudaFree(temp);
+    }
+
+    {
+        CUDA_SPRING ** d_ptrs = new CUDA_SPRING * [c -> springs.size()];
+
+        for (int i = 0; i < c -> springs.size(); i++) {
+            Spring * s = c -> springs[i];
+
+            d_ptrs[i] = s -> arrayptr;
+            springs.remove(s);
+            cudaFree(s -> arrayptr);
+
+            if (s -> _left) { decrementRefCount(s -> _left); }
+            if (s -> _right) { decrementRefCount(s -> _right); }
+        }
+
+        CUDA_SPRING ** temp;
+        cudaMalloc((void **) &temp, sizeof(CUDA_SPRING *) * c -> springs.size());
+        cudaMemcpy(temp, d_ptrs, c -> springs.size() * sizeof(CUDA_SPRING *), cudaMemcpyHostToDevice);
+        delete [] d_ptrs;
+
+        thrust::remove_if(thrust::device, d_springs.begin(), d_springs.begin() + springs.size() + c -> springs.size(), spring_in_list(temp, c -> springs.size()));
+        d_springs.resize(springs.size());
+
+        cudaFree(temp);
+    }
+
+#ifdef GRAPHICS // TODO make a decision about this
+    resize_buffers = true;
+#endif
 
     delete c;
     objs.remove(c);
 }
 
+//void Simulation::deleteContainer(Container * c) {
+//    if (RUNNING) {
+//        assert(false);
+//    }
+//
+//    std::cout << c -> masses.size() << " " << c -> springs.size() << std::endl;
+//
+//    for (Mass * m : c -> masses) {
+//        deleteMass(m);
+//    }
+//
+//    for (Spring * s : c -> springs) {
+//        deleteSpring(s);
+//    }
+//
+//#ifdef GRAPHICS
+//    resize_buffers = true;
+//#endif
+//
+//    delete c;
+//    objs.remove(c);
+//}
+
 void Simulation::get(Mass * m) {
     if (!STARTED) {
         std::cerr << "Simulation has not started." << std::endl;
         return;
+    }
+
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
     }
 
     CUDA_MASS temp;
@@ -249,6 +454,11 @@ void Simulation::set(Mass * m) {
         return;
     }
 
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     CUDA_MASS temp = CUDA_MASS(*m);
     cudaMemcpy(m -> arrayptr, &temp, sizeof(CUDA_MASS), cudaMemcpyHostToDevice);
 }
@@ -257,6 +467,11 @@ void Simulation::get(Spring * s) {
     if (!STARTED) {
         std::cerr << "Simulation has not started." << std::endl;
         return;
+    }
+
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
     }
 
     CUDA_SPRING temp;
@@ -280,11 +495,21 @@ void Simulation::getAll() {
         return;
     }
 
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     massFromArray(); // TODO make a note of this
 }
 
 void Simulation::set(Container * c) {
     {
+        if (ENDED) {
+            std::cerr << "simulation has ended." << std::endl;
+            assert(false);
+        }
+
         CUDA_MASS * h_data = new CUDA_MASS[c -> masses.size()]; // copy masses into single array for copying to the GPU, set GPU pointers
         CUDA_MASS ** d_ptrs = new CUDA_MASS * [c -> masses.size()];
 
@@ -339,6 +564,11 @@ void Simulation::set(Container * c) {
 }
 
 void Simulation::setAll() {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     {
         CUDA_MASS * h_data = new CUDA_MASS[masses.size()]; // copy masses into single array for copying to the GPU, set GPU pointers
 
@@ -384,30 +614,55 @@ void Simulation::setAll() {
 
 
 void Simulation::setSpringConstant(double k) {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     for (Spring * s : springs) {
         s -> setK(k);
     }
 }
 
 void Simulation::defaultRestLength() {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     for (Spring * s : springs) {
         s -> defaultLength();
     }
 }
 
 void Simulation::setMass(double m) {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     for (Mass * mass : masses) {
         mass -> setMass(m);
     }
 }
 void Simulation::setMassDeltaT(double dt) {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     for (Mass * m : masses) {
         m -> setDeltaT(dt);
     }
 }
 
 void Simulation::setBreakpoint(double time) {
-    bpts.insert(time);
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
+    bpts.insert(time); // TODO mutex breakpoints
 }
 
 __global__ void createMassPointers(CUDA_MASS ** ptrs, CUDA_MASS * data, int size) {
@@ -472,6 +727,11 @@ __global__ void createSpringPointers(CUDA_SPRING ** ptrs, CUDA_SPRING * data, in
 }
 
 CUDA_SPRING ** Simulation::springToArray() {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     CUDA_SPRING ** d_ptrs = new CUDA_SPRING * [springs.size()]; // array of pointers
     for (int i = 0; i < springs.size(); i++) { // potentially slow
         cudaMalloc((void **) d_ptrs + i, sizeof(CUDA_SPRING *));
@@ -516,6 +776,11 @@ CUDA_SPRING ** Simulation::springToArray() {
 //}
 
 void Simulation::toArray() {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     CUDA_MASS ** d_mass = massToArray(); // must come first
     CUDA_SPRING ** d_spring = springToArray();
 }
@@ -529,6 +794,11 @@ __global__ void fromMassPointers(CUDA_MASS ** d_mass, CUDA_MASS * data, int size
 }
 
 void Simulation::get(Container *c) {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     CUDA_MASS ** temp;
     cudaMalloc((void **) &temp, sizeof(CUDA_MASS *) * c -> masses.size());
 
@@ -570,6 +840,11 @@ void Simulation::get(Container *c) {
 }
 
 void Simulation::massFromArray() {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     CUDA_MASS * temp;
     cudaMalloc((void **) &temp, sizeof(CUDA_MASS) * masses.size());
 
@@ -606,6 +881,11 @@ void Simulation::constraintsFromArray() {
 }
 
 void Simulation::fromArray() {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     massFromArray();
     springFromArray();
     constraintsFromArray();
@@ -684,7 +964,7 @@ __global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, AllConstraints c, int n
             mass.force += c.d_balls[j].getForce(mass.pos);
         }
 
-        mass.force += Vec(0, 0, -9.81 * mass.m); // don't need atomics
+        mass.force += Vec(0, 0, - G * mass.m); // don't need atomics
 
 //        if (mass.pos[2] < 0)
 //            mass.force += Vec(0, 0, -10000 * mass.pos[2]); // don't need atomics
@@ -841,11 +1121,56 @@ void Simulation::createGLFWWindow() {
 #endif
 #endif
 
-void Simulation::start() {
+void Simulation::stop() {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
+    if (RUNNING) {
+        std::cerr << "simulation is running." << std::endl;
+        assert(false);
+    }
+
+    stop_time = T;
+
+    while (!ENDED) {
+        std::this_thread::sleep_for(std::chrono::microseconds(10));
+    }
+
+    return;
+}
+
+void Simulation::stop(double time) {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
+    stop_time = time;
+    pause(time);
+
+    while (!ENDED) {
+        std::this_thread::sleep_for(std::chrono::microseconds(10));
+    }
+
+    return;
+}
+
+void Simulation::start(double time) {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     if (masses.size() == 0) {
         std::cerr << "No masses have been added. Please add masses before starting the simulation." << std::endl;
         assert(false);
     }
+
+
+    setBreakpoint(time);
+    stop_time = time;
 
     RUNNING = true;
     STARTED = true;
@@ -894,6 +1219,10 @@ void Simulation::start() {
 }
 
 void Simulation::_run() { // repeatedly start next
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
 
 #ifdef GRAPHICS
 
@@ -931,6 +1260,11 @@ void Simulation::_run() { // repeatedly start next
 }
 
 void Simulation::updateCudaParameters() {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     massBlocksPerGrid = (masses.size() + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK;
     springBlocksPerGrid = (springs.size() + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK;
 
@@ -947,6 +1281,11 @@ void Simulation::updateCudaParameters() {
 }
 
 void Simulation::resume() {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     if (masses.size() == 0) {
         std::cerr << "No masses have been added. Please add masses before starting the simulation." << std::endl;
         assert(false);
@@ -975,15 +1314,18 @@ void Simulation::execute() {
             bpts.erase(bpts.begin());
             RUNNING = false;
 
-            while (!RUNNING) {
-                std::this_thread::sleep_for(std::chrono::microseconds(10));
-                if (ENDED) {
-                    break;
-                }
+            if (T >= stop_time) {
+                ENDED = true;
+                freeGPU();
+                return;
             }
 
-            if (ENDED) {
-                break;
+            while (!RUNNING) {
+                std::this_thread::sleep_for(std::chrono::microseconds(1));
+                if (ENDED) {
+                    freeGPU();
+                    return;
+                }
             }
 
 #ifdef GRAPHICS
@@ -1038,11 +1380,22 @@ void Simulation::execute() {
 }
 
 void Simulation::pause(double t) {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     setBreakpoint(t);
     waitForEvent();
 }
 
 void Simulation::wait(double t) {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
+
     double current_time = time();
     while (RUNNING && time() <= current_time + t) {
         std::this_thread::sleep_for(std::chrono::microseconds(10));
@@ -1050,12 +1403,23 @@ void Simulation::wait(double t) {
 }
 
 void Simulation::waitUntil(double t) {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
+
     while (RUNNING && time() <= t) {
         std::this_thread::sleep_for(std::chrono::microseconds(10));
     }
 }
 
 void Simulation::waitForEvent() {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     while (RUNNING) {
         std::this_thread::sleep_for(std::chrono::microseconds(10));
     }
@@ -1233,6 +1597,12 @@ void Simulation::draw() {
 #endif
 
 Cube * Simulation::createCube(const Vec & center, double side_length) { // creates half-space ax + by + cz < d
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
+
     Cube * cube = new Cube(center, side_length);
     for (Mass * m : cube -> masses) {
         createMass(m);
@@ -1248,6 +1618,12 @@ Cube * Simulation::createCube(const Vec & center, double side_length) { // creat
 }
 
 Lattice * Simulation::createLattice(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
+
     Lattice * l = new Lattice(center, dims, nx, ny, nz);
 
     for (Mass * m : l -> masses) {
@@ -1264,6 +1640,12 @@ Lattice * Simulation::createLattice(const Vec & center, const Vec & dims, int nx
 }
 
 Plane * Simulation::createPlane(const Vec & abc, double d ) { // creates half-space ax + by + cz < d
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
+
     Plane * new_plane = new Plane(abc, d);
     constraints.push_back(new_plane);
     d_planes.push_back(CUDA_PLANE(*new_plane));
@@ -1271,6 +1653,12 @@ Plane * Simulation::createPlane(const Vec & abc, double d ) { // creates half-sp
 }
 
 Ball * Simulation::createBall(const Vec & center, double r ) { // creates ball with radius r at position center
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
+
     Ball * new_ball = new Ball(center, r);
     constraints.push_back(new_ball);
     d_balls.push_back(CUDA_BALL(*new_ball));
@@ -1278,6 +1666,12 @@ Ball * Simulation::createBall(const Vec & center, double r ) { // creates ball w
 }
 
 void Simulation::printPositions() {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
+
     if (RUNNING) {
         std::cout << "\nDEVICE MASSES: " << std::endl;
         printMasses<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, masses.size());
@@ -1296,6 +1690,12 @@ void Simulation::printPositions() {
 }
 
 void Simulation::printForces() {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
+
     if (RUNNING) {
         std::cout << "\nDEVICE FORCES: " << std::endl;
         printForce<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, masses.size());
@@ -1312,6 +1712,11 @@ void Simulation::printForces() {
 }
 
 void Simulation::printSprings() {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        assert(false);
+    }
+
     if (RUNNING) {
         std::cout << "\nDEVICE SPRINGS: " << std::endl;
         printSpring<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(d_spring, springs.size());

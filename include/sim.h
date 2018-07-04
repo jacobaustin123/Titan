@@ -37,38 +37,10 @@
 #include <cuda_device_runtime_api.h>
 #include <thread>
 
-static double G = 9.81;
-
-
-struct AllConstraints {
-    CUDA_PLANE * d_planes;
-    CUDA_BALL * d_balls;
-
-    int num_planes;
-    int num_balls;
-};
+__device__ const double G = 9.81;
 
 class Simulation {
 public:
-    Simulation() {
-        dt = 0;
-        RUNNING = false;
-        STARTED = false;
-        ENDED = false;
-        update_constraints = true;
-
-#ifdef GRAPHICS
-        resize_buffers = true;
-        update_colors = true;
-        update_indices = true;
-
-        lineWidth = 1;
-        pointSize = 3;
-#endif
-    }
-
-    ~Simulation();
-
     // Create
     Mass * createMass();
     Mass * createMass(const Vec & pos);
@@ -107,7 +79,11 @@ public:
     void setMassDeltaT(double dt);
 
     // Control
-    void start(); // start simulation
+    void start(double time = 1E20); // start simulation, run until simulation time T
+
+    void stop(); // stop simulation while paused, free all memory.
+    void stop(double time); // stop simulation at time
+
     void pause(double t); // pause at time t
     void resume();
 
@@ -119,6 +95,11 @@ public:
 
 
     // private
+
+    Simulation();
+    ~Simulation();
+
+    void freeGPU();
 
     void setBreakpoint(double time);
     void _run();
@@ -137,6 +118,7 @@ public:
     Mass * createMass(Mass * m); // utility
     Spring * createSpring(Spring * s); // utility
 
+    double stop_time;
 
     double dt; // set to 0 by default, when start is called will be set to min(mass dt) unless previously set
     double T; // global simulation time
@@ -144,6 +126,7 @@ public:
     bool RUNNING;
     bool STARTED;
     bool ENDED;
+    bool FREED;
 
     std::list<Mass *> masses;
     std::list<Spring *> springs;

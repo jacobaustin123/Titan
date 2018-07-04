@@ -5,18 +5,17 @@
 #include <ctime>
 #include <chrono>
 #include <thread>
-using namespace std::literals::chrono_literals;
+#include <cstdlib>
 
 #include "vec.h"
 #include "sim.h"
-#include <cstdlib>
 
 
 static Simulation sim;
 
 int main()
 {
-    Lattice * l1 = sim.createLattice(Vec(0, 0, 20), Vec(6, 6, 6), 5, 5, 5);
+    Lattice * l1 = sim.createLattice(Vec(0, 0, 20), Vec(10, 10, 10), 20, 20, 20);
 
     sim.setMass(0.1);
     sim.setSpringConstant(10000);
@@ -30,11 +29,12 @@ int main()
     double runtime = 20.0;
 
     sim.start();
+//    sim.pause(2.0);
+//    sim.deleteContainer(l1);
+//    sim.resume();
 
     while (sim.running()) {
-        sim.pause(sim.time() + 5.0);
-
-        std::cout << sim.objs.size() << std::endl;
+        sim.pause(sim.time() + 1.0);
 
         sim.get(l1);
 //        sim.printPositions();
@@ -66,8 +66,8 @@ int main()
 //            duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 //            std::cout << "creation time: " << duration << std::endl;
 //        }
-
-//        if (sim.time() > 5.0) {
+//
+//        if (sim.time() > 5) {
 //            std::clock_t start;
 //            double duration;
 //            start = std::clock();
@@ -76,16 +76,8 @@ int main()
 //            std::cout << "deletion time: " << duration << std::endl;
 //        }
 
-        if (sim.time() > runtime) {
-            break;
-        } else {
-            sim.resume();
-        }
+        sim.resume();
     }
-
-    std::cout << "exiting" << std::endl;
-
-    sim.ENDED = true;
 
     return 0;
 }

@@ -173,4 +173,12 @@ public:
     Vec _center, _dims;
 };
 
+struct AllConstraints {
+    CUDA_PLANE * d_planes;
+    CUDA_BALL * d_balls;
+
+    int num_planes;
+    int num_balls;
+};
+
 #endif //LOCH_OBJECT_H

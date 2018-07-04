@@ -86,7 +86,11 @@ CUDA_MASS::CUDA_MASS(Mass &mass) {
 
 void decrementRefCount(Mass * m) {
     if (--m -> ref_count == 0) {
-        cudaFree(m -> arrayptr);
+
+        if (m -> arrayptr) {
+            cudaFree(m -> arrayptr);
+        }
+
         delete m;
     }
 }
