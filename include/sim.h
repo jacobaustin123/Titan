@@ -54,6 +54,7 @@ public:
         dt = 0;
         RUNNING = false;
         STARTED = false;
+        ENDED = false;
         update_constraints = true;
 
 #ifdef GRAPHICS
@@ -137,6 +138,7 @@ public:
 
     bool RUNNING;
     bool STARTED;
+    bool ENDED;
 
     std::list<Mass *> masses;
     std::list<Spring *> springs;

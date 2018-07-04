@@ -18,7 +18,7 @@ public:
     //Properties
     double _k; // spring constant (N/m)
     double _rest; // spring rest length (meters)
-    Mass * _left; // pointer to left mass object
+    Mass * _left; // pointer to left mass object // private
     Mass * _right; // pointer to right mass object
     CUDA_SPRING *arrayptr; //Pointer to struct version for GPU cudaMalloc
 
@@ -36,8 +36,26 @@ public:
     void setK(double k) { _k = k; } //sets K
     void setRestLength(double rest_length) { _rest = rest_length; } //sets Rest length
     void defaultLength() { _rest = (_left -> pos - _right -> pos).norm() ; } //sets Rest Lenght
-    void setLeft(Mass * left) { _left = left; } // sets left mass (attaches spring to mass 1)
-    void setRight(Mass * right) { _right = right; } //sets right mass (attaches spring to mass 2)
+
+    void setLeft(Mass * left) {
+        if (_left) {
+            decrementRefCount(_left);
+        }
+
+        _left = left;
+        _left -> ref_count++;
+
+    } // sets left mass (attaches spring to mass 1)
+
+    void setRight(Mass * right) {
+        if (_right) {
+            decrementRefCount(_right);
+        }
+
+        _right = right;
+        _right -> ref_count++;
+    }
+
     void setMasses(Mass * left, Mass * right) { _left = left; _right = right; } //sets both right and left masses
 
     //Get

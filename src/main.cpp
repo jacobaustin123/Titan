@@ -26,17 +26,12 @@ int main()
 
     std::cout << "running simulation with " << sim.masses.size() << " masses and " << sim.springs.size() << " springs." << std::endl;
 
-    std::clock_t start;
-    double duration;
-    start = std::clock();
+    double runtime = 10.0;
 
-    double runtime = 100.0;
-
-#ifdef GRAPHICS
     sim.start();
 
     while (sim.running()) {
-        sim.pause(sim.time() + 4.0);
+        sim.pause(sim.time() + 1.0);
 
         std::cout << sim.objs.size() << std::endl;
 
@@ -64,33 +59,10 @@ int main()
             sim.resume();
         }
     }
-#else
-    sim.setBreakpoint(runtime); // set breakpoint (could be end of program or just time to check for updates)
-    sim.start();
 
-    int num_masses = sim.masses.size();
+    std::cout << "exiting" << std::endl;
 
-    while (sim.running()) {
-        sim.printPositions();
-        sim.pause(sim.time() + 1.0);
-        sim.createMass(Vec(0, 0, 1));
-//        sim.createLattice(Vec(0, 0, 5), Vec(3, 3, 3), 4, 4, 4);
-        std::cout << "number of masses: " << sim.masses.size() << "!" << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
-        sim.resume();
-    }
-#endif
-
-    std::cout << "This is printing while the program is still running!" << std::endl;
-
-    duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-
-    std::cout<<"wall time for " << runtime << " second start with " << sim.masses.size()
-             << " masses and " << sim.springs.size() << " springs is " << duration << "!" << std::endl;
-
-
-    std::this_thread::sleep_for(20s);
+    sim.ENDED = true;
 
     return 0;
 }
