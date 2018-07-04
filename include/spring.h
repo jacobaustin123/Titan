@@ -39,6 +39,7 @@ public:
 
     void setLeft(Mass * left) {
         if (_left) {
+            decrementRefCount(_left);
         }
 
         _left = left;
@@ -48,6 +49,7 @@ public:
 
     void setRight(Mass * right) {
         if (_right) {
+            decrementRefCount(_right);
         }
 
         _right = right;

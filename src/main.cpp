@@ -9,6 +9,7 @@ using namespace std::literals::chrono_literals;
 
 #include "vec.h"
 #include "sim.h"
+#include <cstdlib>
 
 
 static Simulation sim;
@@ -26,32 +27,49 @@ int main()
 
     std::cout << "running simulation with " << sim.masses.size() << " masses and " << sim.springs.size() << " springs." << std::endl;
 
-    double runtime = 10.0;
+    double runtime = 20.0;
 
     sim.start();
 
     while (sim.running()) {
-        sim.pause(sim.time() + 1.0);
+        sim.pause(sim.time() + 5.0);
 
         std::cout << sim.objs.size() << std::endl;
 
-        {
-            std::clock_t start;
-            double duration;
-            start = std::clock();
-            sim.createLattice(3 * Vec(cos(sim.time()), 3 * sin(sim.time()), 5), Vec(4, 4, 4), 3, 3, 3);
-            duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-            std::cout << "creation time: " << duration << std::endl;
-        }
+        sim.getAll();
+        sim.setSpringConstant(10000 * exp(-sim.time()));
+        sim.setAll();
 
-        if (sim.time() > 5.0) {
-            std::clock_t start;
-            double duration;
-            start = std::clock();
-            sim.deleteContainer(*sim.objs.begin());
-            duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-            std::cout << "deletion time: " << duration << std::endl;
-        }
+
+//        sim.deleteMass(*sim.masses.begin());
+//        sim.createMass(Vec(3 * cos(sim.time()), 3 * sin(sim.time()), 15));
+
+//        auto it1 = sim.masses.begin();
+//        auto it2 = sim.masses.begin();
+//        std::advance(it1, (int) ((double) std::rand() * ((double) (sim.masses.size() - 1) / (double) RAND_MAX)));
+//        std::advance(it2, (int) ((double) std::rand() * ((double) (sim.masses.size() - 1) / (double) RAND_MAX)));
+//
+//        std::cout << sim.masses.size() << " " << std::rand() << " " << (int) ((double) std::rand() * ((double) (sim.masses.size() - 1) / (double) RAND_MAX)) << std::endl;
+//
+//        sim.createSpring(*it1, *it2);
+
+//        {
+//            std::clock_t start;
+//            double duration;
+//            start = std::clock();
+//            sim.createLattice(3 * Vec(cos(sim.time()), 3 * sin(sim.time()), 5), Vec(4, 4, 4), 3, 3, 3);
+//            duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+//            std::cout << "creation time: " << duration << std::endl;
+//        }
+
+//        if (sim.time() > 5.0) {
+//            std::clock_t start;
+//            double duration;
+//            start = std::clock();
+//            sim.deleteContainer(*sim.objs.begin());
+//            duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+//            std::cout << "deletion time: " << duration << std::endl;
+//        }
 
         if (sim.time() > runtime) {
             break;

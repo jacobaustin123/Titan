@@ -83,9 +83,14 @@ public:
 
     void get(Mass *m);
     void get(Spring *s); // not really useful
+    void get(Container *c);
 
     void set(Mass * m);
     void set(Spring *s);
+    void set(Container * c);
+
+    void getAll();
+    void setAll();
 
     // Constraints
     Plane * createPlane(const Vec & abc, double d ); // creates half-space ax + by + cz < d
@@ -95,7 +100,7 @@ public:
     Cube * createCube(const Vec & center, double side_length); // creates cube
     Lattice * createLattice(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
 
-    // Bulk modifications
+    // Bulk modifications, only update CPU
     void setSpringConstant(double k);
     void defaultRestLength();
     void setMass(double m);
@@ -150,6 +155,8 @@ public:
 
     AllConstraints d_constraints;
     bool update_constraints;
+
+    void updateCudaParameters();
 
     std::set<double> bpts; // list of breakpoints
 
@@ -212,6 +219,9 @@ public:
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 #endif
 #endif
+
+__global__ void createSpringPointers(CUDA_SPRING ** ptrs, CUDA_SPRING * data, int size);
+__global__ void createMassPointers(CUDA_MASS ** ptrs, CUDA_MASS * data, int size);
 
 __global__ void computeSpringForces(CUDA_SPRING * device_springs, int num_springs);
 __global__ void computeMassForces(CUDA_MASS * device_masses, int num_masses);

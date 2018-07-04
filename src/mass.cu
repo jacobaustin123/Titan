@@ -83,3 +83,10 @@ CUDA_MASS::CUDA_MASS(Mass &mass) {
     color = mass.color;
 #endif
 }
+
+void decrementRefCount(Mass * m) {
+    if (--m -> ref_count == 0) {
+        cudaFree(m -> arrayptr);
+        delete m;
+    }
+}

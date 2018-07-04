@@ -143,6 +143,16 @@ Spring * Simulation::createSpring(Mass * m1, Mass * m2) {
     return createSpring(s);
 }
 
+__global__ void invalidate(CUDA_MASS ** ptrs, CUDA_MASS * m, int size) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+
+    if (i < size) {
+        if (ptrs[i] == m) {
+            m -> valid = false;
+        }
+    }
+}
+
 void Simulation::deleteMass(Mass * m) {
     if (!STARTED) {
         masses.remove(m);
@@ -151,20 +161,22 @@ void Simulation::deleteMass(Mass * m) {
             assert(false);
         }
 
-        CUDA_MASS temp;
-        cudaMemcpy(&temp, m -> arrayptr, sizeof(CUDA_MASS), cudaMemcpyDeviceToHost);
-        temp.valid = false;
-        cudaMemcpy(m -> arrayptr, &temp, sizeof(CUDA_MASS), cudaMemcpyHostToDevice);
+        updateCudaParameters();
+        invalidate<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, m -> arrayptr, masses.size());
         m -> valid = false;
 
-        thrust::remove(thrust::device, d_masses.begin(), d_masses.end(), m -> arrayptr);
+
+        thrust::remove(thrust::device, d_masses.begin(), d_masses.begin() + masses.size(), m -> arrayptr);
         masses.remove(m);
+
+        d_masses.resize(masses.size());
 
         decrementRefCount(m);
 
-//#ifdef GRAPHICS
-//        resize_buffers = true;
-//#endif
+
+#ifdef GRAPHICS
+        resize_buffers = true;
+#endif
     }
 }
 
@@ -180,14 +192,16 @@ void Simulation::deleteSpring(Spring * s) {
         thrust::remove(thrust::device, d_springs.begin(), d_springs.end(), s -> arrayptr);
         springs.remove(s);
 
+        d_springs.resize(springs.size());
+
         if (s -> _left) { decrementRefCount(s -> _left); }
         if (s -> _right) { decrementRefCount(s -> _right); }
 
         delete s;
 
-//#ifdef GRAPHICS
-//        resize_buffers = true;
-//#endif
+#ifdef GRAPHICS
+        resize_buffers = true;
+#endif
     }
 }
 
@@ -217,7 +231,11 @@ void Simulation::deleteContainer(Container * c) {
 void Simulation::get(Mass * m) {
     CUDA_MASS temp;
     cudaMemcpy(&temp, m -> arrayptr, sizeof(CUDA_MASS), cudaMemcpyDeviceToHost);
-    *m = Mass(temp);
+    Mass temp_data = Mass(temp);
+    temp_data.arrayptr = m -> arrayptr; // TODO error checking if simulation hasn't started
+    temp_data.ref_count = m -> ref_count;
+
+    *m = temp_data;
 }
 
 void Simulation::set(Mass * m) {
@@ -234,6 +252,10 @@ void Simulation::get(Spring * s) {
 void Simulation::set(Spring * s) {
     CUDA_SPRING temp = CUDA_SPRING(*s);
     cudaMemcpy(s -> arrayptr, &temp, sizeof(CUDA_SPRING), cudaMemcpyHostToDevice);
+}
+
+void Simulation::getAll() {
+    massFromArray(); // TODO make a note of this
 }
 
 void Simulation::setSpringConstant(double k) {
@@ -269,6 +291,49 @@ __global__ void createMassPointers(CUDA_MASS ** ptrs, CUDA_MASS * data, int size
     if (i < size) {
 //        ptrs[i] = (CUDA_MASS *) malloc(sizeof(CUDA_MASS));
         *ptrs[i] = data[i];
+    }
+}
+
+void Simulation::setAll() {
+    {
+        CUDA_MASS * h_data = new CUDA_MASS[masses.size()]; // copy masses into single array for copying to the GPU, set GPU pointers
+
+        int count = 0;
+
+        for (Mass * m : masses) {
+            h_data[count] = CUDA_MASS(*m);
+            count++;
+        }
+
+        CUDA_MASS * d_data; // copy to the GPU
+        cudaMalloc((void **)&d_data, sizeof(CUDA_MASS) * masses.size());
+        cudaMemcpy(d_data, h_data, sizeof(CUDA_MASS) * masses.size(), cudaMemcpyHostToDevice);
+
+        delete [] h_data;
+
+        updateCudaParameters();
+        createMassPointers<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(thrust::raw_pointer_cast(d_masses.data()), d_data, masses.size());
+
+        cudaFree(d_data);
+    }
+
+    {
+        CUDA_SPRING * h_spring = new CUDA_SPRING[springs.size()];
+
+        int count = 0;
+        for (Spring * s : springs) {
+            h_spring[count] = CUDA_SPRING(*s, s -> _left -> arrayptr, s -> _right -> arrayptr);
+            count++;
+        }
+
+        CUDA_SPRING * d_data;
+        cudaMalloc((void **)& d_data, sizeof(CUDA_SPRING) * springs.size());
+        cudaMemcpy(d_data, h_spring, sizeof(CUDA_SPRING) * springs.size(), cudaMemcpyHostToDevice);
+
+        delete [] h_spring;
+
+        createSpringPointers<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(thrust::raw_pointer_cast(d_springs.data()), d_data, springs.size());
+        cudaFree(d_data);
     }
 }
 
@@ -393,8 +458,14 @@ void Simulation::massFromArray() {
 
     int count = 0;
 
+    Mass temp_data;
+
     for (Mass * m : masses) {
-        *m = Mass(h_mass[count]);
+        temp_data = Mass(h_mass[count]);
+        temp_data.arrayptr = m -> arrayptr;
+        temp_data.ref_count = m -> ref_count;
+
+        *m = temp_data;
         count++;
     }
 
@@ -422,7 +493,7 @@ __global__ void printMasses(CUDA_MASS ** d_masses, int num_masses) {
 
     if (i < num_masses) {
         CUDA_MASS data = *d_masses[i];
-        printf("(pos) %d: (%3f, %3f, %3f), dt: %f, m: %f, fixed: %d\n", i, data.pos[0], data.pos[1], data.pos[2], data.dt, data.m, data.fixed);
+        printf("%d: (%3f, %3f, %3f)", i, data.pos[0], data.pos[1], data.pos[2]);
     }
 }
 
@@ -431,7 +502,7 @@ __global__ void printForce(CUDA_MASS ** d_masses, int num_masses) {
 
     if (i < num_masses) {
         Vec & data = d_masses[i] -> force;
-        printf("(force) %d: (%3f, %3f, %3f)\n", i, data[0], data[1], data[2]);
+        printf("%d: (%3f, %3f, %3f)\n", i, data[0], data[1], data[2]);
     }
 }
 
@@ -731,7 +802,7 @@ void Simulation::_run() { // repeatedly start next
     execute();
 }
 
-void Simulation::resume() {
+void Simulation::updateCudaParameters() {
     massBlocksPerGrid = (masses.size() + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK;
     springBlocksPerGrid = (springs.size() + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK;
 
@@ -743,6 +814,13 @@ void Simulation::resume() {
         springBlocksPerGrid = MAX_BLOCKS;
     }
 
+    d_mass = thrust::raw_pointer_cast(d_masses.data());
+    d_spring = thrust::raw_pointer_cast(d_springs.data());
+}
+
+void Simulation::resume() {
+    updateCudaParameters();
+
     if (update_constraints) {
         d_constraints.d_balls = thrust::raw_pointer_cast(&d_balls[0]);
         d_constraints.d_planes = thrust::raw_pointer_cast(&d_planes[0]);
@@ -751,8 +829,7 @@ void Simulation::resume() {
         update_constraints = false;
     }
 
-    d_mass = thrust::raw_pointer_cast(d_masses.data());
-    d_spring = thrust::raw_pointer_cast(d_springs.data());
+    cudaDeviceSynchronize();
 
     RUNNING = true;
 }
@@ -1075,8 +1152,10 @@ void Simulation::printPositions() {
     }
     else {
         std::cout << "\nHOST MASSES: " << std::endl;
+        int count = 0;
         for (Mass * m : masses) {
-            std::cout << m -> getPosition() << std::endl;
+            std::cout << count << ": " << m -> getPosition() << std::endl;
+            count++;
         }
     }
 

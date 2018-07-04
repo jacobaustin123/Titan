@@ -85,10 +85,6 @@ public:
 
 };
 
-void decrementRefCount(Mass * m) {
-    if (--m -> ref_count == 0) {
-        cudaFree(m -> arrayptr);
-        delete m;
-    }
-}
+void decrementRefCount(Mass * m);
+
 #endif //LOCH_MASS_H
