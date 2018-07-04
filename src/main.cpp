@@ -16,7 +16,7 @@ static Simulation sim;
 
 int main()
 {
-    sim.createLattice(Vec(0, 0, 20), Vec(6, 6, 6), 5, 5, 5);
+    Lattice * l1 = sim.createLattice(Vec(0, 0, 20), Vec(6, 6, 6), 5, 5, 5);
 
     sim.setMass(0.1);
     sim.setSpringConstant(10000);
@@ -36,9 +36,14 @@ int main()
 
         std::cout << sim.objs.size() << std::endl;
 
-        sim.getAll();
-        sim.setSpringConstant(10000 * exp(-sim.time()));
-        sim.setAll();
+        sim.get(l1);
+//        sim.printPositions();
+        l1 -> setKValue(10000 * exp(-sim.time()));
+        sim.set(l1);
+
+//        sim.getAll();
+//        sim.setSpringConstant(10000 * exp(-sim.time()));
+//        sim.setAll();
 
 
 //        sim.deleteMass(*sim.masses.begin());

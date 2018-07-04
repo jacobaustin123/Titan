@@ -229,6 +229,11 @@ void Simulation::deleteContainer(Container * c) {
 }
 
 void Simulation::get(Mass * m) {
+    if (!STARTED) {
+        std::cerr << "Simulation has not started." << std::endl;
+        return;
+    }
+
     CUDA_MASS temp;
     cudaMemcpy(&temp, m -> arrayptr, sizeof(CUDA_MASS), cudaMemcpyDeviceToHost);
     Mass temp_data = Mass(temp);
@@ -239,58 +244,97 @@ void Simulation::get(Mass * m) {
 }
 
 void Simulation::set(Mass * m) {
+    if (!STARTED) {
+        std::cerr << "Simulation has not started." << std::endl;
+        return;
+    }
+
     CUDA_MASS temp = CUDA_MASS(*m);
     cudaMemcpy(m -> arrayptr, &temp, sizeof(CUDA_MASS), cudaMemcpyHostToDevice);
 }
 
 void Simulation::get(Spring * s) {
+    if (!STARTED) {
+        std::cerr << "Simulation has not started." << std::endl;
+        return;
+    }
+
     CUDA_SPRING temp;
     cudaMemcpy(&temp, s -> arrayptr, sizeof(CUDA_SPRING), cudaMemcpyDeviceToHost);
     *s = Spring(temp);
 }
 
 void Simulation::set(Spring * s) {
+    if (!STARTED) {
+        std::cerr << "Simulation has not started." << std::endl;
+        return;
+    }
+
     CUDA_SPRING temp = CUDA_SPRING(*s);
     cudaMemcpy(s -> arrayptr, &temp, sizeof(CUDA_SPRING), cudaMemcpyHostToDevice);
 }
 
 void Simulation::getAll() {
+    if (!STARTED) {
+        std::cerr << "Simulation has not started." << std::endl;
+        return;
+    }
+
     massFromArray(); // TODO make a note of this
 }
 
-void Simulation::setSpringConstant(double k) {
-    for (Spring * s : springs) {
-        s -> setK(k);
+void Simulation::set(Container * c) {
+    {
+        CUDA_MASS * h_data = new CUDA_MASS[c -> masses.size()]; // copy masses into single array for copying to the GPU, set GPU pointers
+        CUDA_MASS ** d_ptrs = new CUDA_MASS * [c -> masses.size()];
+
+        for (int i = 0; i < c -> masses.size(); i++) {
+            d_ptrs[i] = c -> masses[i] -> arrayptr;
+            h_data[i] = CUDA_MASS(*c -> masses[i]);
+        }
+
+        CUDA_MASS ** temp;
+        cudaMalloc((void **) &temp, sizeof(CUDA_MASS *) * c -> masses.size());
+        cudaMemcpy(temp, d_ptrs, c -> masses.size() * sizeof(CUDA_MASS *), cudaMemcpyHostToDevice);
+        delete [] d_ptrs;
+
+        CUDA_MASS * d_data; // copy to the GPU
+        cudaMalloc((void **)&d_data, sizeof(CUDA_MASS) * c -> masses.size());
+        cudaMemcpy(d_data, h_data, sizeof(CUDA_MASS) * c -> masses.size(), cudaMemcpyHostToDevice);
+        delete [] h_data;
+
+        updateCudaParameters();
+        createMassPointers<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(temp, d_data, c -> masses.size());
+
+        cudaFree(d_data);
+        cudaFree(d_ptrs);
     }
-}
 
-void Simulation::defaultRestLength() {
-    for (Spring * s : springs) {
-        s -> defaultLength();
-    }
-}
+    {
+        CUDA_SPRING * h_spring = new CUDA_SPRING[c -> springs.size()];
+        CUDA_SPRING ** d_ptrs = new CUDA_SPRING *[c -> springs.size()];
 
-void Simulation::setMass(double m) {
-    for (Mass * mass : masses) {
-        mass -> setMass(m);
-    }
-}
-void Simulation::setMassDeltaT(double dt) {
-    for (Mass * m : masses) {
-        m -> setDeltaT(dt);
-    }
-}
+        int count = 0;
+        for (Spring * s : springs) {
+            d_ptrs[count] = c -> springs[count] -> arrayptr;
+            h_spring[count] = CUDA_SPRING(*s, s -> _left -> arrayptr, s -> _right -> arrayptr);
+            count++;
+        }
 
-void Simulation::setBreakpoint(double time) {
-    bpts.insert(time);
-}
+        CUDA_SPRING ** temp;
+        cudaMalloc((void **) &temp, sizeof(CUDA_SPRING *) * c -> springs.size());
+        cudaMemcpy(temp, d_ptrs, c -> springs.size() * sizeof(CUDA_SPRING *), cudaMemcpyHostToDevice);
+        delete [] d_ptrs;
 
-__global__ void createMassPointers(CUDA_MASS ** ptrs, CUDA_MASS * data, int size) {
-    int i = blockDim.x * blockIdx.x + threadIdx.x;
+        CUDA_SPRING * d_data;
+        cudaMalloc((void **)& d_data, sizeof(CUDA_SPRING) * springs.size());
+        cudaMemcpy(d_data, h_spring, sizeof(CUDA_SPRING) * springs.size(), cudaMemcpyHostToDevice);
+        delete [] h_spring;
 
-    if (i < size) {
-//        ptrs[i] = (CUDA_MASS *) malloc(sizeof(CUDA_MASS));
-        *ptrs[i] = data[i];
+        createSpringPointers<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(temp, d_data, springs.size());
+
+        cudaFree(d_data);
+        cudaFree(d_ptrs);
     }
 }
 
@@ -334,6 +378,44 @@ void Simulation::setAll() {
 
         createSpringPointers<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(thrust::raw_pointer_cast(d_springs.data()), d_data, springs.size());
         cudaFree(d_data);
+    }
+}
+
+
+
+void Simulation::setSpringConstant(double k) {
+    for (Spring * s : springs) {
+        s -> setK(k);
+    }
+}
+
+void Simulation::defaultRestLength() {
+    for (Spring * s : springs) {
+        s -> defaultLength();
+    }
+}
+
+void Simulation::setMass(double m) {
+    for (Mass * mass : masses) {
+        mass -> setMass(m);
+    }
+}
+void Simulation::setMassDeltaT(double dt) {
+    for (Mass * m : masses) {
+        m -> setDeltaT(dt);
+    }
+}
+
+void Simulation::setBreakpoint(double time) {
+    bpts.insert(time);
+}
+
+__global__ void createMassPointers(CUDA_MASS ** ptrs, CUDA_MASS * data, int size) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+
+    if (i < size) {
+//        ptrs[i] = (CUDA_MASS *) malloc(sizeof(CUDA_MASS));
+        *ptrs[i] = data[i];
     }
 }
 
@@ -444,6 +526,47 @@ __global__ void fromMassPointers(CUDA_MASS ** d_mass, CUDA_MASS * data, int size
     if (i < size) {
         data[i] = *d_mass[i];
     }
+}
+
+void Simulation::get(Container *c) {
+    CUDA_MASS ** temp;
+    cudaMalloc((void **) &temp, sizeof(CUDA_MASS *) * c -> masses.size());
+
+    CUDA_MASS ** d_ptrs = new CUDA_MASS * [c -> masses.size()];
+
+    for (int i = 0; i < c -> masses.size(); i++) {
+        d_ptrs[i] = c -> masses[i] -> arrayptr;
+    }
+
+    cudaMemcpy(temp, d_ptrs, c -> masses.size() * sizeof(CUDA_MASS *), cudaMemcpyHostToDevice);
+
+    delete [] d_ptrs;
+
+    CUDA_MASS * temp_data;
+    cudaMalloc((void **) &temp_data, sizeof(CUDA_MASS) * c -> masses.size());
+
+    updateCudaParameters();
+    fromMassPointers<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(temp, temp_data, c -> masses.size());
+    cudaFree(temp);
+
+    CUDA_MASS * h_mass = new CUDA_MASS[masses.size()];
+    cudaMemcpy(h_mass, temp_data, sizeof(CUDA_MASS) * masses.size(), cudaMemcpyDeviceToHost);
+    cudaFree(temp_data);
+
+    int count = 0;
+
+    Mass h_data;
+
+    for (Mass * m : c -> masses) {
+        h_data = Mass(h_mass[count]);
+        h_data.arrayptr = m -> arrayptr;
+        h_data.ref_count = m -> ref_count;
+
+        *m = h_data;
+        count++;
+    }
+
+    delete [] h_mass;
 }
 
 void Simulation::massFromArray() {
@@ -719,6 +842,11 @@ void Simulation::createGLFWWindow() {
 #endif
 
 void Simulation::start() {
+    if (masses.size() == 0) {
+        std::cerr << "No masses have been added. Please add masses before starting the simulation." << std::endl;
+        assert(false);
+    }
+
     RUNNING = true;
     STARTED = true;
 
@@ -819,6 +947,11 @@ void Simulation::updateCudaParameters() {
 }
 
 void Simulation::resume() {
+    if (masses.size() == 0) {
+        std::cerr << "No masses have been added. Please add masses before starting the simulation." << std::endl;
+        assert(false);
+    }
+
     updateCudaParameters();
 
     if (update_constraints) {
