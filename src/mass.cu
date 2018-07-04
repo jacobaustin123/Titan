@@ -54,13 +54,6 @@ Mass::Mass(const Vec & position, double mass, bool fixed, double dt) {
 #endif
 }
 
-void decrementRefCount(Mass * m) {
-    if (--m -> ref_count <= 0) {
-        cudaFree(m -> arrayptr);
-        delete m;
-    }
-}
-
 void Mass::update() { // update pos, vel, and acc based on force
     acc = force / m;
     vel = vel + acc * dt;
