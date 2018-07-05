@@ -136,6 +136,9 @@ public:
     thrust::device_vector<CUDA_MASS *> d_masses;
     thrust::device_vector<CUDA_SPRING *> d_springs;
 
+    thrust::device_vector<CUDA_PLANE> d_planes; // used for constraints
+    thrust::device_vector<CUDA_BALL> d_balls; // used for constraints
+
     AllConstraints d_constraints;
     bool update_constraints;
 

@@ -76,6 +76,11 @@ int main()
 //            std::cout << "deletion time: " << duration << std::endl;
 //        }
 
+        if (sim.time() > 10.0) {
+            sim.stop();
+            break;
+        }
+
         sim.resume();
     }
 
