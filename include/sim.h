@@ -139,7 +139,7 @@ public:
     thrust::device_vector<CUDA_PLANE> d_planes; // used for constraints
     thrust::device_vector<CUDA_BALL> d_balls; // used for constraints
 
-    AllConstraints d_constraints;
+    CUDA_CONSTRAINT_STRUCT d_constraints;
     bool update_constraints;
 
     void updateCudaParameters();

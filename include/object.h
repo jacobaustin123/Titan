@@ -173,7 +173,7 @@ public:
     Vec _center, _dims;
 };
 
-struct AllConstraints {
+struct CUDA_CONSTRAINT_STRUCT {
     CUDA_PLANE * d_planes;
     CUDA_BALL * d_balls;
 

@@ -60,9 +60,7 @@ Simulation::Simulation() {
 }
 
 void Simulation::freeGPU() {
-    std::cout << "freeing GPU resources." << std::endl;
-
-    std::cout << "freeing CPU resources" << std::endl;
+    std::cout << "Freeing GPU and CPU resources." << std::endl;
 
     for (Spring * s : springs) {
         if (s -> _left && ! s -> _left -> valid) {
@@ -85,8 +83,6 @@ void Simulation::freeGPU() {
 
     for (Container * c : objs)
         delete c;
-
-    std::cout << "freeing graphics resources" << std::endl;
 
     thrust::host_vector<CUDA_MASS *> m = d_masses;
     thrust::host_vector<CUDA_SPRING *> s = d_springs;
@@ -129,11 +125,11 @@ void Simulation::freeGPU() {
     FREED = true;
     ENDED = true; // just to be safe
 
-    std::cout << "freed everything!" << std::endl;
+    std::cout << "All memory successfully freed!" << std::endl;
 }
 
 Simulation::~Simulation() {
-    std::cerr << "destrutor called" << std::endl;
+    std::cerr << "Simulation destructor called." << std::endl;
 
     if (gpu_thread.joinable()) {
         gpu_thread.join();
@@ -147,7 +143,7 @@ Simulation::~Simulation() {
     FREED = true;
     ENDED = true; // just to be safe
 
-    std::cout << "destructor done!" << std::endl;
+    std::cout << "Simulation destructor done." << std::endl;
 }
 
 Mass * Simulation::createMass(Mass * m) {
@@ -991,7 +987,7 @@ __global__ void computeSpringForces(CUDA_SPRING ** d_spring, int num_springs) {
     }
 }
 
-__global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, AllConstraints c, int num_masses) {
+__global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, CUDA_CONSTRAINT_STRUCT c, int num_masses) {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
 
     if (i < num_masses) {
@@ -1294,8 +1290,6 @@ void Simulation::_run() { // repeatedly start next
 #endif
 
     execute();
-
-    std::cout << "GPU thread has ended!" << std::endl;
 }
 
 void Simulation::updateCudaParameters() {
@@ -1354,7 +1348,7 @@ void Simulation::execute() {
     while (1) {
         if (!bpts.empty() && *bpts.begin() <= T) {
             cudaDeviceSynchronize(); // synchronize before updating the springs and mass positions
-            std::cout << "Exiting program at breakpoint time " << *bpts.begin() << "! Current time is " << T << "!" << std::endl;
+            std::cout << "Breakpoint set for time " << *bpts.begin() << " reached at simulation time " << T << "!" << std::endl;
             bpts.erase(bpts.begin());
             RUNNING = false;
 
@@ -1367,7 +1361,7 @@ void Simulation::execute() {
             while (!RUNNING) {
                 std::this_thread::sleep_for(std::chrono::microseconds(1));
                 if (ENDED) {
-                    std::cout << "detected end of program!" << std::endl;
+                    std::cout << "End of program reached. Exiting GPU thread." << std::endl;
                     freeGPU();
                     return;
                 }
