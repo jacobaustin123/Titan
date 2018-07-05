@@ -138,10 +138,16 @@ public:
 
 struct CUDA_PLANE {
     CUDA_CALLABLE_MEMBER CUDA_PLANE() = default;
+
+    CUDA_CALLABLE_MEMBER CUDA_PLANE(const Vec & normal, double offset) {
+        _normal = normal / normal.norm();
+        _offset = offset;
+    }
+
     CUDA_CALLABLE_MEMBER CUDA_PLANE(const Plane & p) { _normal = p._normal; _offset = p._offset; }
 
-    CUDA_CALLABLE_MEMBER Vec getForce(const Vec & position) {
-        double disp = dot(position, _normal) - _offset;
+    CUDA_CALLABLE_MEMBER Vec getForce(const CUDA_MASS * m) {
+        double disp = dot(m -> pos, _normal) - _offset;
         return (disp < 0) ? - disp * NORMAL * _normal : 0 * _normal; // TODO fix this for the host
     }
 
