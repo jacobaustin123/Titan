@@ -6,7 +6,6 @@
 
 Mass::Mass() {
     m = 1.0;
-    fixed = false;
     dt = 0.0001;
     T = 0;
     valid = true;
@@ -18,7 +17,7 @@ Mass::Mass() {
 #endif
 } // constructor TODO fix timing
 
-Mass::Mass(struct CUDA_MASS & mass) {
+void Mass::operator=(CUDA_MASS & mass) {
     m = mass.m;
     dt = mass.dt;
     T = mass.T;
@@ -26,11 +25,14 @@ Mass::Mass(struct CUDA_MASS & mass) {
     vel = mass.vel;
     acc = mass.acc;
     force = mass.force;
-    fixed = mass.fixed;
     valid = mass.valid;
 
-    ref_count = 0;
-    arrayptr = nullptr;
+    ref_count = this -> ref_count;
+    arrayptr = this -> arrayptr;
+
+#ifdef CONSTRAINTS
+    constraints = this -> constraints;
+#endif
 
 #ifdef GRAPHICS
     color = mass.color;
@@ -41,7 +43,6 @@ Mass::Mass(const Vec & position, double mass, bool fixed, double dt) {
     m = mass;
     pos = position;
 
-    this -> fixed = fixed;
     this -> dt = dt;
 
     T = 0;
@@ -62,13 +63,46 @@ CUDA_MASS::CUDA_MASS(Mass &mass) {
     vel = mass.vel;
     acc = mass.acc;
     force = mass.force;
-    fixed = mass.fixed;
     valid = true;
+
+#ifdef CONSTRAINTS
+    constraints = CUDA_LOCAL_CONSTRAINTS(mass.constraints);
+#endif
 
 #ifdef GRAPHICS
     color = mass.color;
 #endif
 }
+
+#ifdef CONSTRAINTS
+void Mass::addConstraint(CONSTRAINT_TYPE type, const Vec & vec, double num) { // TODO make this more efficient
+    if (type == 0) {
+        this -> constraints.constraint_plane.push_back(CudaConstraintPlane(vec, num));
+        this -> constraints.num_constraint_planes++;
+        this -> constraints.constraint_plane_ptr = thrust::raw_pointer_cast(constraints.constraint_plane.data());
+    } else if (type == 1) {
+        this -> constraints.contact_plane.push_back(CudaContactPlane(vec, num));
+        this -> constraints.num_contact_planes++;
+        this -> constraints.contact_plane_ptr = thrust::raw_pointer_cast(constraints.contact_plane.data());
+    } else if (type == 2) {
+        this -> constraints.ball.push_back(CudaBall(vec, num));
+        this -> constraints.num_balls++;
+        this -> constraints.ball_ptr = thrust::raw_pointer_cast(constraints.ball.data());
+    } else if (type == 3) {
+        this -> constraints.direction.push_back(CudaDirection(vec, num));
+        this -> constraints.num_directions++;
+        this -> constraints.direction_ptr = thrust::raw_pointer_cast(constraints.direction.data());
+    }
+}
+
+void Mass::fix() {
+    this -> constraints.fixed = true;
+}
+void Mass::unfix() {
+    this -> constraints.fixed = false;
+}
+
+#endif
 
 void decrementRefCount(Mass * m) {
     if (--m -> ref_count == 0) {

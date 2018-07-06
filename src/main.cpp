@@ -26,7 +26,9 @@ int main()
 
     std::cout << "running simulation with " << sim.masses.size() << " masses and " << sim.springs.size() << " springs." << std::endl;
 
-    double runtime = 20.0;
+    double runtime = 5.0;
+
+    l1 -> masses[0] -> addConstraint(CONSTRAINT_PLANE, Vec(0, 0, 1), 0);
 
     sim.start();
 //    sim.pause(2.0);
@@ -34,14 +36,14 @@ int main()
 //    sim.resume();
 
     while (sim.running()) {
-        sim.pause(sim.time() + 2.0);
+        sim.pause(sim.time() + 1.0);
 
-        sim.createBall(Vec(5 * sin(sim.time()), 5 * cos(sim.time()), 5 * sin(sim.time())), 2);
+//        sim.createBall(Vec(5 * sin(sim.time()), 5 * cos(sim.time()), 5 * sin(sim.time())), 2);
 
-//        sim.get(l1);
+        sim.get(l1);
 ////        sim.printPositions();
-//        l1 -> setKValue(10000 * exp(-sim.time() / 3));
-//        sim.set(l1);
+        l1 -> setKValue(10000 * exp(-sim.time() / 3));
+        sim.set(l1);
 
 //        sim.getAll();
 //        sim.setSpringConstant(10000 * exp(-sim.time()));
@@ -78,7 +80,7 @@ int main()
 //            std::cout << "deletion time: " << duration << std::endl;
 //        }
 
-        if (sim.time() > 10.0) {
+        if (sim.time() > runtime) {
             sim.stop();
             break;
         }

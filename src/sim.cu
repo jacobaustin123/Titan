@@ -481,11 +481,7 @@ void Simulation::get(Mass * m) {
 
     CUDA_MASS temp;
     gpuErrchk(cudaMemcpy(&temp, m -> arrayptr, sizeof(CUDA_MASS), cudaMemcpyDeviceToHost));
-    Mass temp_data = Mass(temp);
-    temp_data.arrayptr = m -> arrayptr; // TODO error checking if simulation hasn't started
-    temp_data.ref_count = m -> ref_count;
-
-    *m = temp_data;
+    *m = temp;
 }
 
 void Simulation::set(Mass * m) {
@@ -865,14 +861,9 @@ void Simulation::get(Container *c) {
 
     int count = 0;
 
-    Mass h_data;
 
     for (Mass * m : c -> masses) {
-        h_data = Mass(h_mass[count]);
-        h_data.arrayptr = m -> arrayptr;
-        h_data.ref_count = m -> ref_count;
-
-        *m = h_data;
+        *m = h_mass[count];
         count++;
     }
 
@@ -899,11 +890,7 @@ void Simulation::massFromArray() {
     Mass temp_data;
 
     for (Mass * m : masses) {
-        temp_data = Mass(h_mass[count]);
-        temp_data.arrayptr = m -> arrayptr;
-        temp_data.ref_count = m -> ref_count;
-
-        *m = temp_data;
+        *m = h_mass[count];
         count++;
     }
 
@@ -978,10 +965,10 @@ __global__ void computeSpringForces(CUDA_SPRING ** d_spring, int num_springs) {
         Vec temp = (spring._right -> pos) - (spring._left -> pos);
         Vec force = spring._k * (spring._rest - temp.norm()) * (temp / temp.norm());
 
-        if (spring._right -> fixed == false) {
+        if (spring._right -> constraints.fixed == false) {
             spring._right->force.atomicVecAdd(force); // need atomics here
         }
-        if (spring._left -> fixed == false) {
+        if (spring._left -> constraints.fixed == false) {
             spring._left->force.atomicVecAdd(-force);
         }
     }
@@ -993,21 +980,40 @@ __global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, CUDA_GLOBAL_CONSTRAINTS
     if (i < num_masses) {
         CUDA_MASS &mass = *d_mass[i];
 
-        if (mass.fixed == 1)
+#ifdef CONSTRAINTS
+        if (mass.constraints.fixed == 1)
             return;
+#endif
 
-        for (int j = 0; j < c.num_planes; j++) {
-            c.d_planes[j].applyForce(d_mass[i]);
+        mass.force += Vec(0, 0, - G * mass.m); // gravity
+
+        for (int j = 0; j < c.num_planes; j++) { // global constraints
+            c.d_planes[j].applyForce(&mass);
         }
 
         for (int j = 0; j < c.num_balls; j++) {
-            c.d_balls[j].applyForce(d_mass[i]);
+            c.d_balls[j].applyForce(&mass);
         }
 
-        mass.force += Vec(0, 0, - G * mass.m); // don't need atomics
+#ifdef CONSTRAINTS
+        for (int j = 0; j < mass.constraints.num_contact_planes; j++) { // local constraints
+            mass.constraints.contact_plane[j].applyForce(&mass);
+        }
 
-//        if (mass.pos[2] < 0)
-//            mass.force += Vec(0, 0, -10000 * mass.pos[2]); // don't need atomics
+        for (int j = 0; j < mass.constraints.num_balls; j++) {
+            mass.constraints.ball[j].applyForce(&mass);
+        }
+
+        for (int j = 0; j < mass.constraints.num_constraint_planes; j++) {
+            mass.constraints.constraint_plane[j].applyForce(&mass);
+        }
+
+        for (int j = 0; j < mass.constraints.num_directions; j++) {
+            mass.constraints.direction[j].applyForce(&mass);
+        }
+
+        mass.force += mass.constraints.drag_coefficient * pow(mass.vel.norm(), 2) * mass.vel; // drag
+#endif
 
         mass.acc = mass.force / mass.m;
         mass.vel = mass.vel + mass.acc * mass.dt;

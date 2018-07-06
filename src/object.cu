@@ -6,6 +6,68 @@
 #include <cmath>
 #include "sim.h"
 
+CUDA_CALLABLE_MEMBER CudaBall::CudaBall(const Vec & center, double radius) {
+    _center = center;
+    _radius = radius;
+}
+
+CUDA_CALLABLE_MEMBER CudaBall::CudaBall(const Ball & b) {
+    _center = b._center;
+    _radius = b._radius;
+}
+
+CUDA_CALLABLE_MEMBER void CudaBall::applyForce(CUDA_MASS * m) {
+    double dist = (m -> pos - _center).norm();
+    m -> force += (dist <= _radius) ? NORMAL * (m -> pos - _center) / dist : Vec(0, 0, 0);
+}
+
+CUDA_CALLABLE_MEMBER CudaContactPlane::CudaContactPlane(const Vec & normal, double offset) {
+    _normal = normal / normal.norm();
+    _offset = offset;
+}
+
+CudaContactPlane::CudaContactPlane(const ContactPlane & p) {
+    _normal = p._normal;
+    _offset = p._offset;
+}
+
+CUDA_CALLABLE_MEMBER void CudaContactPlane::applyForce(CUDA_MASS * m) {
+    double disp = dot(m -> pos, _normal) - _offset;
+    m -> force += (disp < 0) ? - disp * NORMAL * _normal : 0 * _normal; // TODO fix this for the host
+}
+
+CUDA_CALLABLE_MEMBER CudaConstraintPlane::CudaConstraintPlane(const Vec & normal, double friction) {
+    _normal = normal / normal.norm();
+    _friction = friction;
+}
+
+CUDA_CALLABLE_MEMBER void CudaConstraintPlane::applyForce(CUDA_MASS * m) {
+    printf("a) (%f, %f, %f)\n", m -> force[0], m-> force[1], m-> force[2]);
+    printf("b) (%f, %f, %f)\n", _normal[0], _normal[1], _normal[2]);
+
+    m -> vel += - _normal * dot(m -> vel, _normal); // constraint velocity
+
+    double normal_force = dot(m -> force, _normal);
+    m -> force += - _normal * normal_force; // constraint force
+    printf("c) (%f, %f, %f) (%f)\n", m -> force[0], m-> force[1], m-> force[2], normal_force);
+
+//    m -> force += - _friction * normal_force * (m -> vel) / (m -> vel).norm(); // apply friction force
+}
+
+CUDA_CALLABLE_MEMBER CudaDirection::CudaDirection(const Vec & tangent, double friction) {
+    _tangent = tangent / tangent.norm();
+    _friction = friction;
+}
+
+CUDA_CALLABLE_MEMBER void CudaDirection::applyForce(CUDA_MASS * m) {
+    m -> vel = _tangent * dot(m -> vel, _tangent);
+
+    Vec normal_force = m -> force - dot(m -> force, _tangent) * _tangent;
+    m -> force += -normal_force;
+
+    m -> force += - normal_force.norm() * _friction * _tangent;
+}
+
 void Container::setMassValue(double m) { // set masses for all Mass objects
     for (Mass * mass : masses) {
         mass -> m += m;
@@ -32,7 +94,7 @@ void Container::setRestLengthValue(double len) { // set masses for all Mass obje
 
 void Container::makeFixed() {
     for (Mass * mass : masses) {
-        mass -> fixed = true;
+        mass -> constraints.fixed = true;
     }
 }
 
@@ -130,6 +192,45 @@ void Lattice::translate(const Vec &displ) {
         m -> pos += displ;
     }
 }
+
+#ifdef CONSTRAINTS
+
+LOCAL_CONSTRAINTS::LOCAL_CONSTRAINTS() {
+    constraint_plane = thrust::device_vector<CudaConstraintPlane>(1);
+    contact_plane = thrust::device_vector<CudaContactPlane>(1);
+    ball = thrust::device_vector<CudaBall>(1);
+    direction = thrust::device_vector<CudaDirection>(1);
+
+    contact_plane_ptr = thrust::raw_pointer_cast(contact_plane.data());
+    constraint_plane_ptr = thrust::raw_pointer_cast(constraint_plane.data());
+    ball_ptr = thrust::raw_pointer_cast(ball.data());
+    direction_ptr = thrust::raw_pointer_cast(direction.data());
+
+    num_contact_planes = 0;
+    num_constraint_planes = 0;
+    num_balls = 0;
+    num_directions = 0;
+
+    drag_coefficient = 0;
+    fixed = false;
+}
+
+CUDA_LOCAL_CONSTRAINTS::CUDA_LOCAL_CONSTRAINTS(LOCAL_CONSTRAINTS & c) {
+    contact_plane = c.contact_plane_ptr;
+    constraint_plane = c.constraint_plane_ptr;
+    ball = c.ball_ptr;
+    direction = c.direction_ptr;
+
+    num_contact_planes = c.num_contact_planes;
+    num_constraint_planes = c.num_constraint_planes;
+    num_balls = c.num_balls;
+    num_directions = c.num_directions;
+
+    fixed = c.fixed;
+    drag_coefficient = c.drag_coefficient;
+}
+
+#endif
 
 #ifdef GRAPHICS
 

@@ -6,13 +6,14 @@
 #define LOCH_MASS_H
 
 #include "vec.h"
+#include "object.h"
 
 class Mass;
 struct CUDA_MASS;
 
 //Struct with CPU Spring properties used for optimal memory allocation on GPU memory
 struct CUDA_MASS {
-    CUDA_MASS() {};
+    CUDA_MASS() = default;
     CUDA_MASS(Mass & mass);
 
     double m; // mass in kg
@@ -27,9 +28,19 @@ struct CUDA_MASS {
     Vec color;
 #endif
 
-    bool fixed; // is the mass position fixed?
     bool valid;
+
+#ifdef CONSTRAINTS
+    CUDA_LOCAL_CONSTRAINTS constraints;
+#endif
+
 };
+
+#ifdef CONSTRAINTS
+enum CONSTRAINT_TYPE {
+    CONSTRAINT_PLANE, CONTACT_PLANE, BALL, DIRECTION
+};
+#endif
 
 class Mass {
 public:
@@ -42,21 +53,28 @@ public:
     Vec acc; // acceleration in m/s^2
     Vec force; // force in kg m / s^2
 
-    bool fixed; // is the mass position fixed?
     bool valid;
 
     int ref_count;
-    struct CUDA_MASS * arrayptr; //Pointer to struct version for GPU cudaMemAlloc
+    CUDA_MASS * arrayptr; //Pointer to struct version for GPU cudaMemAlloc
+
+#ifdef CONSTRAINTS
+    LOCAL_CONSTRAINTS constraints;
+    void addConstraint(CONSTRAINT_TYPE type, const Vec & vec, double num);
+    void fix();
+    void unfix();
+#endif
 
 #ifdef GRAPHICS
     Vec color;
 #endif
 
     Mass(const Vec & position, double mass = 0.1, bool fixed = false, double dt = 0.0001);
+
 private:
     //Set
     Mass();
-    Mass(struct CUDA_MASS & mass);
+    void operator=(CUDA_MASS & mass);
 
     friend class Simulation;
 };

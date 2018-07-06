@@ -62,6 +62,7 @@ target_link_libraries(nographics PRIVATE cuda)
 
 add_executable(graphics src/main.cpp ${SOURCE_FILES} ${HEADERS}) # create graphics target
 target_compile_definitions(graphics PRIVATE GRAPHICS) # defines the GRAPHICS preprocessor variable
+target_compile_definitions(graphics PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
 
 target_compile_features(graphics PUBLIC cxx_std_11) # same as above
 set_target_properties(graphics PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
