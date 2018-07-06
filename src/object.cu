@@ -6,56 +6,33 @@
 #include <cmath>
 #include "sim.h"
 
-Vec Plane::getForce(const Vec & position) { // returns force on an object based on its position, e.g. plane or
-    double disp = dot(position, _normal) - _offset;
-    return (disp < 0) ? - disp * NORMAL * _normal : 0 * _normal; // TODO fix this for the host
-}
-
-Plane::Plane(const Vec & normal, double d) {
-    _offset = d;
-    _normal = normal;
-}
-
-void Plane::translate(const Vec & displ) {
-    _offset += dot(displ, _normal);
-}
-
-void Ball::translate(const Vec & displ) {
-    _center += displ;
-}
-
-Ball::Ball(const Vec & center, double r) {
-    _center = center;
-    _radius = r;
-}
-
 void Container::setMassValue(double m) { // set masses for all Mass objects
     for (Mass * mass : masses) {
-        mass -> setMass(m);
+        mass -> m += m;
     }
 }
 
 void Container::setKValue(double k) {
     for (Spring * spring : springs) {
-        spring -> setK(k);
+        spring -> _k = k;
     }
 }
 
 void Container::setDeltaTValue(double dt) { // set masses for all Mass objects
     for (Mass * mass : masses) {
-        mass -> setDeltaT(dt);
+        mass -> dt += dt;
     }
 }
 
 void Container::setRestLengthValue(double len) { // set masses for all Mass objects
     for (Spring * spring : springs) {
-        spring -> setRestLength(len);
+        spring -> _rest = len;
     }
 }
 
 void Container::makeFixed() {
     for (Mass * mass : masses) {
-        mass -> makeFixed();
+        mass -> fixed = true;
     }
 }
 
@@ -75,13 +52,13 @@ Cube::Cube(const Vec & center, double side_length) {
     }
 
     for (Spring * s : springs) {
-        s -> setRestLength((s -> _right -> getPosition() - s -> _left -> getPosition()).norm());
+        s -> setRestLength((s -> _right -> pos - s -> _left -> pos).norm());
     }
 }
 
 void Cube::translate(const Vec & displ) {
     for (Mass * m : masses) {
-        m->translate(displ);
+        m -> pos += displ;
     }
 }
 
@@ -144,7 +121,7 @@ Lattice::Lattice(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
     }
 
     for (Spring * s : springs) {
-        s -> setRestLength((s -> _right -> getPosition() - s -> _left -> getPosition()).norm());
+        s -> setRestLength((s -> _right -> pos - s -> _left -> pos).norm());
     }
 }
 
@@ -152,12 +129,6 @@ void Lattice::translate(const Vec &displ) {
     for (Mass * m : masses) {
         m -> pos += displ;
     }
-}
-
-Vec Ball::getForce(const Vec & position) {
-    double dist = (position - _center).norm();
-//    std::cout << dist << std::endl;
-    return (dist <= _radius) ? NORMAL * (position - _center) / dist : Vec(0, 0, 0);
 }
 
 #ifdef GRAPHICS
@@ -239,7 +210,6 @@ void Ball::generateBuffers() {
         subdivide(&vertex_data[3 * 3 * (int) pow(4, depth) * i], vdata[tindices[i][0]], vdata[tindices[i][1]], vdata[tindices[i][2]], depth);
     }
 
-
     glGenBuffers(1, &vertices); // create buffer for these vertices
     glBindBuffer(GL_ARRAY_BUFFER, vertices);
     glBufferData(GL_ARRAY_BUFFER, 20 * 3 * 3 * (int) pow(4, depth) * sizeof(GLfloat), vertex_data, GL_STATIC_DRAW);
@@ -258,6 +228,8 @@ void Ball::generateBuffers() {
 
     delete [] color_data;
     delete [] vertex_data;
+
+    _initialized = true;
 }
 
 void Ball::draw() {
@@ -295,7 +267,7 @@ void Ball::draw() {
 
 #ifdef GRAPHICS
 
-void Plane::generateBuffers() {
+void ContactPlane::generateBuffers() {
 
     float length = 5;
     float width = 5;
@@ -393,9 +365,11 @@ void Plane::generateBuffers() {
     glGenBuffers(1, &colors);
     glBindBuffer(GL_ARRAY_BUFFER, colors);
     glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
+
+    _initialized = true;
 }
 
-void Plane::draw() {
+void ContactPlane::draw() {
     // 1st attribute buffer : vertices
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, vertices);

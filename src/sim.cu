@@ -3,6 +3,7 @@
 //
 
 #include "sim.h"
+#include "../include/object.h"
 #include <thrust/remove.h>
 #include <thrust/execution_policy.h>
 
@@ -64,10 +65,18 @@ void Simulation::freeGPU() {
 
     for (Spring * s : springs) {
         if (s -> _left && ! s -> _left -> valid) {
+            if (s -> _left -> arrayptr) {
+                gpuErrchk(cudaFree(s -> _left -> arrayptr));
+            }
+
             delete s -> _left;
         }
 
         if (s -> _right && ! s -> _right -> valid) {
+            if (s -> _right -> arrayptr) {
+                gpuErrchk(cudaFree(s -> _right -> arrayptr));
+            }
+
             delete s -> _right;
         }
         
@@ -78,21 +87,12 @@ void Simulation::freeGPU() {
         delete m;
     }
 
-    for (Constraint * c : constraints)
+    for (Constraint * c : constraints)  {
         delete c;
-
-    for (Container * c : objs)
-        delete c;
-
-    thrust::host_vector<CUDA_MASS *> m = d_masses;
-    thrust::host_vector<CUDA_SPRING *> s = d_springs;
-
-    for (CUDA_MASS * mass : m) { // this leaves some springs free. Thankfully not too many TODO
-        gpuErrchk(cudaFree(mass));
     }
 
-    for (CUDA_SPRING * spring : s) {
-        gpuErrchk(cudaFree(spring));
+    for (Container * c : objs) {
+        delete c;
     }
 
     d_balls.clear();
@@ -682,7 +682,7 @@ void Simulation::setMass(double m) {
     }
 
     for (Mass * mass : masses) {
-        mass -> setMass(m);
+        mass -> m += m;
     }
 }
 void Simulation::setMassDeltaT(double dt) {
@@ -692,7 +692,7 @@ void Simulation::setMassDeltaT(double dt) {
     }
 
     for (Mass * m : masses) {
-        m -> setDeltaT(dt);
+        m -> dt += dt;
     }
 }
 
@@ -987,7 +987,7 @@ __global__ void computeSpringForces(CUDA_SPRING ** d_spring, int num_springs) {
     }
 }
 
-__global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, CUDA_CONSTRAINT_STRUCT c, int num_masses) {
+__global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, CUDA_GLOBAL_CONSTRAINTS c, int num_masses) {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
 
     if (i < num_masses) {
@@ -997,11 +997,11 @@ __global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, CUDA_CONSTRAINT_STRUCT 
             return;
 
         for (int j = 0; j < c.num_planes; j++) {
-            mass.force += c.d_planes[j].getForce(mass.pos);
+            c.d_planes[j].applyForce(d_mass[i]);
         }
 
         for (int j = 0; j < c.num_balls; j++) {
-            mass.force += c.d_balls[j].getForce(mass.pos);
+            c.d_balls[j].applyForce(d_mass[i]);
         }
 
         mass.force += Vec(0, 0, - G * mass.m); // don't need atomics
@@ -1234,13 +1234,12 @@ void Simulation::start(double time) {
 
     updateCudaParameters();
 
-    if (update_constraints) {
-        d_constraints.d_balls = thrust::raw_pointer_cast(&d_balls[0]);
-        d_constraints.d_planes = thrust::raw_pointer_cast(&d_planes[0]);
-        d_constraints.num_balls = d_balls.size();
-        d_constraints.num_planes = d_planes.size();
-        update_constraints = false;
-    }
+    d_constraints.d_balls = thrust::raw_pointer_cast(&d_balls[0]);
+    d_constraints.d_planes = thrust::raw_pointer_cast(&d_planes[0]);
+    d_constraints.num_balls = d_balls.size();
+    d_constraints.num_planes = d_planes.size();
+
+    update_constraints = false;
 
 //    cudaDeviceSetLimit(cudaLimitMallocHeapSize, 5 * (masses.size() * sizeof(CUDA_MASS) + springs.size() * sizeof(CUDA_SPRING)));
     toArray();
@@ -1331,14 +1330,6 @@ void Simulation::resume() {
 
     updateCudaParameters();
 
-    if (update_constraints) {
-        d_constraints.d_balls = thrust::raw_pointer_cast(&d_balls[0]);
-        d_constraints.d_planes = thrust::raw_pointer_cast(&d_planes[0]);
-        d_constraints.num_balls = d_balls.size();
-        d_constraints.num_planes = d_planes.size();
-        update_constraints = false;
-    }
-
     cudaDeviceSynchronize();
 
     RUNNING = true;
@@ -1373,6 +1364,20 @@ void Simulation::execute() {
                 resize_buffers = false;
                 update_colors = true;
                 update_indices = true;
+            }
+
+            if (update_constraints) {
+                d_constraints.d_balls = thrust::raw_pointer_cast(&d_balls[0]);
+                d_constraints.d_planes = thrust::raw_pointer_cast(&d_planes[0]);
+                d_constraints.num_balls = d_balls.size();
+                d_constraints.num_planes = d_planes.size();
+
+                for (Constraint * c : constraints) { // generate buffers for constraint objects
+                    if (! c -> _initialized)
+                        c -> generateBuffers();
+                }
+
+                update_constraints = false;
             }
 #endif
             continue;
@@ -1641,8 +1646,11 @@ Cube * Simulation::createCube(const Vec & center, double side_length) { // creat
         assert(false);
     }
 
-
     Cube * cube = new Cube(center, side_length);
+
+    d_masses.reserve(masses.size() + cube -> masses.size());
+    d_springs.reserve(springs.size() + cube -> springs.size());
+
     for (Mass * m : cube -> masses) {
         createMass(m);
     }
@@ -1662,8 +1670,10 @@ Lattice * Simulation::createLattice(const Vec & center, const Vec & dims, int nx
         assert(false);
     }
 
-
     Lattice * l = new Lattice(center, dims, nx, ny, nz);
+
+    d_masses.reserve(masses.size() + l -> masses.size());
+    d_springs.reserve(springs.size() + l -> springs.size());
 
     for (Mass * m : l -> masses) {
         createMass(m);
@@ -1678,30 +1688,35 @@ Lattice * Simulation::createLattice(const Vec & center, const Vec & dims, int nx
     return l;
 }
 
-Plane * Simulation::createPlane(const Vec & abc, double d ) { // creates half-space ax + by + cz < d
+void Simulation::createPlane(const Vec & abc, double d ) { // creates half-space ax + by + cz < d
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
         assert(false);
     }
 
-
-    Plane * new_plane = new Plane(abc, d);
+    ContactPlane * new_plane = new ContactPlane(abc, d);
     constraints.push_back(new_plane);
-    d_planes.push_back(CUDA_PLANE(*new_plane));
-    return new_plane;
+    d_planes.push_back(CudaContactPlane(*new_plane));
+
+    update_constraints = true;
 }
 
-Ball * Simulation::createBall(const Vec & center, double r ) { // creates ball with radius r at position center
+void Simulation::createBall(const Vec & center, double r ) { // creates ball with radius r at position center
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
         assert(false);
     }
-
 
     Ball * new_ball = new Ball(center, r);
     constraints.push_back(new_ball);
-    d_balls.push_back(CUDA_BALL(*new_ball));
-    return new_ball;
+    d_balls.push_back(CudaBall(*new_ball));
+
+    update_constraints = true;
+}
+
+void Simulation::clearConstraints() { // clears global constraints only
+    this -> constraints.clear();
+    update_constraints = true;
 }
 
 void Simulation::printPositions() {
@@ -1720,7 +1735,7 @@ void Simulation::printPositions() {
         std::cout << "\nHOST MASSES: " << std::endl;
         int count = 0;
         for (Mass * m : masses) {
-            std::cout << count << ": " << m -> getPosition() << std::endl;
+            std::cout << count << ": " << m -> pos << std::endl;
             count++;
         }
     }
@@ -1743,7 +1758,7 @@ void Simulation::printForces() {
     else {
         std::cout << "\nHOST FORCES: " << std::endl;
         for (Mass * m : masses) {
-            std::cout << m->getForce() << std::endl;
+            std::cout << m -> force << std::endl;
         }
     }
 

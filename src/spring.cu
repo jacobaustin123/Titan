@@ -5,14 +5,14 @@
 #include "spring.h"
 
 Vec Spring::getForce() { // computes force on right object. left force is - right force.
-    Vec temp = (_right -> getPosition()) - (_left -> getPosition());
+    Vec temp = (_right -> pos) - (_left -> pos);
     return _k * (_rest - temp.norm()) * (temp / temp.norm());
 }
 
 void Spring::setForce() { // computes force on right object. left force is - right force.
     Vec f = getForce();
-    _right -> addForce(f);
-    _left -> addForce(-f);
+    _right -> force += f;
+    _left -> force += -f;
 }
 
 Spring::Spring(const CUDA_SPRING & spr) {

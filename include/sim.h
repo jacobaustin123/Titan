@@ -65,8 +65,10 @@ public:
     void setAll();
 
     // Constraints
-    Plane * createPlane(const Vec & abc, double d ); // creates half-space ax + by + cz < d
-    Ball * createBall(const Vec & center, double r ); // creates ball with radius r at position center
+    void createPlane(const Vec & abc, double d ); // creates half-space ax + by + cz < d
+    void createBall(const Vec & center, double r ); // creates ball with radius r at position center
+
+    void clearConstraints(); // clears global constraints only
 
     // Containers
     Cube * createCube(const Vec & center, double side_length); // creates cube
@@ -136,10 +138,10 @@ public:
     thrust::device_vector<CUDA_MASS *> d_masses;
     thrust::device_vector<CUDA_SPRING *> d_springs;
 
-    thrust::device_vector<CUDA_PLANE> d_planes; // used for constraints
-    thrust::device_vector<CUDA_BALL> d_balls; // used for constraints
+    thrust::device_vector<CudaContactPlane> d_planes; // used for constraints
+    thrust::device_vector<CudaBall> d_balls; // used for constraints
 
-    CUDA_CONSTRAINT_STRUCT d_constraints;
+    CUDA_GLOBAL_CONSTRAINTS d_constraints;
     bool update_constraints;
 
     void updateCudaParameters();

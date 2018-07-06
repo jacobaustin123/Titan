@@ -21,8 +21,8 @@ int main()
     sim.setSpringConstant(10000);
     sim.setMassDeltaT(0.0001);
 
-    Plane * p = sim.createPlane(Vec(0, 0, 1), 0); // add a constraint (can't go below plane z = 0)
-//    Ball * b = sim.createBall(Vec(0, 0, 0), 5);
+//    sim.createPlane(Vec(0, 0, 1), 0); // add a constraint (can't go below plane z = 0)
+    sim.createBall(Vec(0, 0, 0), 2);
 
     std::cout << "running simulation with " << sim.masses.size() << " masses and " << sim.springs.size() << " springs." << std::endl;
 
@@ -34,12 +34,14 @@ int main()
 //    sim.resume();
 
     while (sim.running()) {
-        sim.pause(sim.time() + 1.0);
+        sim.pause(sim.time() + 2.0);
 
-        sim.get(l1);
-//        sim.printPositions();
-        l1 -> setKValue(10000 * exp(-sim.time()));
-        sim.set(l1);
+        sim.createBall(Vec(5 * sin(sim.time()), 5 * cos(sim.time()), 5 * sin(sim.time())), 2);
+
+//        sim.get(l1);
+////        sim.printPositions();
+//        l1 -> setKValue(10000 * exp(-sim.time() / 3));
+//        sim.set(l1);
 
 //        sim.getAll();
 //        sim.setSpringConstant(10000 * exp(-sim.time()));
