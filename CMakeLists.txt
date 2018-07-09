@@ -55,10 +55,13 @@ if (glm_FOUND)
     link_libraries(${glm_LIBRARIES})
 endif()
 
+file(COPY ${SOURCE_DIR}/shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
 add_executable(nographics src/main.cpp ${SOURCE_FILES} ${HEADERS}) # create nographics target
 target_compile_features(nographics PUBLIC cxx_std_11)
 set_target_properties(nographics PROPERTIES CUDA_SEPARABLE_COMPILATION ON) # allows declarations and implementations to be separated
 target_link_libraries(nographics PRIVATE cuda)
+target_compile_definitions(nographics PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
 
 add_executable(graphics src/main.cpp ${SOURCE_FILES} ${HEADERS}) # create graphics target
 target_compile_definitions(graphics PRIVATE GRAPHICS) # defines the GRAPHICS preprocessor variable

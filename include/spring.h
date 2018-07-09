@@ -20,9 +20,6 @@ public:
     //Properties
     double _k; // spring constant (N/m)
     double _rest; // spring rest length (meters)
-    Mass * _left; // pointer to left mass object // private
-    Mass * _right; // pointer to right mass object
-    CUDA_SPRING *arrayptr; //Pointer to struct version for GPU cudaMalloc
 
     //Set
     Spring() { _left = nullptr; _right = nullptr; arrayptr = nullptr; _k = 10000.0; _rest = 1.0; }; //Constructor
@@ -46,6 +43,17 @@ public:
 
     //Get
     Vec getForce(); // computes force on right object. left force is - right force.
+
+private:
+    Mass * _left; // pointer to left mass object // private
+    Mass * _right; // pointer to right mass object
+    CUDA_SPRING *arrayptr; //Pointer to struct version for GPU cudaMalloc
+
+    friend class Simulation;
+    friend struct CUDA_SPRING;
+    friend class Container;
+    friend class Lattice;
+    friend class Cube;
 };
 
 struct CUDA_SPRING {

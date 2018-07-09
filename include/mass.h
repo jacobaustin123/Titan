@@ -56,11 +56,14 @@ public:
     bool valid;
 
     int ref_count;
-    CUDA_MASS * arrayptr; //Pointer to struct version for GPU cudaMemAlloc
 
 #ifdef CONSTRAINTS
     LOCAL_CONSTRAINTS constraints;
     void addConstraint(CONSTRAINT_TYPE type, const Vec & vec, double num);
+    void clearConstraints(CONSTRAINT_TYPE type);
+    void clearAllConstraints();
+
+    void setDrag(double C);
     void fix();
     void unfix();
 #endif
@@ -72,13 +75,19 @@ public:
     Mass(const Vec & position, double mass = 0.1, bool fixed = false, double dt = 0.0001);
 
 private:
-    //Set
+    void decrementRefCount();
+
+    CUDA_MASS * arrayptr; //Pointer to struct version for GPU cudaMemAlloc
+
     Mass();
     void operator=(CUDA_MASS & mass);
 
     friend class Simulation;
+    friend class Spring;
+    friend struct CUDA_SPRING;
+    friend class Container;
+    friend class Lattice;
+    friend class Cube;
 };
-
-void decrementRefCount(Mass * m);
 
 #endif //LOCH_MASS_H

@@ -4,6 +4,7 @@
 
 #include "mass.h"
 
+
 Mass::Mass() {
     m = 1.0;
     dt = 0.0001;
@@ -95,6 +96,33 @@ void Mass::addConstraint(CONSTRAINT_TYPE type, const Vec & vec, double num) { //
     }
 }
 
+void Mass::clearConstraints(CONSTRAINT_TYPE type) {
+    if (type == 0) {
+        this -> constraints.constraint_plane.clear();
+        this -> constraints.constraint_plane.shrink_to_fit();
+        this -> constraints.num_constraint_planes = 0;
+    } else if (type == 1) {
+        this -> constraints.contact_plane.clear();
+        this -> constraints.contact_plane.shrink_to_fit();
+        this -> constraints.num_contact_planes = 0;
+    } else if (type == 2) {
+        this -> constraints.ball.clear();
+        this -> constraints.ball.shrink_to_fit();
+        this -> constraints.num_balls = 0;
+    } else if (type == 3) {
+        this -> constraints.direction.clear();
+        this -> constraints.direction.shrink_to_fit();
+        this -> constraints.num_directions = 0;
+    }
+}
+
+void Mass::clearAllConstraints() {
+    clearConstraints(CONSTRAINT_PLANE);
+    clearConstraints(CONTACT_PLANE);
+    clearConstraints(DIRECTION);
+    clearConstraints(BALL);
+}
+
 void Mass::fix() {
     this -> constraints.fixed = true;
 }
@@ -102,15 +130,20 @@ void Mass::unfix() {
     this -> constraints.fixed = false;
 }
 
+void Mass::setDrag(double C) {
+    this -> constraints.drag_coefficient = C;
+}
+
+
 #endif
 
-void decrementRefCount(Mass * m) {
-    if (--m -> ref_count == 0) {
+void Mass::decrementRefCount() {
+    if (--ref_count == 0) {
 
-        if (m -> arrayptr) {
-            cudaFree(m -> arrayptr);
+        if (arrayptr) {
+            cudaFree(arrayptr);
         }
 
-        delete m;
+        delete this;
     }
 }

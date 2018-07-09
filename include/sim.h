@@ -37,7 +37,6 @@
 #include <cuda_device_runtime_api.h>
 #include <thread>
 
-__device__ const double G = 9.81;
 
 class Simulation {
 public:
@@ -54,7 +53,7 @@ public:
     void deleteContainer(Container * c);
 
     void get(Mass *m);
-    void get(Spring *s); // not really useful
+    void get(Spring *s); // not really useful, no commands change springs
     void get(Container *c);
 
     void set(Mass * m);
@@ -71,14 +70,16 @@ public:
     void clearConstraints(); // clears global constraints only
 
     // Containers
+    Container * createContainer();
     Cube * createCube(const Vec & center, double side_length); // creates cube
     Lattice * createLattice(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
 
     // Bulk modifications, only update CPU
     void setSpringConstant(double k);
+    void setMassValues(double m);
+    void setDeltaT(double dt);
+
     void defaultRestLength();
-    void setMass(double m);
-    void setMassDeltaT(double dt);
 
     // Control
     void start(double time = 1E20); // start simulation, run until simulation time T
@@ -94,12 +95,17 @@ public:
     double time() { return T; }
     double running() { return RUNNING; }
 
-
-
-    // private
+    void printPositions();
+    void printForces();
 
     Simulation();
     ~Simulation();
+
+    Spring * getSpringByIndex(int i);
+    Mass * getMassByIndex(int i);
+    Container * getContainerByIndex(int i);
+
+private:
 
     void freeGPU();
 
@@ -112,10 +118,7 @@ public:
     void execute(); // same as above but w/out reset
 
     //Prints
-    void printPositions();
-    void printForces();
     void printSprings();
-//    void printSpringForces();
 
     Mass * createMass(Mass * m); // utility
     Spring * createSpring(Spring * s); // utility
@@ -130,10 +133,10 @@ public:
     bool ENDED;
     bool FREED;
 
-    std::list<Mass *> masses;
-    std::list<Spring *> springs;
-    std::list<Constraint *> constraints;
-    std::list<Container *> objs;
+    std::vector<Mass *> masses;
+    std::vector<Spring *> springs;
+    std::vector<Constraint *> constraints;
+    std::vector<Container *> objs;
 
     thrust::device_vector<CUDA_MASS *> d_masses;
     thrust::device_vector<CUDA_SPRING *> d_springs;
@@ -212,8 +215,8 @@ __global__ void createSpringPointers(CUDA_SPRING ** ptrs, CUDA_SPRING * data, in
 __global__ void createMassPointers(CUDA_MASS ** ptrs, CUDA_MASS * data, int size);
 
 __global__ void computeSpringForces(CUDA_SPRING * device_springs, int num_springs);
-__global__ void computeMassForces(CUDA_MASS * device_masses, int num_masses);
+//__global__ void computeMassForces(CUDA_MASS * device_masses, int num_masses);
 __global__ void massForcesAndUpdate(CUDA_SPRING * device_springs, Constraint ** d_constraints, int num_springs, int num_constraints);
-__global__ void update(CUDA_MASS * d_mass, int num_masses);
+//__global__ void update(CUDA_MASS * d_mass, int num_masses);
 
 #endif //LOCH_SIM_H

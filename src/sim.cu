@@ -3,9 +3,11 @@
 //
 
 #include "sim.h"
-#include "../include/object.h"
+
 #include <thrust/remove.h>
 #include <thrust/execution_policy.h>
+
+__device__ const double G = 9.81;
 
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=false)
@@ -179,6 +181,24 @@ Mass * Simulation::createMass(Mass * m) {
     }
 }
 
+Spring * Simulation::getSpringByIndex(int i) {
+    assert(i < springs.size() && i >= 0);
+
+    return springs[i];
+}
+
+Mass * Simulation::getMassByIndex(int i) {
+    assert(i < masses.size() && i >= 0);
+
+    return masses[i];
+}
+
+Container * Simulation::getContainerByIndex(int i) {
+    assert(i < objs.size() && i >= 0);
+
+    return objs[i];
+}
+
 Mass * Simulation::createMass() {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
@@ -270,8 +290,8 @@ void Simulation::deleteMass(Mass * m) {
     }
 
     if (!STARTED) {
-        masses.remove(m);
-        decrementRefCount(m);
+        masses.resize(std::remove(masses.begin(), masses.end(), m) - masses.begin());
+        m -> decrementRefCount();
     } else {
         if (RUNNING) {
             assert(false);
@@ -283,11 +303,11 @@ void Simulation::deleteMass(Mass * m) {
 
 
         thrust::remove(thrust::device, d_masses.begin(), d_masses.begin() + masses.size(), m -> arrayptr);
-        masses.remove(m);
+        masses.resize(std::remove(masses.begin(), masses.end(), m) - masses.begin());
 
         d_masses.resize(masses.size());
 
-        decrementRefCount(m);
+        m -> decrementRefCount();
 
 
 #ifdef GRAPHICS
@@ -303,10 +323,10 @@ void Simulation::deleteSpring(Spring * s) {
     }
 
     if (!STARTED) {
-        springs.remove(s);
+        springs.resize(std::remove(springs.begin(), springs.end(), s) - springs.begin());
 
-        if (s -> _left) { decrementRefCount(s -> _left); }
-        if (s -> _right) { decrementRefCount(s -> _right); }
+        if (s -> _left) { s -> _left -> decrementRefCount(); }
+        if (s -> _right) { s -> _right -> decrementRefCount(); }
 
     } else {
         if (RUNNING) {
@@ -316,11 +336,10 @@ void Simulation::deleteSpring(Spring * s) {
         gpuErrchk(cudaFree(s -> arrayptr));
         thrust::remove(thrust::device, d_springs.begin(), d_springs.begin() + springs.size(), s -> arrayptr);
 
-        springs.remove(s);
-        d_springs.resize(springs.size());
+        springs.resize(std::remove(springs.begin(), springs.end(), s) - springs.begin());
 
-        if (s -> _left) { decrementRefCount(s -> _left); }
-        if (s -> _right) { decrementRefCount(s -> _right); }
+        if (s -> _left) { s -> _left -> decrementRefCount(); }
+        if (s -> _right) { s -> _right -> decrementRefCount(); }
 
         delete s;
 
@@ -365,6 +384,41 @@ struct spring_in_list {
     int size;
 };
 
+struct host_mass_in_list {
+    __device__ __host__ host_mass_in_list(Mass ** ptr, int n) : list(ptr), size(n) {};
+
+    __device__ __host__ bool operator()(Mass * data) {
+        for (int i = 0; i < size; i++) {
+            if (list[i] == data) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    Mass ** list;
+    int size;
+};
+
+
+struct host_spring_in_list {
+    __device__ __host__ host_spring_in_list(Spring ** ptr, int n) : list(ptr), size(n) {};
+
+    __device__ __host__ bool operator()(Spring * data) {
+        for (int i = 0; i < size; i++) {
+            if (list[i] == data) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    Spring ** list;
+    int size;
+};
+
 void Simulation::deleteContainer(Container * c) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
@@ -386,20 +440,23 @@ void Simulation::deleteContainer(Container * c) {
         }
 
         delete c;
-        objs.remove(c);
+        objs.resize(std::remove(objs.begin(), objs.end(), c) - objs.begin());
 
         return;
     }
 
     {
+        std::cout << "deleting masses" << std::endl;
+
         CUDA_MASS ** d_ptrs = new CUDA_MASS * [c -> masses.size()];
 
         for (int i = 0; i < c -> masses.size(); i++) {
             d_ptrs[i] = c -> masses[i] -> arrayptr;
-            masses.remove(c -> masses[i]);
             c -> masses[i] -> valid = false;
-            decrementRefCount(c -> masses[i]);
+            c -> masses[i] -> decrementRefCount();
         }
+
+        masses.resize(thrust::remove_if(thrust::host, masses.begin(), masses.end(), host_mass_in_list(c -> masses.data(), c -> masses.size())) - masses.begin());
 
         CUDA_MASS ** temp;
         gpuErrchk(cudaMalloc((void **) &temp, sizeof(CUDA_MASS *) * c -> masses.size()));
@@ -413,28 +470,35 @@ void Simulation::deleteContainer(Container * c) {
     }
 
     {
+        std::cout << "deleting springs" << std::endl;
+
         CUDA_SPRING ** d_ptrs = new CUDA_SPRING * [c -> springs.size()];
 
         for (int i = 0; i < c -> springs.size(); i++) {
             Spring * s = c -> springs[i];
 
             d_ptrs[i] = s -> arrayptr;
-            springs.remove(s);
             gpuErrchk(cudaFree(s -> arrayptr));
 
-            if (s -> _left) { decrementRefCount(s -> _left); }
-            if (s -> _right) { decrementRefCount(s -> _right); }
+            if (s -> _left) { s -> _left -> decrementRefCount(); }
+            if (s -> _right) { s -> _right -> decrementRefCount(); }
         }
+
+        springs.resize(thrust::remove_if(thrust::host, springs.begin(), springs.end(), host_spring_in_list(c -> springs.data(), c -> springs.size())) - springs.begin());
 
         CUDA_SPRING ** temp;
         gpuErrchk(cudaMalloc((void **) &temp, sizeof(CUDA_SPRING *) * c -> springs.size()));
         gpuErrchk(cudaMemcpy(temp, d_ptrs, c -> springs.size() * sizeof(CUDA_SPRING *), cudaMemcpyHostToDevice));
         delete [] d_ptrs;
 
+        std::cout << "remove called" << std::endl;
+
         thrust::remove_if(thrust::device, d_springs.begin(), d_springs.begin() + springs.size() + c -> springs.size(), spring_in_list(temp, c -> springs.size()));
         d_springs.resize(springs.size());
 
         gpuErrchk(cudaFree(temp));
+
+        std::cout << "done" << std::endl;
     }
 
 #ifdef GRAPHICS // TODO make a decision about this
@@ -442,7 +506,7 @@ void Simulation::deleteContainer(Container * c) {
 #endif
 
     delete c;
-    objs.remove(c);
+    objs.resize(std::remove(objs.begin(), objs.end(), c) - objs.begin());
 }
 
 //void Simulation::deleteContainer(Container * c) {
@@ -671,7 +735,7 @@ void Simulation::defaultRestLength() {
     }
 }
 
-void Simulation::setMass(double m) {
+void Simulation::setMassValues(double m) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
         assert(false);
@@ -681,7 +745,7 @@ void Simulation::setMass(double m) {
         mass -> m += m;
     }
 }
-void Simulation::setMassDeltaT(double dt) {
+void Simulation::setDeltaT(double dt) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
         assert(false);
@@ -965,12 +1029,18 @@ __global__ void computeSpringForces(CUDA_SPRING ** d_spring, int num_springs) {
         Vec temp = (spring._right -> pos) - (spring._left -> pos);
         Vec force = spring._k * (spring._rest - temp.norm()) * (temp / temp.norm());
 
+#ifdef CONSTRAINTS
         if (spring._right -> constraints.fixed == false) {
             spring._right->force.atomicVecAdd(force); // need atomics here
         }
         if (spring._left -> constraints.fixed == false) {
             spring._left->force.atomicVecAdd(-force);
         }
+#else
+        spring._right->force.atomicVecAdd(force);
+        spring._left->force.atomicVecAdd(-force);
+#endif
+
     }
 }
 
@@ -1012,7 +1082,9 @@ __global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, CUDA_GLOBAL_CONSTRAINTS
             mass.constraints.direction[j].applyForce(&mass);
         }
 
-        mass.force += mass.constraints.drag_coefficient * pow(mass.vel.norm(), 2) * mass.vel; // drag
+        if (mass.vel.norm() != 0.0) {
+            mass.force += - mass.constraints.drag_coefficient * pow(mass.vel.norm(), 2) * mass.vel / mass.vel.norm(); // drag
+        }
 #endif
 
         mass.acc = mass.force / mass.m;
@@ -1646,6 +1718,12 @@ void Simulation::draw() {
 
 #endif
 
+Container * Simulation::createContainer() {
+    Container * c = new Container();
+    objs.push_back(c);
+    return c;
+}
+
 Cube * Simulation::createCube(const Vec & center, double side_length) { // creates half-space ax + by + cz < d
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
@@ -1680,6 +1758,8 @@ Lattice * Simulation::createLattice(const Vec & center, const Vec & dims, int nx
 
     d_masses.reserve(masses.size() + l -> masses.size());
     d_springs.reserve(springs.size() + l -> springs.size());
+
+    std::cout << "creating lattice" << std::endl;
 
     for (Mass * m : l -> masses) {
         createMass(m);
@@ -1788,3 +1868,4 @@ void Simulation::printSprings() {
 
     std::cout << std::endl;
 }
+

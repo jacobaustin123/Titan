@@ -15,7 +15,6 @@
 // Include GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <thrust/device_vector.h>
 
 #endif
 
@@ -147,7 +146,7 @@ struct Ball : public Constraint {
 };
 
 struct CudaBall {
-    CUDA_CALLABLE_MEMBER CudaBall() = default;
+    CudaBall() = default;
     CUDA_CALLABLE_MEMBER CudaBall(const Vec & center, double radius);
     CUDA_CALLABLE_MEMBER CudaBall(const Ball & b);
 
@@ -185,7 +184,7 @@ struct ContactPlane : public Constraint {
 };
 
 struct CudaContactPlane {
-    CUDA_CALLABLE_MEMBER CudaContactPlane() = default;
+    CudaContactPlane() = default;
     CUDA_CALLABLE_MEMBER CudaContactPlane(const Vec & normal, double offset);
     CudaContactPlane(const ContactPlane & p);
 
@@ -197,7 +196,7 @@ struct CudaContactPlane {
 
 
 struct CudaConstraintPlane {
-    CUDA_CALLABLE_MEMBER CudaConstraintPlane() = default;
+    CudaConstraintPlane() = default;
 
     CUDA_CALLABLE_MEMBER CudaConstraintPlane(const Vec & normal, double friction);
 
@@ -208,7 +207,7 @@ struct CudaConstraintPlane {
 };
 
 struct CudaDirection {
-    CUDA_CALLABLE_MEMBER CudaDirection() = default;
+    CudaDirection() = default;
 
     CUDA_CALLABLE_MEMBER CudaDirection(const Vec & tangent, double friction);
 
@@ -272,20 +271,21 @@ struct CUDA_LOCAL_CONSTRAINTS {
 #endif
 
 
-
-
-
-
 class Container { // contains and manipulates groups of masses and springs
 public:
     virtual ~Container() {};
-    virtual void translate(const Vec & displ) = 0; // translate all masses by fixed amount
+    void translate(const Vec & displ); // translate all masses by fixed amount
 
-    void setMassValue(double m); // set masses for all Mass objects
-    void setKValue(double k); // set k for all Spring objects
-    void setDeltaTValue(double m); // set masses for all Mass objects
-    void setRestLengthValue(double len); // set masses for all Mass objects
+    void setMassValues(double m); // set masses for all Mass objects
+    void setSpringConstants(double k); // set k for all Spring objects
+    void setDeltaT(double m); // set masses for all Mass objects
+    void setRestLengths(double len); // set masses for all Mass objects
+
     void makeFixed();
+
+    void add(Mass * m);
+    void add(Spring * s);
+    void add(Container * c);
 
     // we can have more of these
     std::vector<Mass *> masses;
@@ -298,8 +298,6 @@ public:
 
     Cube(const Vec & center, double side_length = 1.0);
 
-    void translate(const Vec & displ);
-
     double _side_length;
     Vec _center;
 };
@@ -309,8 +307,6 @@ public:
     ~Lattice() {};
 
     Lattice(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
-
-    void translate(const Vec & displ);
 
     int nx, ny, nz;
     Vec _center, _dims;

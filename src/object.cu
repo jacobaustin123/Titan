@@ -37,67 +37,80 @@ CUDA_CALLABLE_MEMBER void CudaContactPlane::applyForce(CUDA_MASS * m) {
 }
 
 CUDA_CALLABLE_MEMBER CudaConstraintPlane::CudaConstraintPlane(const Vec & normal, double friction) {
+    assert(normal.norm() != 0.0);
+
     _normal = normal / normal.norm();
     _friction = friction;
 }
 
 CUDA_CALLABLE_MEMBER void CudaConstraintPlane::applyForce(CUDA_MASS * m) {
-    printf("a) (%f, %f, %f)\n", m -> force[0], m-> force[1], m-> force[2]);
-    printf("b) (%f, %f, %f)\n", _normal[0], _normal[1], _normal[2]);
-
-    m -> vel += - _normal * dot(m -> vel, _normal); // constraint velocity
-
     double normal_force = dot(m -> force, _normal);
     m -> force += - _normal * normal_force; // constraint force
-    printf("c) (%f, %f, %f) (%f)\n", m -> force[0], m-> force[1], m-> force[2], normal_force);
 
-//    m -> force += - _friction * normal_force * (m -> vel) / (m -> vel).norm(); // apply friction force
+    if (m -> vel.norm() != 0.0) {
+        m -> vel += - _normal * dot(m -> vel, _normal); // constraint velocity
+        m -> force += - _friction * normal_force * (m -> vel) / (m -> vel).norm(); // apply friction force
+    }
 }
 
 CUDA_CALLABLE_MEMBER CudaDirection::CudaDirection(const Vec & tangent, double friction) {
+    assert(tangent.norm() != 0.0);
+
     _tangent = tangent / tangent.norm();
     _friction = friction;
 }
 
 CUDA_CALLABLE_MEMBER void CudaDirection::applyForce(CUDA_MASS * m) {
-    m -> vel = _tangent * dot(m -> vel, _tangent);
-
     Vec normal_force = m -> force - dot(m -> force, _tangent) * _tangent;
-    m -> force += -normal_force;
+    m -> force += - normal_force;
 
-    m -> force += - normal_force.norm() * _friction * _tangent;
+    if (m -> vel.norm() != 0.0) {
+        m -> vel = _tangent * dot(m -> vel, _tangent);
+        m -> force += - normal_force.norm() * _friction * _tangent;
+    }
 }
 
-void Container::setMassValue(double m) { // set masses for all Mass objects
+void Container::setMassValues(double m) { // set masses for all Mass objects
     for (Mass * mass : masses) {
         mass -> m += m;
     }
 }
 
-void Container::setKValue(double k) {
+void Container::setSpringConstants(double k) {
     for (Spring * spring : springs) {
         spring -> _k = k;
     }
 }
 
-void Container::setDeltaTValue(double dt) { // set masses for all Mass objects
+void Container::setDeltaT(double dt) { // set masses for all Mass objects
     for (Mass * mass : masses) {
         mass -> dt += dt;
     }
 }
 
-void Container::setRestLengthValue(double len) { // set masses for all Mass objects
+void Container::setRestLengths(double len) { // set masses for all Mass objects
     for (Spring * spring : springs) {
         spring -> _rest = len;
     }
 }
 
-void Container::makeFixed() {
-    for (Mass * mass : masses) {
-        mass -> constraints.fixed = true;
-    }
+void Container::add(Mass * m) {
+    masses.push_back(m);
 }
 
+void Container::add(Spring * s) {
+    springs.push_back(s);
+}
+
+void Container::add(Container * c) {
+    for (Mass * m : c -> masses) {
+        masses.push_back(m);
+    }
+
+    for (Spring * s : c -> springs) {
+        springs.push_back(s);
+    }
+}
 
 Cube::Cube(const Vec & center, double side_length) {
     _center = center;
@@ -118,7 +131,7 @@ Cube::Cube(const Vec & center, double side_length) {
     }
 }
 
-void Cube::translate(const Vec & displ) {
+void Container::translate(const Vec & displ) {
     for (Mass * m : masses) {
         m -> pos += displ;
     }
@@ -187,24 +200,24 @@ Lattice::Lattice(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
     }
 }
 
-void Lattice::translate(const Vec &displ) {
-    for (Mass * m : masses) {
-        m -> pos += displ;
+#ifdef CONSTRAINTS
+
+void Container::makeFixed() {
+    for (Mass * mass : masses) {
+        mass -> constraints.fixed = true;
     }
 }
 
-#ifdef CONSTRAINTS
-
 LOCAL_CONSTRAINTS::LOCAL_CONSTRAINTS() {
-    constraint_plane = thrust::device_vector<CudaConstraintPlane>(1);
-    contact_plane = thrust::device_vector<CudaContactPlane>(1);
-    ball = thrust::device_vector<CudaBall>(1);
-    direction = thrust::device_vector<CudaDirection>(1);
+//    constraint_plane = thrust::device_vector<CudaConstraintPlane>(1);
+//    contact_plane = thrust::device_vector<CudaContactPlane>(1);
+//    ball = thrust::device_vector<CudaBall>(1);
+//    direction = thrust::device_vector<CudaDirection>(1);
 
-    contact_plane_ptr = thrust::raw_pointer_cast(contact_plane.data());
-    constraint_plane_ptr = thrust::raw_pointer_cast(constraint_plane.data());
-    ball_ptr = thrust::raw_pointer_cast(ball.data());
-    direction_ptr = thrust::raw_pointer_cast(direction.data());
+//    contact_plane_ptr = thrust::raw_pointer_cast(contact_plane.data()); // TODO make sure this is safe
+//    constraint_plane_ptr = thrust::raw_pointer_cast(constraint_plane.data());
+//    ball_ptr = thrust::raw_pointer_cast(ball.data());
+//    direction_ptr = thrust::raw_pointer_cast(direction.data());
 
     num_contact_planes = 0;
     num_constraint_planes = 0;

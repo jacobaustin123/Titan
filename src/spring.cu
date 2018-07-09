@@ -24,7 +24,7 @@ void Spring::defaultLength() { _rest = (_left -> pos - _right -> pos).norm() ; }
 
 void Spring::setLeft(Mass * left) {
     if (_left) {
-        decrementRefCount(_left);
+        _left -> decrementRefCount();
     }
 
     _left = left;
@@ -34,7 +34,7 @@ void Spring::setLeft(Mass * left) {
 
 void Spring::setRight(Mass * right) {
     if (_right) {
-        decrementRefCount(_right);
+        _right -> decrementRefCount();
     }
 
     _right = right;
