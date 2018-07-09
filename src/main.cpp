@@ -1,11 +1,11 @@
 // Include standard headers
-#include <stdio.h>
-#include <stdlib.h>
-#include <cmath>
-#include <ctime>
-#include <chrono>
-#include <thread>
-#include <cstdlib>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <cmath>
+//#include <ctime>
+//#include <chrono>
+//#include <thread>
+//#include <cstdlib>
 
 #include "sim.h"
 
@@ -47,10 +47,16 @@ int main()
 
 //        sim.createBall(Vec(5 * sin(sim.time()), 5 * cos(sim.time()), 5 * sin(sim.time())), 2);
 
-//        sim.get(c1);
+//        std::cout << "getting" << std::endl;
+//
+//        sim.get(l1);
+//
+//        std::cout << "printing" << std::endl;
+//
 //        sim.printPositions();
-//        c1->setSpringConstants(10000 * exp(-sim.time() / 3));
-//        sim.set(c1);
+//
+//        l1->setSpringConstants(10000 * exp(-sim.time() / 3));
+//        sim.set(l1);
 
 //        sim.getAll();
 //        sim.setSpringConstants(10000 * exp(-sim.time()));
@@ -71,23 +77,23 @@ int main()
 
 //        std::cout << "starting new iteration" << std::endl;
 //
-        {
-            std::clock_t start;
-            double duration;
-            start = std::clock();
-            sim.createLattice(3 * Vec(cos(sim.time()), 3 * sin(sim.time()), 5), Vec(4, 4, 4), 3, 3, 3);
-            duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-            std::cout << "creation time: " << duration << std::endl;
-        }
-
-        if (sim.time() > 5) {
-            std::clock_t start;
-            double duration;
-            start = std::clock();
-            sim.deleteContainer(sim.getContainerByIndex(0));
-            duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-            std::cout << "deletion time: " << duration << std::endl;
-        }
+//        {
+//            std::clock_t start;
+//            double duration;
+//            start = std::clock();
+//            sim.createLattice(3 * Vec(cos(sim.time()), 3 * sin(sim.time()), 5), Vec(4, 4, 4), 3, 3, 3);
+//            duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+//            std::cout << "creation time: " << duration << std::endl;
+//        }
+//
+//        if (sim.time() > 5) {
+//            std::clock_t start;
+//            double duration;
+//            start = std::clock();
+//            sim.deleteContainer(sim.getContainerByIndex(0));
+//            duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+//            std::cout << "deletion time: " << duration << std::endl;
+//        }
 
         if (sim.time() > runtime) {
             sim.stop();

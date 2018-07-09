@@ -900,13 +900,21 @@ void Simulation::get(Container *c) {
     }
 
     CUDA_MASS ** temp;
+
+    std::cout << "HI" << std::endl;
+
     gpuErrchk(cudaMalloc((void **) &temp, sizeof(CUDA_MASS *) * c -> masses.size()));
+
+    std::cout << "HI" << std::endl;
 
     CUDA_MASS ** d_ptrs = new CUDA_MASS * [c -> masses.size()];
 
     for (int i = 0; i < c -> masses.size(); i++) {
         d_ptrs[i] = c -> masses[i] -> arrayptr;
     }
+
+    std::cout << "HI" << std::endl;
+
 
     gpuErrchk(cudaMemcpy(temp, d_ptrs, c -> masses.size() * sizeof(CUDA_MASS *), cudaMemcpyHostToDevice));
 
@@ -915,9 +923,13 @@ void Simulation::get(Container *c) {
     CUDA_MASS * temp_data;
     gpuErrchk(cudaMalloc((void **) &temp_data, sizeof(CUDA_MASS) * c -> masses.size()));
 
+    std::cout << "HI" << std::endl;
+
     updateCudaParameters();
     fromMassPointers<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(temp, temp_data, c -> masses.size());
     gpuErrchk(cudaFree(temp));
+
+    std::cout << "HI" << std::endl;
 
     CUDA_MASS * h_mass = new CUDA_MASS[masses.size()];
     gpuErrchk(cudaMemcpy(h_mass, temp_data, sizeof(CUDA_MASS) * masses.size(), cudaMemcpyDeviceToHost));
@@ -925,6 +937,7 @@ void Simulation::get(Container *c) {
 
     int count = 0;
 
+    std::cout << "HI" << std::endl;
 
     for (Mass * m : c -> masses) {
         *m = h_mass[count];
@@ -932,6 +945,8 @@ void Simulation::get(Container *c) {
     }
 
     delete [] h_mass;
+    std::cout << "HI" << std::endl;
+
 }
 
 void Simulation::massFromArray() {
@@ -1427,6 +1442,8 @@ void Simulation::execute() {
                 return;
             }
 
+            std::cout << "SLEEPING!" << std::endl;
+
             while (!RUNNING) {
                 std::this_thread::sleep_for(std::chrono::microseconds(1));
                 if (ENDED) {
@@ -1435,6 +1452,8 @@ void Simulation::execute() {
                     return;
                 }
             }
+
+            std::cout << "restarting" << std::endl;
 
 #ifdef GRAPHICS
             if (resize_buffers) {

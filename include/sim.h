@@ -63,7 +63,7 @@ public:
     void getAll();
     void setAll();
 
-    // Constraints
+    // Global constraints (can be rendered)
     void createPlane(const Vec & abc, double d ); // creates half-space ax + by + cz < d
     void createBall(const Vec & center, double r ); // creates ball with radius r at position center
 
