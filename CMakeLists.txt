@@ -40,6 +40,7 @@ if (glm_FOUND)
     link_libraries(${glm_LIBRARIES})
 endif()
 
+file(COPY ${SOURCE_DIR}/shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 add_executable(graphics src/main.cpp ${SOURCE_FILES} ${HEADERS})
 target_compile_definitions(graphics PRIVATE GRAPHICS)
 
@@ -49,8 +50,8 @@ target_link_libraries(graphics PRIVATE glm)
 if ( WIN32 )
     target_link_libraries(graphics PRIVATE GLEW::GLEW)
 else()
-    target_link_libraries(graphics PRIVATE GLEW)
-    target_link_libraries(graphics PRIVATE gl)
+    #target_link_libraries(graphics PRIVATE GLEW)
+    #    target_link_libraries(graphics PRIVATE gl)
 endif()
 
 add_executable(nographics src/main.cpp ${SOURCE_FILES} ${HEADERS})
