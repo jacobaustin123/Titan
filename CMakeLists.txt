@@ -6,11 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 include_directories(include)
 
-set(SOURCE_FILES src/vec.cpp src/sim.cpp src/common/shader.cpp src/sim.cpp src/mass.cpp src/spring.cpp src/object.cpp src/graphics.cpp)
-
-#set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} C:/Users/PLoch/Documents/dependencies)
-
-file(GLOB HEADERS "*.h")
+set(SOURCE_FILES src/vec.cpp src/sim.cpp src/common/shader.cpp src/sim.cpp src/mass.cpp src/spring.cpp src/object.cpp src/graphics.cpp include/sim.h include/mass.h include/object.h include/spring.h include/vec.h include/graphics.h)
 
 find_package(OPENGL REQUIRED)
 if (OPENGL_FOUND)
@@ -50,8 +46,8 @@ target_link_libraries(graphics PRIVATE glm)
 if ( WIN32 )
     target_link_libraries(graphics PRIVATE GLEW::GLEW)
 else()
-    #target_link_libraries(graphics PRIVATE GLEW)
-    #    target_link_libraries(graphics PRIVATE gl)
+    # target_link_libraries(graphics PRIVATE GLEW)
+    # target_link_libraries(graphics PRIVATE gl)
 endif()
 
 add_executable(nographics src/main.cpp ${SOURCE_FILES} ${HEADERS})
