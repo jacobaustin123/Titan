@@ -24,7 +24,8 @@ static double G = 9.81;
 
 class Simulation {
 public:
-    Simulation() { dt = 0; RUNNING = 0; } // constructors;
+    Simulation() = default;
+
     ~Simulation();
 
     Mass * createMass(); // create objects

@@ -183,6 +183,8 @@ void Simulation::resume() {
 
 #ifdef GRAPHICS
         if (fmod(T, 250 * dt) < dt) {
+            std::cout << "HELLO" << std::endl;
+
             clearScreen();
 
             updateBuffers();
@@ -268,7 +270,7 @@ void Simulation::generateBuffers() {
 
 void Simulation::updateBuffers() {
     {
-        glBindBuffer(GL_ARRAY_BUFFER, this->colors);
+        glBindBuffer(GL_ARRAY_BUFFER, this -> colors);
         GLfloat *color_buffer_data = (GLfloat *) glMapBufferRange(GL_ARRAY_BUFFER, 0, 3 * masses.size() * sizeof(GLfloat), GL_MAP_WRITE_BIT); // new GLfloat[3 * masses.size()];
 
         for (int i = 0; i < masses.size(); i++) {

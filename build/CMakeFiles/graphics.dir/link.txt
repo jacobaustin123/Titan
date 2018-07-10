@@ -1,0 +1,2 @@
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar qc libgraphics.a  CMakeFiles/graphics.dir/src/vec.cpp.o CMakeFiles/graphics.dir/src/sim.cpp.o CMakeFiles/graphics.dir/src/common/shader.cpp.o CMakeFiles/graphics.dir/src/mass.cpp.o CMakeFiles/graphics.dir/src/spring.cpp.o CMakeFiles/graphics.dir/src/object.cpp.o CMakeFiles/graphics.dir/src/graphics.cpp.o
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib libgraphics.a

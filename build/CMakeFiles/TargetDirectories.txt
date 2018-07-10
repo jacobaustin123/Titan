@@ -1,0 +1,4 @@
+/Users/JAustin/Desktop/Loch/build/CMakeFiles/main.dir
+/Users/JAustin/Desktop/Loch/build/CMakeFiles/rebuild_cache.dir
+/Users/JAustin/Desktop/Loch/build/CMakeFiles/edit_cache.dir
+/Users/JAustin/Desktop/Loch/build/CMakeFiles/graphics.dir
