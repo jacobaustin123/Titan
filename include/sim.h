@@ -22,24 +22,6 @@
 
 static double G = 9.81;
 
-struct Event {
-    Event(void (*func)(), double time, double repeat = 0) {
-        this -> func = func;
-        this -> time = time;
-        this -> repeat = repeat;
-    }
-
-    void (*func)();
-    double time;
-    double repeat;
-};
-
-struct compareEvents {
-    bool operator()(const Event & a, const Event & b) {
-        return a.time < b.time;
-    }
-};
-
 class Simulation {
 public:
     Simulation() { dt = 0; RUNNING = 0; } // constructors;
@@ -63,10 +45,6 @@ public:
     Mass * getMass(int i) { return masses[i]; }
     Spring * getSpring(int i) { return springs[i]; }
     ContainerObject * getObject(int i) { return objs[i]; }
-
-    void runFunc(void (*func)(), double time, double repeat = 0) {
-        bpts.insert(Event(func, time, repeat));
-    }
 
     void setBreakpoint(double time);
 
@@ -109,7 +87,7 @@ public:
     void draw();
 #endif
 
-    std::set<Event, compareEvents> bpts; // list of breakpoints
+    std::set<double> bpts; // list of breakpoints
 
     void computeForces();
 

@@ -49,7 +49,7 @@ Spring * Simulation::createSpring(Mass * m1, Mass * m2, double k, double len) {
 }
 
 void Simulation::setBreakpoint(double time) {
-    bpts.insert(Event(nullptr, time));
+    bpts.insert(time);
 }
 
 void Simulation::setSpringConstant(double k) {
@@ -158,25 +158,12 @@ void Simulation::resume() {
     while (1) {
         T += dt;
 
-        if (!bpts.empty() && (*bpts.begin()).time <= T) {
+        if (!bpts.empty() && (*bpts.begin()) <= T) {
             fromArray();
 
-            if ((*bpts.begin()).func != nullptr) {
-                (*bpts.begin()).func();
-                if ((*bpts.begin()).repeat != 0) {
-                    Event new_event = (*bpts.begin());
-                    new_event.time += new_event.repeat;
-                    bpts.insert(new_event);
-                }
-                bpts.erase(bpts.begin());
-                resume();
-                RUNNING = 0;
-                break;
-            } else {
-                bpts.erase(bpts.begin());
-                RUNNING = 0;
-                break;
-            }
+            bpts.erase(bpts.begin());
+            RUNNING = 0;
+            break;
         }
 
 

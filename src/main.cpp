@@ -3,14 +3,12 @@
 #include <stdlib.h>
 #include <cmath>
 
-#include "vec.h"
 #include "sim.h"
-
-
-static Simulation sim;
 
 int main()
 {
+    Simulation sim;
+
     Lattice * l1 = sim.createLattice(Vec(0, 0, 5), Vec(4, 4, 2), 3, 3, 2);
 
     sim.setSpringConstant(1000);
