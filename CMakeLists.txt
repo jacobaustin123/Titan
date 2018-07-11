@@ -78,6 +78,7 @@ else()
     target_link_libraries(Loch PRIVATE GLEW)
 endif()
 
+
 install(DIRECTORY ${LOCH_INCLUDE_DIR} DESTINATION include/Loch)
 install(TARGETS Loch DESTINATION lib)
 
@@ -86,3 +87,7 @@ set(Loch_LIBRARIES ${CMAKE_INSTALL_PREFIX}/lib/Loch)
 
 configure_file(cmake/LochConfig.cmake.in
         ${CMAKE_INSTALL_PREFIX}/lib/cmake/Loch/LochConfig.cmake @ONLY)
+
+
+add_subdirectory(tests/test1)
+add_subdirectory(tests/test2)

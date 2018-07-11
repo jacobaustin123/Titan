@@ -4,8 +4,8 @@ project(Loch LANGUAGES CXX CUDA) # use CXX, CUDA by default (since CUDA is a lan
 set(CMAKE_CXX_STANDARD 14) # set C++ standard to C++11
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++14") # same thing, may be unnecessary
 
-set(LOCH_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
-set(LOCH_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include/Loch)
+set(LOCH_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../src)
+set(LOCH_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../include/Loch)
 
 set(LOCH_SOURCE_FILES ${LOCH_SOURCE_DIR}/vec.cu ${LOCH_SOURCE_DIR}/sim.cu ${LOCH_SOURCE_DIR}/shader.cpp
         ${LOCH_SOURCE_DIR}/sim.cu ${LOCH_SOURCE_DIR}/mass.cu ${LOCH_SOURCE_DIR}/spring.cu

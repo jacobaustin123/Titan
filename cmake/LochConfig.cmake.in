@@ -1,3 +1,12 @@
+find_package(CUDA REQUIRED) # find and include CUDA
+if (CUDA_FOUND)
+    message(STATUS "CUDA FOUND")
+    include_directories(${CUDA_INCLUDE_DIRS})
+    link_libraries(${CUDA_LIBRARIES})
+else()
+    message(STATUS "CUDA NOT FOUND")
+endif()
+
 find_package(OPENGL REQUIRED)
 if (OPENGL_FOUND)
     message(STATUS "OPENGL FOUND")
@@ -26,21 +35,32 @@ if (glm_FOUND)
     link_libraries(${glm_LIBRARIES})
 endif()
 
-FIND_LIBRARY(Loch_LIBRARY Loch
-        PATHS @CMAKE_INSTALL_PREFIX@/lib
-        NO_DEFAULT_PATH
-        )
+if (WIN32)
+    MESSAGE(STATUS "DEFAULTING TO FIXED LIBRARY PATH FOR WINDOWS")
+    SET(Loch_LIBRARY "@CMAKE_INSTALL_PREFIX@/lib/Loch.lib")
+else()
+    FIND_LIBRARY(Loch_LIBRARY Loch
+            PATHS @CMAKE_INSTALL_PREFIX@/lib
+            NO_DEFAULT_PATH
+            )
+endif()
 
 SET(Loch_LIBRARIES ${Loch_LIBRARY})
-FIND_PATH(Loch_INCLUDE_DIR Loch
-        PATHS @CMAKE_INSTALL_PREFIX@/include
-        NO_DEFAULT_PATH
-        )
+
+if(WIN32)
+    MESSAGE(STATUS "DEFAULTING TO FIXED INCLUDE PATH FOR WINDOWS")
+    SET(Loch_INCLUDE_DIR "@CMAKE_INSTALL_PREFIX@/include")
+else()
+    FIND_PATH(Loch_INCLUDE_DIR Loch
+            PATHS @CMAKE_INSTALL_PREFIX@/include
+            NO_DEFAULT_PATH
+            )
+endif()
 
 SET(Loch_INCLUDE_DIR ${Loch_INCLUDE_DIR}/Loch)
 SET(Loch_INCLUDE_DIRS ${Loch_INCLUDE_DIR})
 SET(Loch_DEFINITIONS GRAPHICS)
 
-set(Loch_INCLUDE_DIRS ${Loch_INCLUDE_DIRS} ${glfw3_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIRS} ${glm_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS})
-set(Loch_LIBRARIES ${Loch_LIBRARIES} ${glfw3_LIBRARIES} ${OPENGL_LIBRARIES} ${glm_LIBRARIES} ${GLEW_LIBRARIES} glfw)
+set(Loch_INCLUDE_DIRS ${Loch_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS} ${glfw3_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIRS} ${glm_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS})
+set(Loch_LIBRARIES ${Loch_LIBRARIES} ${CUDA_LIBRARIES} ${glfw3_LIBRARIES} ${OPENGL_LIBRARIES} ${glm_LIBRARIES} ${GLEW_LIBRARIES} glfw)
 add_definitions(-DGRAPHICS)
