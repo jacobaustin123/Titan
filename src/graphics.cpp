@@ -12,7 +12,7 @@
 using namespace glm;
 
 // Include shaders and support files
-#include "../src/common/shader.h"
+#include "Loch/shader.h"
 #include "vec.h"
 #include "sim.h"
 

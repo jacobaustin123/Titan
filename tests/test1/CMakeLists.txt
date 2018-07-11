@@ -62,7 +62,7 @@ if (glm_FOUND)
     link_libraries(${glm_LIBRARIES})
 endif()
 
-add_library(Loch ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
+add_executable(Loch ${CMAKE_CURRENT_LIST_DIR}/test1.cpp ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
 target_compile_definitions(Loch PRIVATE GRAPHICS)
 target_compile_definitions(Loch PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
 
@@ -77,12 +77,3 @@ if ( WIN32 )
 else()
     target_link_libraries(Loch PRIVATE GLEW)
 endif()
-
-install(DIRECTORY ${LOCH_INCLUDE_DIR} DESTINATION include/Loch)
-install(TARGETS Loch DESTINATION lib)
-
-set(Loch_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/include/Loch)
-set(Loch_LIBRARIES ${CMAKE_INSTALL_PREFIX}/lib/Loch)
-
-configure_file(cmake/LochConfig.cmake.in
-        ${CMAKE_INSTALL_PREFIX}/lib/cmake/Loch/LochConfig.cmake @ONLY)
