@@ -3,6 +3,8 @@
 //
 
 #include "sim.h"
+#include "shader.h"
+
 #include <cmath>
 
 Simulation::~Simulation() {
@@ -183,7 +185,6 @@ void Simulation::resume() {
 
 #ifdef GRAPHICS
         if (fmod(T, 250 * dt) < dt) {
-            std::cout << "HELLO" << std::endl;
 
             clearScreen();
 
@@ -222,7 +223,7 @@ void Simulation::run() { // repeatedly run next
     glBindVertexArray(VertexArrayID);
 
     // Create and compile our GLSL program from the shaders
-    this -> programID = LoadShaders("shaders/TransformVertexShader.vertexshader", "shaders/ColorFragmentShader.fragmentshader");
+    this -> programID = LoadShaders();
     // Get a handle for our "MVP" uniform
 
     this -> MVP = getProjection(); // compute perspective projection matrix

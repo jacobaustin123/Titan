@@ -17,7 +17,6 @@
 
 #ifdef GRAPHICS
 #include "graphics.h"
-#include "../src/common/shader.h"
 #endif
 
 static double G = 9.81;

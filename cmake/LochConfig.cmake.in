@@ -1,0 +1,46 @@
+find_package(OPENGL REQUIRED)
+if (OPENGL_FOUND)
+    message(STATUS "OPENGL FOUND")
+    include_directories(${OPENGL_INCLUDE_DIRS})
+    link_libraries(${OPENGL_LIBRARIES})
+endif()
+
+find_package(glfw3 CONFIG REQUIRED)
+if (glfw3_FOUND)
+    message(STATUS "GLFW FOUND")
+    include_directories(${glfw3_INCLUDE_DIRS})
+    link_libraries(${glfw3_LIBRARIES})
+endif()
+
+find_package(GLEW REQUIRED)
+if (GLEW_FOUND)
+    message(STATUS "GLEW FOUND")
+    include_directories(${GLEW_INCLUDE_DIRS})
+    link_libraries(${GLEW_LIBRARIES})
+endif()
+
+find_package(glm CONFIG REQUIRED)
+if (glm_FOUND)
+    message(STATUS "GLM FOUND")
+    include_directories(${glm_INCLUDE_DIRS})
+    link_libraries(${glm_LIBRARIES})
+endif()
+
+FIND_LIBRARY(Loch_LIBRARY Loch
+        PATHS @CMAKE_INSTALL_PREFIX@/lib
+        NO_DEFAULT_PATH
+        )
+
+SET(Loch_LIBRARIES ${Loch_LIBRARY})
+FIND_PATH(Loch_INCLUDE_DIR Loch
+        PATHS @CMAKE_INSTALL_PREFIX@/include
+        NO_DEFAULT_PATH
+        )
+
+SET(Loch_INCLUDE_DIRS ${Loch_INCLUDE_DIR})
+SET(Loch_DEFINITIONS GRAPHICS)
+
+set(Loch_INCLUDE_DIRS ${Loch_INCLUDE_DIRS} ${glfw3_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIRS} ${glm_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS})
+set(Loch_LIBRARIES ${Loch_LIBRARIES} ${glfw3_LIBRARIES} ${OPENGL_LIBRARIES} ${glm_LIBRARIES} ${GLEW_LIBRARIES} glfw)
+
+add_compile_definitions(GRAPHICS)

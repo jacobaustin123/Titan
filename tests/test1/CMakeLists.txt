@@ -1,15 +1,15 @@
 cmake_minimum_required(VERSION 3.7)
-project(Loch)
+project(test1)
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(LOCH_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
-set(LOCH_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include/Loch)
+set(LOCH_SOURCE_DIR ../../src)
+set(LOCH_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/../include/test1)
 
 message(STATUS ${LOCH_SOURCE_DIR} " " ${LOCH_INCLUDE_DIR})
 
 set(LOCH_SOURCE_FILES ${LOCH_SOURCE_DIR}/vec.cpp ${LOCH_SOURCE_DIR}/sim.cpp ${LOCH_SOURCE_DIR}/shader.cpp
-        ${LOCH_SOURCE_DIR}/sim.cpp ${LOCH_SOURCE_DIR}/mass.cpp ${LOCH_SOURCE_DIR}/spring.cpp 
+        ${LOCH_SOURCE_DIR}/sim.cpp ${LOCH_SOURCE_DIR}/mass.cpp ${LOCH_SOURCE_DIR}/spring.cpp
         ${LOCH_SOURCE_DIR}/object.cpp ${LOCH_SOURCE_DIR}/graphics.cpp)
 
 set(LOCH_HEADER_FILES ${LOCH_INCLUDE_DIR}/sim.h ${LOCH_INCLUDE_DIR}/mass.h ${LOCH_INCLUDE_DIR}/object.h
@@ -45,19 +45,8 @@ if (glm_FOUND)
     link_libraries(${glm_LIBRARIES})
 endif()
 
-#file(COPY ${LOCH_SOURCE_DIR}/shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+add_executable(test1.cpp ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
+target_compile_definitions(test1 PRIVATE GRAPHICS)
 
-add_library(Loch ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
-target_compile_definitions(Loch PRIVATE GRAPHICS)
-
-target_link_libraries(Loch PRIVATE glfw)
-target_link_libraries(Loch PRIVATE glm)
-
-install(DIRECTORY ${LOCH_INCLUDE_DIR} DESTINATION include/Loch)
-install(TARGETS Loch DESTINATION lib)
-
-set(Loch_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/include/Loch)
-set(Loch_LIBRARIES ${CMAKE_INSTALL_PREFIX}/lib/Loch)
-
-configure_file(cmake/LochConfig.cmake.in
-        ${CMAKE_INSTALL_PREFIX}/lib/cmake/Loch/LochConfig.cmake @ONLY)
+target_link_libraries(test1 PRIVATE glfw)
+target_link_libraries(test1 PRIVATE glm)
