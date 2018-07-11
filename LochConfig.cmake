@@ -56,12 +56,12 @@ if (glm_FOUND)
 endif()
 
 file(COPY ${SOURCE_DIR}/shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-add_library(nographics ${SOURCE_FILES} ${HEADERS}) # create nographics target
-target_compile_features(nographics PUBLIC cxx_std_11)
-set_target_properties(nographics PROPERTIES CUDA_SEPARABLE_COMPILATION ON) # allows declarations and implementations to be separated
-target_link_libraries(nographics PRIVATE cuda)
-target_compile_definitions(nographics PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
+#
+#add_library(nographics ${SOURCE_FILES} ${HEADERS}) # create nographics target
+#target_compile_features(nographics PUBLIC cxx_std_11)
+#set_target_properties(nographics PROPERTIES CUDA_SEPARABLE_COMPILATION ON) # allows declarations and implementations to be separated
+#target_link_libraries(nographics PRIVATE cuda)
+#target_compile_definitions(nographics PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
 
 add_library(graphics ${SOURCE_FILES} ${HEADERS}) # create graphics target
 target_compile_definitions(graphics PRIVATE GRAPHICS) # defines the GRAPHICS preprocessor variable
@@ -84,4 +84,4 @@ else() # use SDL2 on Mac
 endif()
 
 set(Loch_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include)
-set(Loch_LIBRARIES ${CMAKE_BINARY_DIR}/graphics.lib)
+#set(Loch_LIBRARIES ${CMAKE_BINARY_DIR}/graphics.lib)

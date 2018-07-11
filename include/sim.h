@@ -128,10 +128,10 @@ private:
     double dt; // set to 0 by default, when start is called will be set to min(mass dt) unless previously set
     double T; // global simulation time
 
-    bool RUNNING;
-    bool STARTED;
-    bool ENDED;
-    bool FREED;
+    static bool RUNNING;
+    static bool STARTED;
+    static bool ENDED;
+    static bool FREED;
 
     std::vector<Mass *> masses;
     std::vector<Spring *> springs;
@@ -172,22 +172,22 @@ private:
 #ifdef GRAPHICS
 
 #ifdef SDL2
-    SDL_Window * window;
-    SDL_GLContext context;
+    static SDL_Window * window;
+    static SDL_GLContext context;
     void createSDLWindow();
 #else
-    GLFWwindow * window;
+    static GLFWwindow * window;
     void createGLFWWindow();
 #endif
 
-    GLuint VertexArrayID;
-    GLuint programID;
-    GLuint MatrixID;
-    glm::mat4 MVP;
+    static GLuint VertexArrayID;
+    static GLuint programID;
+    static GLuint MatrixID;
+    static glm::mat4 MVP;
 
-    GLuint vertices;
-    GLuint colors;
-    GLuint indices;
+    static GLuint vertices;
+    static GLuint colors;
+    static GLuint indices;
 
     void clearScreen();
     void renderScreen();
@@ -196,12 +196,12 @@ private:
     void resizeBuffers();
     void draw();
 
-    bool update_indices;
-    bool update_colors;
-    bool resize_buffers;
+    static bool update_indices;
+    static bool update_colors;
+    static bool resize_buffers;
 
-    int lineWidth;
-    int pointSize;
+    static int lineWidth;
+    static int pointSize;
 #endif
 };
 

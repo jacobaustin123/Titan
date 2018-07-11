@@ -7,7 +7,32 @@
 #include <thrust/remove.h>
 #include <thrust/execution_policy.h>
 
+#ifdef GRAPHICS
+#include <GLFW/glfw3.h>
+#endif
+
 __device__ const double G = 9.81;
+
+bool Simulation::RUNNING;
+bool Simulation::STARTED;
+bool Simulation::ENDED;
+bool Simulation::FREED;
+
+#ifdef GRAPHICS
+GLFWwindow * Simulation::window;
+GLuint Simulation::VertexArrayID;
+GLuint Simulation::programID;
+GLuint Simulation::MatrixID;
+glm::mat4 Simulation::MVP;
+GLuint Simulation::vertices;
+GLuint Simulation::colors;
+GLuint Simulation::indices;
+bool Simulation::update_indices;
+bool Simulation::update_colors;
+int Simulation::lineWidth;
+int Simulation::pointSize;
+bool Simulation::resize_buffers;
+#endif
 
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=false)
@@ -81,7 +106,7 @@ void Simulation::freeGPU() {
 
             delete s -> _right;
         }
-        
+
         delete s;
     }
 
