@@ -1391,7 +1391,7 @@ void Simulation::_run() { // repeatedly start next
 //    glEnable(GL_LIGHT0);
 
     // Create and compile our GLSL program from the shaders
-    this -> programID = LoadShaders("shaders/TransformVertexShader.vertexshader", "shaders/ColorFragmentShader.fragmentshader"); // ("shaders/StandardShading.vertexshader", "shaders/StandardShading.fragmentshader"); //
+    this -> programID = LoadShaders(); // ("shaders/StandardShading.vertexshader", "shaders/StandardShading.fragmentshader"); //
     // Get a handle for our "MVP" uniform
 
     this -> MVP = getProjection(); // compute perspective projection matrix

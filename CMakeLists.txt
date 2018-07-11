@@ -90,4 +90,4 @@ configure_file(cmake/LochConfig.cmake.in
 
 
 add_subdirectory(tests/test1)
-add_subdirectory(tests/test2)
+#add_subdirectory(tests/test2)

@@ -23,7 +23,7 @@
 #ifdef GRAPHICS
 
 #include "graphics.h"
-#include "common/shader.h"
+#include "shader.h"
 #include <cuda_gl_interop.h>
 
 #endif

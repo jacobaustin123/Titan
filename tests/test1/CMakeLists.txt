@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.9)
-project(Loch LANGUAGES CXX CUDA) # use CXX, CUDA by default (since CUDA is a language, don't need cuda_add_executable)
+project(test1 LANGUAGES CXX CUDA) # use CXX, CUDA by default (since CUDA is a language, don't need cuda_add_executable)
 
 set(CMAKE_CXX_STANDARD 14) # set C++ standard to C++11
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++14") # same thing, may be unnecessary
@@ -32,21 +32,13 @@ if (OPENGL_FOUND)
     link_libraries(${OPENGL_LIBRARIES})
 endif()
 
-if (WIN32)
-    find_package(glfw3 CONFIG REQUIRED)
-    if (glfw3_FOUND)
-        message(STATUS "GLFW FOUND")
-        include_directories(${glfw3_INCLUDE_DIRS})
-        link_libraries(${glfw3_LIBRARIES})
-    endif()
-else()
-    find_package(sdl2 CONFIG REQUIRED)
-    if (sdl2_FOUND)
-        message(STATUS "sdl2 FOUND")
-        include_directories(${sdl2_INCLUDE_DIRS})
-        link_libraries(${sdl2_LIBRARIES})
-    endif()
+find_package(glfw3 CONFIG REQUIRED)
+if (glfw3_FOUND)
+    message(STATUS "GLFW FOUND")
+    include_directories(${glfw3_INCLUDE_DIRS})
+    link_libraries(${glfw3_LIBRARIES})
 endif()
+
 
 find_package(GLEW REQUIRED) # GLEW
 if (GLEW_FOUND)
@@ -62,18 +54,19 @@ if (glm_FOUND)
     link_libraries(${glm_LIBRARIES})
 endif()
 
-add_executable(Loch ${CMAKE_CURRENT_LIST_DIR}/test1.cpp ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
-target_compile_definitions(Loch PRIVATE GRAPHICS)
-target_compile_definitions(Loch PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
+add_executable(test1 ${CMAKE_CURRENT_LIST_DIR}/test1.cpp ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
+target_compile_definitions(test1 PRIVATE GRAPHICS)
+target_compile_definitions(test1 PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
 
-target_compile_features(Loch PUBLIC cxx_std_11) # same as above
-set_target_properties(Loch PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+target_compile_features(test1 PUBLIC cxx_std_11) # same as above
+set_target_properties(test1 PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 
-target_link_libraries(Loch PRIVATE cuda)
-target_link_libraries(Loch PRIVATE glm)
+target_link_libraries(test1 PRIVATE cuda)
+target_link_libraries(test1 PRIVATE glm)
+target_link_libraries(test1 PRIVATE glfw)
 
 if ( WIN32 )
-    target_link_libraries(Loch PRIVATE GLEW::GLEW)
+    target_link_libraries(test1 PRIVATE GLEW::GLEW)
 else()
-    target_link_libraries(Loch PRIVATE GLEW)
+    target_link_libraries(test1 PRIVATE GLEW)
 endif()
