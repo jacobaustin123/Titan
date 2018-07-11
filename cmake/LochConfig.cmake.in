@@ -26,16 +26,27 @@ if (glm_FOUND)
     link_libraries(${glm_LIBRARIES})
 endif()
 
-FIND_LIBRARY(Loch_LIBRARY Loch
-        PATHS @CMAKE_INSTALL_PREFIX@/lib
-        NO_DEFAULT_PATH
-        )
+if (WIN32)
+    MESSAGE(STATUS "DEFAULTING TO FIXED LIBRARY PATH FOR WINDOWS")
+    SET(Loch_LIBRARY "@CMAKE_INSTALL_PREFIX@/lib/Loch.lib")
+else()
+    FIND_LIBRARY(Loch_LIBRARY Loch
+            PATHS @CMAKE_INSTALL_PREFIX@/lib
+            NO_DEFAULT_PATH
+            )
+endif()
 
 SET(Loch_LIBRARIES ${Loch_LIBRARY})
-FIND_PATH(Loch_INCLUDE_DIR Loch
-        PATHS @CMAKE_INSTALL_PREFIX@/include
-        NO_DEFAULT_PATH
-        )
+
+if(WIN32)
+    MESSAGE(STATUS "DEFAULTING TO FIXED INCLUDE PATH FOR WINDOWS")
+    SET(Loch_INCLUDE_DIR "@CMAKE_INSTALL_PREFIX@/include")
+else()
+    FIND_PATH(Loch_INCLUDE_DIR Loch
+            PATHS @CMAKE_INSTALL_PREFIX@/include
+            NO_DEFAULT_PATH
+            )
+endif()
 
 SET(Loch_INCLUDE_DIR ${Loch_INCLUDE_DIR}/Loch)
 SET(Loch_INCLUDE_DIRS ${Loch_INCLUDE_DIR})
