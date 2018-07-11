@@ -1280,11 +1280,6 @@ void Simulation::createGLFWWindow() {
 #endif
 
 void Simulation::stop() {
-    if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        assert(false);
-    }
-
     if (RUNNING) {
         std::cerr << "simulation is running." << std::endl;
         assert(false);

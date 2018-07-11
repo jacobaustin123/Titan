@@ -1,12 +1,3 @@
-find_package(CUDA REQUIRED) # find and include CUDA
-if (CUDA_FOUND)
-    message(STATUS "CUDA FOUND")
-    include_directories(${CUDA_INCLUDE_DIRS})
-    link_libraries(${CUDA_LIBRARIES})
-else()
-    message(STATUS "CUDA NOT FOUND")
-endif()
-
 find_package(OPENGL REQUIRED)
 if (OPENGL_FOUND)
     message(STATUS "OPENGL FOUND")
@@ -62,5 +53,5 @@ SET(Loch_INCLUDE_DIRS ${Loch_INCLUDE_DIR})
 SET(Loch_DEFINITIONS GRAPHICS)
 
 set(Loch_INCLUDE_DIRS ${Loch_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS} ${glfw3_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIRS} ${glm_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS})
-set(Loch_LIBRARIES ${Loch_LIBRARIES} ${CUDA_LIBRARIES} ${glfw3_LIBRARIES} ${OPENGL_LIBRARIES} ${glm_LIBRARIES} ${GLEW_LIBRARIES} glfw)
-add_definitions(-DGRAPHICS)
+set(Loch_LIBRARIES ${Loch_LIBRARIES} ${CUDA_LIBRARIES} ${glfw3_LIBRARIES} ${OPENGL_LIBRARIES} ${glm_LIBRARIES} ${GLEW_LIBRARIES} glfw Loch)
+add_definitions(-DGRAPHICS -DCONSTRAINTS)

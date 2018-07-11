@@ -32,20 +32,11 @@ if (OPENGL_FOUND)
     link_libraries(${OPENGL_LIBRARIES})
 endif()
 
-if (WIN32)
-    find_package(glfw3 CONFIG REQUIRED)
-    if (glfw3_FOUND)
-        message(STATUS "GLFW FOUND")
-        include_directories(${glfw3_INCLUDE_DIRS})
-        link_libraries(${glfw3_LIBRARIES})
-    endif()
-else()
-    find_package(sdl2 CONFIG REQUIRED)
-    if (sdl2_FOUND)
-        message(STATUS "sdl2 FOUND")
-        include_directories(${sdl2_INCLUDE_DIRS})
-        link_libraries(${sdl2_LIBRARIES})
-    endif()
+find_package(glfw3 CONFIG REQUIRED)
+if (glfw3_FOUND)
+    message(STATUS "GLFW FOUND")
+    include_directories(${glfw3_INCLUDE_DIRS})
+    link_libraries(${glfw3_LIBRARIES})
 endif()
 
 find_package(GLEW REQUIRED) # GLEW
@@ -70,6 +61,7 @@ target_compile_features(Loch PUBLIC cxx_std_11) # same as above
 set_target_properties(Loch PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 
 target_link_libraries(Loch PRIVATE cuda)
+target_link_libraries(Loch PRIVATE cudart)
 target_link_libraries(Loch PRIVATE glm)
 
 if ( WIN32 )
@@ -90,4 +82,4 @@ configure_file(cmake/LochConfig.cmake.in
 
 
 add_subdirectory(tests/test1)
-#add_subdirectory(tests/test2)
+add_subdirectory(tests/test2)

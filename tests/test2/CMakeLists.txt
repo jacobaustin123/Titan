@@ -10,5 +10,5 @@ else()
     message(STATUS "LOCH NOT FOUND")
 endif()
 
-add_executable(test2 test2.cpp)
-target_link_libraries(test2 ${Loch_LIBRARIES})
+add_executable(test2 ${CMAKE_CURRENT_LIST_DIR}/test2.cpp)
+
