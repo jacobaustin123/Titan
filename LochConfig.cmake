@@ -8,11 +8,13 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_CXX_STANDARD 14) # set C++ standard to C++11
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++14") # same thing, may be unnecessary
 
-set(SOURCE_DIR "src") # set SOURCE_DIR to src directory
+set(SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/src) # set SOURCE_DIR to src directory
+set(INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include) # set SOURCE_DIR to src directory
+
 include_directories(include) # include the include directory (can find headers there)
 
-set(SOURCE_FILES src/vec.cu src/sim.cu src/sim.cu src/mass.cu src/spring.cu src/object.cu src/graphics.cpp src/common/shader.cpp include/graphics.h include/mass.h include/object.h include/sim.h include/spring.h include/vec.h) # add all of the .cu/.cpp files to SOURCE_FILES target
-file(GLOB HEADERS "include/*.h")
+set(SOURCE_FILES ${SOURCE_DIR}/vec.cu ${SOURCE_DIR}/sim.cu ${SOURCE_DIR}/sim.cu ${SOURCE_DIR}/mass.cu ${SOURCE_DIR}/spring.cu ${SOURCE_DIR}/object.cu ${SOURCE_DIR}/graphics.cpp ${SOURCE_DIR}/common/shader.cpp ${INCLUDE_DIR}/graphics.h ${INCLUDE_DIR}/mass.h ${INCLUDE_DIR}/object.h ${INCLUDE_DIR}/sim.h ${INCLUDE_DIR}/spring.h ${INCLUDE_DIR}/vec.h) # add all of the .cu/.cpp files to SOURCE_FILES target
+file(GLOB HEADERS "${INCLUDE_DIR}/*.h")
 
 find_package(CUDA REQUIRED) # find and include CUDA
 if (CUDA_FOUND)
@@ -88,7 +90,7 @@ else() # use SDL2 on Mac
     target_compile_definitions(Loch PRIVATE SDL2)
 endif()
 
-set(Loch_INCLUDE_DIRS include)
+set(Loch_INCLUDE_DIRS ${INCLUDE_DIR})
 #set(Loch_LIBRARIES ${CMAKE_BINARY_DIR}/graphics.lib)
 
 install(FILES ${HEADERS} DESTINATION include)
