@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 14) # set C++ standard to C++11
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++14") # same thing, may be unnecessary
 
 set(SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/src) # set SOURCE_DIR to src directory
-set(INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/Loch/include) # set SOURCE_DIR to src directory
+set(INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include/Loch) # set SOURCE_DIR to src directory
 
 include_directories(${INCLUDE_DIR}) # include the include directory (can find headers there)
 
