@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.9)
-project(testa LANGUAGES CXX)
+project(test1 LANGUAGES CXX)
 
 set(Loch_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 find_package(Loch)
@@ -11,5 +11,5 @@ else()
     message(STATUS "LOCH NOT FOUND")
 endif()
 
-add_executable(testa ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
-target_link_libraries(testa graphics)
+add_executable(test1 ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
+target_link_libraries(test1 Loch)

@@ -1,13 +1,20 @@
 cmake_minimum_required(VERSION 3.9)
 project(Loch LANGUAGES CXX CUDA) # use CXX, CUDA by default (since CUDA is a language, don't need cuda_add_executable)
 
+SET(CMAKE_INSTALL_PREFIX ".")
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
 set(CMAKE_CXX_STANDARD 14) # set C++ standard to C++11
 SET(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++14") # same thing, may be unnecessary
 
-set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src") # set SOURCE_DIR to src directory
+message(${CMAKE_MODULE_PATH})
+
+set(SOURCE_DIR "src") # set SOURCE_DIR to src directory
 include_directories(include) # include the include directory (can find headers there)
 
 set(SOURCE_FILES src/vec.cu src/sim.cu src/sim.cu src/mass.cu src/spring.cu src/object.cu src/graphics.cpp src/common/shader.cpp include/graphics.h include/mass.h include/object.h include/sim.h include/spring.h include/vec.h) # add all of the .cu/.cpp files to SOURCE_FILES target
+file(GLOB HEADERS "include/*.h")
 
 find_package(CUDA REQUIRED) # find and include CUDA
 if (CUDA_FOUND)
@@ -63,25 +70,29 @@ file(COPY ${SOURCE_DIR}/shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 #target_link_libraries(nographics PRIVATE cuda)
 #target_compile_definitions(nographics PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
 
-add_library(graphics ${SOURCE_FILES} ${HEADERS}) # create graphics target
-target_compile_definitions(graphics PRIVATE GRAPHICS) # defines the GRAPHICS preprocessor variable
-target_compile_definitions(graphics PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
+add_library(Loch ${SOURCE_FILES} ${HEADERS}) # create graphics target
+target_compile_definitions(Loch PRIVATE GRAPHICS) # defines the GRAPHICS preprocessor variable
+target_compile_definitions(Loch PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
 
-target_compile_features(graphics PUBLIC cxx_std_11) # same as above
-set_target_properties(graphics PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-target_link_libraries(graphics PRIVATE cuda)
+target_compile_features(Loch PUBLIC cxx_std_11) # same as above
+set_target_properties(Loch PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+target_link_libraries(Loch PRIVATE cuda)
 
-target_link_libraries(graphics PRIVATE glm)
+target_link_libraries(Loch PRIVATE glm)
 
 if ( WIN32 ) # use GLFW on Windows
-    target_link_libraries(graphics PRIVATE GLEW::GLEW)
-    target_link_libraries(graphics PRIVATE glfw)
+    target_link_libraries(Loch PRIVATE GLEW::GLEW)
+    target_link_libraries(Loch PRIVATE glfw)
 else() # use SDL2 on Mac
-    target_link_libraries(graphics PRIVATE GLEW)
-    target_link_libraries(graphics PRIVATE gl)
-    target_link_libraries(graphics PRIVATE sdl2)
-    target_compile_definitions(graphics PRIVATE SDL2)
+    target_link_libraries(Loch PRIVATE GLEW)
+    target_link_libraries(Loch PRIVATE gl)
+    target_link_libraries(Loch PRIVATE sdl2)
+    target_compile_definitions(Loch PRIVATE SDL2)
 endif()
 
-set(Loch_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(Loch_INCLUDE_DIRS include)
 #set(Loch_LIBRARIES ${CMAKE_BINARY_DIR}/graphics.lib)
+
+install(FILES ${HEADERS} DESTINATION include)
+install(TARGETS Loch DESTINATION lib)
+install(FILES LochConfig.cmake LochConfigVersion.cmake DESTINATION lib/cmake/LochConfig.cmake)
