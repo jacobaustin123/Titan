@@ -3,8 +3,8 @@ project(test1)
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(LOCH_SOURCE_DIR ../../src)
-set(LOCH_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/../include/test1)
+set(LOCH_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../src)
+set(LOCH_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../include/Loch)
 
 message(STATUS ${LOCH_SOURCE_DIR} " " ${LOCH_INCLUDE_DIR})
 
@@ -45,7 +45,7 @@ if (glm_FOUND)
     link_libraries(${glm_LIBRARIES})
 endif()
 
-add_executable(test1.cpp ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
+add_executable(test1 test1.cpp ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
 target_compile_definitions(test1 PRIVATE GRAPHICS)
 
 target_link_libraries(test1 PRIVATE glfw)

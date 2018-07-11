@@ -10,8 +10,7 @@ if (Loch_FOUND)
     link_libraries(${Loch_LIBRARIES})
 endif()
 
-add_executable(test2.cpp ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
-target_compile_definitions(test2 PRIVATE GRAPHICS)
+add_executable(test2 ${CMAKE_CURRENT_LIST_DIR}/test2.cpp ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
 
 target_link_libraries(test2 PRIVATE glfw)
 target_link_libraries(test2 PRIVATE glm)

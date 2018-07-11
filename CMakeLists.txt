@@ -45,8 +45,6 @@ if (glm_FOUND)
     link_libraries(${glm_LIBRARIES})
 endif()
 
-#file(COPY ${LOCH_SOURCE_DIR}/shaders DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
 add_library(Loch ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
 target_compile_definitions(Loch PRIVATE GRAPHICS)
 
