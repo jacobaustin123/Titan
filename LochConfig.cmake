@@ -9,9 +9,9 @@ set(CMAKE_CXX_STANDARD 14) # set C++ standard to C++11
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++14") # same thing, may be unnecessary
 
 set(SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/src) # set SOURCE_DIR to src directory
-set(INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include) # set SOURCE_DIR to src directory
+set(INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/Loch/include) # set SOURCE_DIR to src directory
 
-include_directories(include) # include the include directory (can find headers there)
+include_directories(${INCLUDE_DIR}) # include the include directory (can find headers there)
 
 set(SOURCE_FILES ${SOURCE_DIR}/vec.cu ${SOURCE_DIR}/sim.cu ${SOURCE_DIR}/sim.cu ${SOURCE_DIR}/mass.cu ${SOURCE_DIR}/spring.cu ${SOURCE_DIR}/object.cu ${SOURCE_DIR}/graphics.cpp ${SOURCE_DIR}/common/shader.cpp ${INCLUDE_DIR}/graphics.h ${INCLUDE_DIR}/mass.h ${INCLUDE_DIR}/object.h ${INCLUDE_DIR}/sim.h ${INCLUDE_DIR}/spring.h ${INCLUDE_DIR}/vec.h) # add all of the .cu/.cpp files to SOURCE_FILES target
 file(GLOB HEADERS "${INCLUDE_DIR}/*.h")
@@ -93,6 +93,7 @@ endif()
 set(Loch_INCLUDE_DIRS ${INCLUDE_DIR})
 #set(Loch_LIBRARIES ${CMAKE_BINARY_DIR}/graphics.lib)
 
-install(FILES ${HEADERS} DESTINATION include)
+install(DIRECTORY ${INCLUDE_DIR} DESTINATION include FILES_MATCHING PATTERN "*.h*")
 install(TARGETS Loch DESTINATION lib)
-install(FILES LochConfig.cmake LochConfigVersion.cmake DESTINATION lib/cmake/LochConfig.cmake)
+install(FILES LochConfig.cmake DESTINATION lib/cmake/LochConfig.cmake)
+install(FILES LochConfigVersion.cmake DESTINATION lib/cmake/LochConfigVersion.cmake)
