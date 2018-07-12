@@ -5,7 +5,7 @@
 
 Detailed instructions can be found in the user wiki [here](https://github.com/ja3067/Loch/wiki/Set-Up) for downloading and building the Loch physics library.
 
-** Try a simple Loch physics simulation **
+**Try a simple Loch physics simulation**
 
 ```C++
 #include <Loch/sim.h>
