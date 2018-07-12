@@ -16,3 +16,13 @@ int main() {
   sim.start(10); // run for 10 seconds;
 }
 ```
+
+which produces a beautiful bouncing cube:
+
+<img src="https://i.imgur.com/zdB0ZPg.gif" width="400" height="400">
+
+For more examples and troubleshooting, see the [github wiki](https://github.com/ja3067/Loch/wiki/Using-CMake-or-Visual-Studio). 
+
+## License
+
+This software was written by Jacob Austin and Rafael Corrales Fatou as part of a project led by Professor Hod Lipson at Columbia University. The software is currently closed-source, but may be open-sourced in the future. Please do not redistribute until that time.
