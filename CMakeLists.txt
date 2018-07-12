@@ -3,13 +3,15 @@ project(Loch LANGUAGES CXX CUDA) # use CXX, CUDA by default (since CUDA is a lan
 
 set(CMAKE_CXX_STANDARD 14) # set C++ standard to C++11
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++14") # same thing, may be unnecessary
+set(CUDA_SEPARABLE_COMPILATION ON)
+set_property(GLOBAL PROPERTY CUDA_SEPARABLE_COMPILATION ON)
 
 set(LOCH_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
 set(LOCH_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include/Loch)
 
 set(LOCH_SOURCE_FILES ${LOCH_SOURCE_DIR}/vec.cu ${LOCH_SOURCE_DIR}/sim.cu ${LOCH_SOURCE_DIR}/shader.cpp
-        ${LOCH_SOURCE_DIR}/mass.cu ${LOCH_SOURCE_DIR}/spring.cu ${LOCH_SOURCE_DIR}/object.cu
-        ${LOCH_SOURCE_DIR}/graphics.cpp)
+        ${LOCH_SOURCE_DIR}/mass.cu ${LOCH_SOURCE_DIR}/spring.cu
+        ${LOCH_SOURCE_DIR}/object.cu ${LOCH_SOURCE_DIR}/graphics.cpp)
 
 set(LOCH_HEADER_FILES ${LOCH_INCLUDE_DIR}/sim.h ${LOCH_INCLUDE_DIR}/mass.h ${LOCH_INCLUDE_DIR}/object.h
         ${LOCH_INCLUDE_DIR}/spring.h ${LOCH_INCLUDE_DIR}/vec.h ${LOCH_INCLUDE_DIR}/graphics.h ${LOCH_INCLUDE_DIR}/shader.h)
@@ -53,15 +55,19 @@ if (glm_FOUND)
     link_libraries(${glm_LIBRARIES})
 endif()
 
-add_library(Loch STATIC ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
+add_library(Loch ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
+set_target_properties(Loch PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+set_target_properties(Loch PROPERTIES POSITION_INDEPENDENT_CODE ON)
+set_target_properties(Loch PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 
 target_compile_definitions(Loch PRIVATE GRAPHICS)
 target_compile_definitions(Loch PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
 
-#target_compile_features(Loch PUBLIC cxx_std_11) # same as above
-set_target_properties(Loch PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+target_compile_features(Loch PUBLIC cxx_std_11) # same as above
 
-target_link_libraries(Loch PRIVATE cuda glm glfw cudart)
+target_link_libraries(Loch PRIVATE cuda)
+target_link_libraries(Loch PRIVATE cudart)
+target_link_libraries(Loch PRIVATE glm)
 
 if ( WIN32 )
     target_link_libraries(Loch PRIVATE GLEW::GLEW)
@@ -69,11 +75,6 @@ else()
     target_link_libraries(Loch PRIVATE GLEW)
 endif()
 
-#if (WIN32)
-#    set(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/Common\ Files)
-#endif()
-
-target_link_libraries(Loch PRIVATE ${CUDA_LIBRARIES} ${glfw3_LIBRARIES} ${glm_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES} cuda cudart)
 
 install(DIRECTORY ${LOCH_INCLUDE_DIR} DESTINATION include/Loch)
 install(TARGETS Loch DESTINATION lib)
@@ -83,6 +84,7 @@ set(Loch_LIBRARIES ${CMAKE_INSTALL_PREFIX}/lib/Loch)
 
 configure_file(cmake/LochConfig.cmake.in
         ${CMAKE_INSTALL_PREFIX}/lib/cmake/Loch/LochConfig.cmake @ONLY)
+
 
 #add_subdirectory(tests/test1)
 #add_subdirectory(tests/test2)
