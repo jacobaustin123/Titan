@@ -70,9 +70,9 @@ set_target_properties(Loch PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 #    target_link_libraries(Loch PRIVATE GLEW)
 #endif()
 
-if (WIN32)
-    set(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/Common\ Files)
-endif()
+#if (WIN32)
+#    set(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/Common\ Files)
+#endif()
 
 install(DIRECTORY ${LOCH_INCLUDE_DIR} DESTINATION include/Loch)
 install(TARGETS Loch DESTINATION lib)
