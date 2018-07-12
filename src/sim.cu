@@ -745,7 +745,7 @@ void Simulation::setSpringConstant(double k) {
     }
 
     for (Spring * s : springs) {
-        s -> setK(k);
+        s -> _k = k;
     }
 }
 
