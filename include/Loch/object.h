@@ -245,7 +245,7 @@ struct LOCAL_CONSTRAINTS {
     int num_constraint_planes;
     int num_directions; // if this is greater than 1, just make it fixed
 
-    int drag_coefficient;
+    double drag_coefficient;
     bool fixed; // move here from the class itself;
 };
 
