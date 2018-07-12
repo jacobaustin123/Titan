@@ -53,7 +53,7 @@ if (glm_FOUND)
     link_libraries(${glm_LIBRARIES})
 endif()
 
-add_library(Loch ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
+add_library(Loch STATIC ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
 
 target_compile_definitions(Loch PRIVATE GRAPHICS)
 target_compile_definitions(Loch PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
@@ -61,19 +61,19 @@ target_compile_definitions(Loch PRIVATE CONSTRAINTS) # defines the CONSTRAINTS p
 #target_compile_features(Loch PUBLIC cxx_std_11) # same as above
 set_target_properties(Loch PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 
-#target_link_libraries(Loch PRIVATE cuda)
-#target_link_libraries(Loch PRIVATE glm)
-#target_link_libraries(Loch PRIVATE glfw)
-#
-#if ( WIN32 )
-#    target_link_libraries(Loch PRIVATE GLEW::GLEW)
-#else()
-#    target_link_libraries(Loch PRIVATE GLEW)
-#endif()
+target_link_libraries(Loch PRIVATE cuda glm glfw cudart)
+
+if ( WIN32 )
+    target_link_libraries(Loch PRIVATE GLEW::GLEW)
+else()
+    target_link_libraries(Loch PRIVATE GLEW)
+endif()
 
 #if (WIN32)
 #    set(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/Common\ Files)
 #endif()
+
+target_link_libraries(Loch PRIVATE ${CUDA_LIBRARIES} ${glfw3_LIBRARIES} ${glm_LIBRARIES} ${GLEW_LIBRARIES} ${OPENGL_LIBRARIES} cuda cudart)
 
 install(DIRECTORY ${LOCH_INCLUDE_DIR} DESTINATION include/Loch)
 install(TARGETS Loch DESTINATION lib)

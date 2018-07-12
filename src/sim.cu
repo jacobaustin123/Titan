@@ -1523,7 +1523,7 @@ void Simulation::execute() {
             draw();
 
             for (Constraint * c : constraints) {
-                c -> draw();
+                c->draw();
             }
 
             renderScreen();
