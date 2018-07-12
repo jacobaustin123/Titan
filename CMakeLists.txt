@@ -54,10 +54,11 @@ if (glm_FOUND)
 endif()
 
 add_library(Loch ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
+
 target_compile_definitions(Loch PRIVATE GRAPHICS)
 target_compile_definitions(Loch PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
 
-target_compile_features(Loch PUBLIC cxx_std_11) # same as above
+#target_compile_features(Loch PUBLIC cxx_std_11) # same as above
 set_target_properties(Loch PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 
 #target_link_libraries(Loch PRIVATE cuda)
