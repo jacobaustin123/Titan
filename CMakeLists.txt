@@ -48,8 +48,8 @@ endif()
 add_library(Loch ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
 target_compile_definitions(Loch PRIVATE GRAPHICS)
 
-target_link_libraries(Loch PRIVATE glfw)
-target_link_libraries(Loch PRIVATE glm)
+#target_link_libraries(Loch PRIVATE glfw)
+#target_link_libraries(Loch PRIVATE glm)
 
 install(DIRECTORY ${LOCH_INCLUDE_DIR} DESTINATION include/Loch)
 install(TARGETS Loch DESTINATION lib)
@@ -60,5 +60,5 @@ set(Loch_LIBRARIES ${CMAKE_INSTALL_PREFIX}/lib/Loch)
 configure_file(cmake/LochConfig.cmake.in
         ${CMAKE_INSTALL_PREFIX}/lib/cmake/Loch/LochConfig.cmake @ONLY)
 
-add_subdirectory(tests/test1)
-add_subdirectory(tests/test2)
+#add_subdirectory(tests/test1)
+#add_subdirectory(tests/test2)
