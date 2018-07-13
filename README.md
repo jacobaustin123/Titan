@@ -3,7 +3,7 @@
 
 ## Installation
 
-Detailed instructions can be found in the user wiki [here](https://github.com/ja3067/Loch/wiki/Set-Up) for downloading and building the Loch physics library.
+Detailed instructions can be found in the [user wiki](https://github.com/ja3067/Loch/wiki/Set-Up) for building and installing the Loch physics library.
 
 **Try a simple Loch physics simulation**
 
@@ -17,7 +17,7 @@ int main() {
 }
 ```
 
-which produces a beautiful bouncing cube:
+This simple program produces a large lattice bouncing on the given plane:
 
 <img src="https://i.imgur.com/zdB0ZPg.gif" width="400" height="400">
 
