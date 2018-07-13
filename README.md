@@ -1,5 +1,5 @@
 # Loch
-**Loch** is a versitile CUDA-based physics simulation library exposing powerful GPU-accelerated operations on physics primatives like springs and masses. Library users can create masses, springs, and more complicated objects, apply constraints, and modify simulation parameters in real time, while the simulation runs asynchronous on the GPU.
+**Loch** is a versitile CUDA-based physics simulation library that provides a powerful GPU-accelerated simulation environment for physics primatives like springs and masses. Library users can create masses, springs, and more complicated objects, apply constraints, and modify simulation parameters in real time, while the simulation runs asynchronous on the GPU.
 
 ## Installation
 
