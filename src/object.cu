@@ -6,6 +6,21 @@
 #include <cmath>
 #include "sim.h"
 
+#ifdef CONSTRAINTS
+void Constraint::addConstraint(CONSTRAINT_TYPE type, const Vec & v, double d) {
+    for (Mass * m : masses) {
+        m -> addConstraint(type, v, d);
+    }
+}
+
+void Constraint::clearConstraints() {
+    for (Mass * m : masses) {
+        m -> clearConstraints();
+    }
+}
+
+#endif
+
 CUDA_CALLABLE_MEMBER CudaBall::CudaBall(const Vec & center, double radius) {
     _center = center;
     _radius = radius;

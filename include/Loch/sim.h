@@ -50,7 +50,6 @@ public:
     // Delete
     void deleteMass(Mass * m);
     void deleteSpring(Spring * s);
-    void deleteContainer(Container * c);
 
     void get(Mass *m);
     void get(Spring *s); // not really useful, no commands change springs
@@ -71,6 +70,8 @@ public:
 
     // Containers
     Container * createContainer();
+    void deleteContainer(Container * c);
+
     Cube * createCube(const Vec & center, double side_length); // creates cube
     Lattice * createLattice(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
 
@@ -90,7 +91,11 @@ public:
     void pause(double t); // pause at time t
     void resume();
 
+    void setBreakpoint(double time);
+
     void wait(double t); // wait fixed time without stopping
+    void waitUntil(double t);
+    void waitForEvent();
 
     double time() { return T; }
     double running() { return RUNNING; }
@@ -109,11 +114,8 @@ private:
 
     void freeGPU();
 
-    void setBreakpoint(double time);
     void _run();
 
-    void waitUntil(double t);
-    void waitForEvent();
 
     void execute(); // same as above but w/out reset
 

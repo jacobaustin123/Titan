@@ -1233,6 +1233,7 @@ void Simulation::createGLFWWindow() {
     {
         fprintf( stderr, "Failed to initialize GLFW\n" );
         getchar();
+        assert(false);
     }
 
     glfwWindowHint(GLFW_SAMPLES, 4);
@@ -1252,6 +1253,7 @@ void Simulation::createGLFWWindow() {
                 "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n");
         getchar();
         glfwTerminate();
+        assert(false);
     }
 
     glfwMakeContextCurrent(window);
@@ -1267,7 +1269,9 @@ void Simulation::createGLFWWindow() {
         fprintf(stderr, "Failed to initialize GLEW\n");
         getchar();
         glfwTerminate();
+        assert(false);
     }
+
 
     // Ensure we can capture the escape key being pressed below
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
@@ -1389,7 +1393,7 @@ void Simulation::_run() { // repeatedly start next
     this -> programID = LoadShaders(); // ("shaders/StandardShading.vertexshader", "shaders/StandardShading.fragmentshader"); //
     // Get a handle for our "MVP" uniform
 
-    this -> MVP = getProjection(); // compute perspective projection matrix
+    this -> MVP = getProjection(Vec(15, 15, 7), Vec(0, 0, 2), Vec(0, 0, 1)); // compute perspective projection matrix
 
     this -> MatrixID = glGetUniformLocation(programID, "MVP"); // doesn't seem to be necessary
 

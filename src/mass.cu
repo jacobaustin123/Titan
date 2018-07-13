@@ -116,7 +116,7 @@ void Mass::clearConstraints(CONSTRAINT_TYPE type) {
     }
 }
 
-void Mass::clearAllConstraints() {
+void Mass::clearConstraints() {
     clearConstraints(CONSTRAINT_PLANE);
     clearConstraints(CONTACT_PLANE);
     clearConstraints(DIRECTION);

@@ -36,12 +36,6 @@ struct CUDA_MASS {
 
 };
 
-#ifdef CONSTRAINTS
-enum CONSTRAINT_TYPE {
-    CONSTRAINT_PLANE, CONTACT_PLANE, BALL, DIRECTION
-};
-#endif
-
 class Mass {
 public:
     //Properties
@@ -61,7 +55,7 @@ public:
     LOCAL_CONSTRAINTS constraints;
     void addConstraint(CONSTRAINT_TYPE type, const Vec & vec, double num);
     void clearConstraints(CONSTRAINT_TYPE type);
-    void clearAllConstraints();
+    void clearConstraints();
 
     void setDrag(double C);
     void fix();
