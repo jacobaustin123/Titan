@@ -3,7 +3,7 @@ namespace py = pybind11;
 
 #include "sim.h"
 
-void bind_sim(py::module &){
+void bind_sim(py::module &m){
     py::class_<Simulation>(m, "Sim")
 
             //Creators/Destructors
@@ -17,7 +17,7 @@ void bind_sim(py::module &){
             .def("deleteMass", &Simulation::deleteMass)
             .def("deleteSpring", &Simulation::deleteSpring)
             .def("deleteContainer", &Simulation::deleteContainer)
-
+            .def("clearConstraints", &Simulation::clearConstraints)
                     //Setters
             .def("set", (void (Simulation::*)(Mass *m)) &Simulation::set)
             .def("set", (void (Simulation::*)(Spring *s)) &Simulation::set)
@@ -31,10 +31,11 @@ void bind_sim(py::module &){
 
                     //Bulk
             .def("setSpringConstant", &Simulation::setSpringConstant)
-            .def("setMass", &Simulation::setMass)
-            .def("setMassDeltaT", &Simulation::setMassDeltaT)
+            .def("setMass", &Simulation::setMassValues)
+            .def("setMassDeltaT", &Simulation::setDeltaT)
             .def("setAll", &Simulation::setAll)
             .def("getAll", &Simulation::getAll)
+            .def("defaultRestLength", &Simulation::defaultRestLength)
 
                     //Control
 

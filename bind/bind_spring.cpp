@@ -3,7 +3,7 @@ namespace py = pybind11;
 
 #include "spring.h"
 
-void bind_sim(py::module &){
+void bind_sim(py::module &m){
     py::class_<Spring>(m, "Spring")
             .def("setForce", &Spring::setForce)
             .def("setK", &Spring::setK)
