@@ -3,11 +3,9 @@ namespace py = pybind11;
 
 #include "mass.h"
 
-void bind_sim(py::module &m){
+void bind_mass(py::module &m){
     py::class_<Mass>(m, "Mass")
-            .def(py::init<>( ))
-//            .def(py::init<(void (Mass::*)(struct CUDA_MASS &mass))>( ))
-//            .def(py::init<const Vec & position, double mass = 0.1, bool fixed = false, double dt = 0.0001>())
+            .def(py::init<>())
 
             //properties
             .def_readwrite("m", &Mass::m)
@@ -16,7 +14,7 @@ void bind_sim(py::module &m){
             .def_readwrite("acc", &Mass::acc)
             .def_readwrite("force", &Mass::force)
             .def_readwrite("dt", &Mass::dt)
-            .def_readwrite("T", &Mass::T)
+            .def_readwrite("T", &Mass::T);
 
 //Methods (Legacy)
 //            .def("setMass", &Mass::setMass)

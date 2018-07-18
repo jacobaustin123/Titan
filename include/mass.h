@@ -44,6 +44,7 @@ enum CONSTRAINT_TYPE {
 
 class Mass {
 public:
+    Mass();
     //Properties
     double m; // mass in kg
     double dt; // update interval
@@ -79,7 +80,6 @@ private:
 
     CUDA_MASS * arrayptr; //Pointer to struct version for GPU cudaMemAlloc
 
-    Mass();
     void operator=(CUDA_MASS & mass);
 
     friend class Simulation;

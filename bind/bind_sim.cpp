@@ -7,10 +7,10 @@ void bind_sim(py::module &m){
     py::class_<Simulation>(m, "Sim")
 
             //Creators/Destructors
-            .def("createMass", (void (Simulation::*)()) &Simulation::createMass)
-            .def("createMass", (void (Simulation::*)(const Vec & pos)) &Simulation::createMass)
-            .def("createSpring", (void (Simulation::*)()) &Simulation::createSpring)
-            .def("createSpring", (void (Simulation::*)(Mass * m1, Mass * m2)) &Simulation::createSpring)
+            .def("createMass", (Mass * (Simulation::*)()) &Simulation::createMass)
+            .def("createMass", (Mass * (Simulation::*)(const Vec & pos)) &Simulation::createMass)
+            .def("createSpring", (Spring * (Simulation::*)()) &Simulation::createSpring)
+            .def("createSpring", (Spring * (Simulation::*)(Mass * m1, Mass * m2)) &Simulation::createSpring)
             .def("createPlane", &Simulation::createPlane)
             .def("createLattice", &Simulation::createLattice)
 
@@ -18,13 +18,13 @@ void bind_sim(py::module &m){
             .def("deleteSpring", &Simulation::deleteSpring)
             .def("deleteContainer", &Simulation::deleteContainer)
             .def("clearConstraints", &Simulation::clearConstraints)
-                    //Setters
+//                    //Setters
             .def("set", (void (Simulation::*)(Mass *m)) &Simulation::set)
             .def("set", (void (Simulation::*)(Spring *s)) &Simulation::set)
             .def("set", (void (Simulation::*)(Container *c)) &Simulation::set)
             .def("setAll", &Simulation::setAll)
-
-            //Getters
+//
+//            //Getters
             .def("get", (void (Simulation::*)(Mass *m)) &Simulation::get)
             .def("get", (void (Simulation::*)(Spring *s)) &Simulation::get)
             .def("get", (void (Simulation::*)(Container *c)) &Simulation::get)
