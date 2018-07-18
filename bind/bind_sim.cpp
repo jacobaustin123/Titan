@@ -5,7 +5,7 @@ namespace py = pybind11;
 
 void bind_sim(py::module &m){
     py::class_<Simulation>(m, "Sim")
-
+            .def(py::init<>())
             //Creators/Destructors
             .def("createMass", (Mass * (Simulation::*)()) &Simulation::createMass)
             .def("createMass", (Mass * (Simulation::*)(const Vec & pos)) &Simulation::createMass)

@@ -74,23 +74,23 @@ endif()
 
 
 #Create Library with .cu files
-add_library(cu_lib2 ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
-target_include_directories(cu_lib2 PRIVATE ${INCLUDE_DIR} ${CUDA_INCLUDE_DIRS})
-set_target_properties(cu_lib2 PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-set_target_properties(cu_lib2 PROPERTIES POSITION_INDEPENDENT_CODE ON)
-set_target_properties(cu_lib2 PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
+add_library(cu_lib ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
+target_include_directories(cu_lib PRIVATE ${INCLUDE_DIR} ${CUDA_INCLUDE_DIRS})
+set_target_properties(cu_lib PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+set_target_properties(cu_lib PROPERTIES POSITION_INDEPENDENT_CODE ON)
+set_target_properties(cu_lib PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 
-target_compile_features(cu_lib2 PUBLIC cxx_std_11)
-target_link_libraries(cu_lib2 PRIVATE cuda)
-target_link_libraries(cu_lib2 PRIVATE cudart)
+target_compile_features(cu_lib PUBLIC cxx_std_11)
+target_link_libraries(cu_lib PRIVATE cuda)
+target_link_libraries(cu_lib PRIVATE cudart)
 
 #Create binding
 pybind11_add_module(bindloch ${LOCH_BIND_FILES} ${LOCH_HEADER_FILES})
 
 #Add linking dependedncies to the binding library
 target_include_directories(bindloch PRIVATE include)
-add_dependencies(bindloch cu_lib2)
-target_link_libraries(bindloch PRIVATE cu_lib2)
+add_dependencies(bindloch cu_lib)
+target_link_libraries(bindloch PRIVATE cu_lib)
 
 
 
