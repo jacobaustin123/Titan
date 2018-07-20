@@ -1,4 +1,4 @@
-set(PYTHON_EXECUTABLE C:/Users/rcorr/Anaconda3/python.exe)
+#set(PYTHON_EXECUTABLE C:/Users/rcorr/Anaconda3/python.exe)
 cmake_minimum_required(VERSION 3.9)
 project(Loch LANGUAGES CXX CUDA) # use CXX, CUDA by default (since CUDA is a language, don't need cuda_add_executable)
 
@@ -80,6 +80,7 @@ set_target_properties(cu_lib PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 set_target_properties(cu_lib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(cu_lib PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 
+#target_compile_definitions(cu_lib PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
 target_compile_features(cu_lib PUBLIC cxx_std_11)
 target_link_libraries(cu_lib PRIVATE cuda)
 target_link_libraries(cu_lib PRIVATE cudart)

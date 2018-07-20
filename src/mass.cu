@@ -66,6 +66,8 @@ CUDA_MASS::CUDA_MASS(Mass &mass) {
     force = mass.force;
     valid = true;
 
+
+
 #ifdef CONSTRAINTS
     constraints = CUDA_LOCAL_CONSTRAINTS(mass.constraints);
 #endif
@@ -74,6 +76,7 @@ CUDA_MASS::CUDA_MASS(Mass &mass) {
     color = mass.color;
 #endif
 }
+
 
 #ifdef CONSTRAINTS
 void Mass::addConstraint(CONSTRAINT_TYPE type, const Vec & vec, double num) { // TODO make this more efficient

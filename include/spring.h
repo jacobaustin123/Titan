@@ -1,7 +1,6 @@
 //
 // Created by Jacob Austin on 5/17/18.
 //
-
 #ifndef LOCH_SPRING_H
 #define LOCH_SPRING_H
 
@@ -55,7 +54,29 @@ private:
     friend class Lattice;
     friend class Cube;
 };
+class pySpring {
+public:
+    pySpring() = default;
+    pySpring(Spring * spring) { pointer = spring;};
 
+    //Pointer to real C++ spring object
+    Spring * pointer;
+
+    //Properties
+    double _k (){return pointer -> _k;} // spring constant (N/m)
+    double _rest () {return pointer -> _rest;} // spring rest length (meters)
+
+    //Set
+
+    void pysetK(double k) { pointer -> _k = k; } //sets K
+    void pysetRestLength(double rest_length) {pointer -> _rest = rest_length; } //sets Rest length
+    void pydefaultLength() { pointer -> defaultLength();} //sets Rest Lenght
+
+    void pysetLeft(Mass * left) {pointer -> setLeft(left);}; // sets left mass (attaches spring to mass 1)
+    void pysetRight(Mass * right) {pointer -> setRight(right);};
+
+    void pysetMasses(Mass * left, Mass * right) { pointer -> setLeft(left); pointer -> setRight(right); } //sets both right and left masses
+};
 struct CUDA_SPRING {
     CUDA_SPRING() {};
     CUDA_SPRING(const Spring & s);

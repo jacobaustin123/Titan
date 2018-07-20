@@ -90,4 +90,23 @@ private:
     friend class Cube;
 };
 
+class pyMass {
+public:
+    //constructor
+    pyMass() = default;
+    pyMass(Mass * mass){ pointer = mass;}
+
+    //Pointer to real C++ mass object
+    Mass * pointer;
+
+    //Properties
+    double m() { return (pointer -> m);}  // mass in kg
+    double dt() { return (pointer -> dt);} // update interval
+    double T() { return (pointer -> T);} // local time
+    Vec pos() { return (pointer -> pos);} // position in m
+    Vec vel() { return (pointer -> vel);} // velocity in m/s
+    Vec acc() { return (pointer -> acc);} // acceleration in m/s^2
+    Vec force() { return (pointer -> force);} // force in kg m / s^2
+
+};
 #endif //LOCH_MASS_H

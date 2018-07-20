@@ -8,6 +8,17 @@ void bind_mass(py::module &m){
             .def(py::init<>())
 
             //properties
+//            .def_readwrite("pointer", &pyMass::pointer)
+//            .def("m", &pyMass::m)
+//            .def("pos", &pyMass::pos)
+//            .def("vel", &pyMass::vel)
+//            .def("acc", &pyMass::acc)
+//            .def("force", &pyMass::force)
+//            .def("dt", &pyMass::dt)
+//            .def("T", &pyMass::T);
+
+
+//
             .def_readwrite("m", &Mass::m)
             .def_readwrite("pos", &Mass::pos)
             .def_readwrite("vel", &Mass::vel)
