@@ -1,23 +1,28 @@
 # Loch
-A CUDA-based physics simulation sandbox written in C++ which uses springs and masses to simulate flexible robots and other mechanical objects. 
+**Loch** is a versitile CUDA-based physics simulation library that provides a powerful GPU-accelerated simulation environment for physics primatives like springs and masses. Library users can create masses, springs, and more complicated objects, apply constraints, and modify simulation parameters in real time, while the simulation runs asynchronous on the GPU.
 
-## About The Library
+## Installation
 
-This library exposes a simple and powerful C++ API for handling general spring/mass simulations on an NVIDIA GPU. A user can create an arbitrary configuration of masses and springs with custom constraints, and run a simulation asynchronously while performing computations on the CPU and updating parameters in real time. A minimal example involves as little setup as:
+Detailed instructions can be found in the [user wiki](https://github.com/ja3067/Loch/wiki/Set-Up) for building and installing the Loch physics library.
+
+**Try a simple Loch physics simulation**
 
 ```C++
+#include <Loch/sim.h>
+
 int main() {
-  Simulation sim;
-  Mass * m1 = sim.createMass(Vec(0, 0, 1));
-  Mass * m2 = sim.createMass(Vec(0, 0, -1));
-  Spring * s1 = sim.createMass(m1, m2);
-  
-  sim.start();
+  sim.createLattice(Vec(0, 0, 10), Vec(5, 5, 5), 5, 5, 5); // create lattice with center at (0, 0, 10) and given dimensions
+  sim.createPlane(Vec(0, 0, 1), 0); // create constraint plane
+  sim.start(10); // run for 10 seconds;
 }
 ```
 
-The simulation is dynamically parallelized on the GPU and runs orders of magnitude faster than any available CPU implementation. Benchmarks have shown the library running as fast as 400 million springs per second.
+This simple program produces a large lattice bouncing on the given plane:
 
-## Installation Instructions
+<img src="https://i.imgur.com/zdB0ZPg.gif" width="400" height="400">
 
-Detailed instructions can be found in the user wiki [here](https://github.com/ja3067/Loch/wiki/Set-Up).
+For more examples and troubleshooting, see the [github wiki](https://github.com/ja3067/Loch/wiki/Using-CMake-or-Visual-Studio). 
+
+## License
+
+This software was written by Jacob Austin and Rafael Corrales Fatou as part of a project led by Professor Hod Lipson at Columbia University. The software is currently closed-source, but may be open-sourced in the future. Please do not redistribute until that time.
