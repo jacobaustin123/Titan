@@ -1,3 +1,31 @@
+find_package(OPENGL REQUIRED)
+if (OPENGL_FOUND)
+    message(STATUS "OPENGL FOUND")
+    include_directories(${OPENGL_INCLUDE_DIRS})
+    link_libraries(${OPENGL_LIBRARIES})
+endif()
+
+find_package(glfw3 CONFIG REQUIRED)
+if (glfw3_FOUND)
+    message(STATUS "GLFW FOUND")
+    include_directories(${glfw3_INCLUDE_DIRS})
+    link_libraries(${glfw3_LIBRARIES})
+endif()
+
+find_package(GLEW REQUIRED)
+if (GLEW_FOUND)
+    message(STATUS "GLEW FOUND")
+    include_directories(${GLEW_INCLUDE_DIRS})
+    link_libraries(${GLEW_LIBRARIES})
+endif()
+
+find_package(glm CONFIG REQUIRED)
+if (glm_FOUND)
+    message(STATUS "GLM FOUND")
+    include_directories(${glm_INCLUDE_DIRS})
+    link_libraries(${glm_LIBRARIES})
+endif()
+
 if (WIN32)
     MESSAGE(STATUS "DEFAULTING TO FIXED LIBRARY PATH FOR WINDOWS")
     SET(Loch_LIBRARY "@CMAKE_INSTALL_PREFIX@/lib/Loch.lib")
@@ -6,8 +34,6 @@ else()
             PATHS @CMAKE_INSTALL_PREFIX@/lib
             NO_DEFAULT_PATH
             )
-    message(STATUS ${Loch_LIBRARY})
-
 endif()
 
 SET(Loch_LIBRARIES ${Loch_LIBRARY})
@@ -24,8 +50,8 @@ endif()
 
 SET(Loch_INCLUDE_DIR ${Loch_INCLUDE_DIR}/Loch)
 SET(Loch_INCLUDE_DIRS ${Loch_INCLUDE_DIR})
-SET(Loch_DEFINITIONS GRAPHICS)
+SET(Loch_DEFINITIONS GRAPHICS CONSTRAINTS)
 
-set(Loch_INCLUDE_DIRS ${Loch_INCLUDE_DIRS})
-set(Loch_LIBRARIES ${Loch_LIBRARIES})
+set(Loch_INCLUDE_DIRS ${Loch_INCLUDE_DIRS} ${glfw3_INCLUDE_DIRS} ${OPENGL_INCLUDE_DIRS} ${glm_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS})
+set(Loch_LIBRARIES ${Loch_LIBRARIES} ${glfw3_LIBRARIES} ${OPENGL_LIBRARIES} ${glm_LIBRARIES} ${GLEW_LIBRARIES} glfw)
 add_definitions(-DGRAPHICS)

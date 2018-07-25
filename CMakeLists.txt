@@ -45,18 +45,8 @@ if (glm_FOUND)
     link_libraries(${glm_LIBRARIES})
 endif()
 
-#Static start
-
-add_library(Loch SHARED ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
-#get_property(Loch_LOC TARGET Loch PROPERTY LOCATION)
-
+add_library(Loch ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
 target_compile_definitions(Loch PRIVATE GRAPHICS)
-
-#set_target_properties(Loch PROPERTIES LINK_SEARCH_START_STATIC 1)
-#set_target_properties(Loch PROPERTIES LINK_SEARCH_END_STATIC 1)
-#set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
-
-#set(CMAKE_EXE_LINKER_FLAGS "-static")
 
 target_link_libraries(Loch PRIVATE glfw)
 target_link_libraries(Loch PRIVATE glm)
@@ -71,4 +61,4 @@ configure_file(cmake/LochConfig.cmake.in
         ${CMAKE_INSTALL_PREFIX}/lib/cmake/Loch/LochConfig.cmake @ONLY)
 
 #add_subdirectory(tests/test1)
-#add_subdirectory(tests/test2)
+add_subdirectory(tests/test2)
