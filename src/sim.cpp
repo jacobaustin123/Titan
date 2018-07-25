@@ -3,9 +3,28 @@
 //
 
 #include "sim.h"
-#include "shader.h"
 
 #include <cmath>
+
+
+#ifdef GRAPHICS
+#include "graphics.h"
+#endif
+
+
+#ifdef GRAPHICS
+
+GLuint VertexArrayID;
+GLuint programID;
+GLuint MatrixID;
+GLFWwindow * window;
+glm::mat4 MVP;
+
+GLuint vertices;
+GLuint colors;
+GLuint indices;
+
+#endif
 
 Simulation::~Simulation() {
     for (Mass * m : masses)
@@ -216,17 +235,17 @@ void Simulation::run() { // repeatedly run next
     }
 
 #ifdef GRAPHICS
-    this -> window = createGLFWWindow();
+    window = createGLFWWindow();
 
     GLuint VertexArrayID;
     glGenVertexArrays(1, &VertexArrayID);
     glBindVertexArray(VertexArrayID);
 
     // Create and compile our GLSL program from the shaders
-    this -> programID = LoadShaders();
+    programID = LoadShaders();
     // Get a handle for our "MVP" uniform
 
-    this -> MVP = getProjection(); // compute perspective projection matrix
+    MVP = getProjection(); // compute perspective projection matrix
 
     // this -> MatrixID = glGetUniformLocation(programID, "MVP"); // doesn't seem to be necessary
 
@@ -249,7 +268,7 @@ void Simulation::generateBuffers() {
         glGenBuffers(1, &colorbuffer);
         glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
         glBufferData(GL_ARRAY_BUFFER, 3 * masses.size() * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
-        this -> colors = colorbuffer;
+        colors = colorbuffer;
     }
 
     {
@@ -257,7 +276,7 @@ void Simulation::generateBuffers() {
         glGenBuffers(1, &elementbuffer);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * springs.size() * sizeof(GLuint), NULL, GL_DYNAMIC_DRAW); // second argument is number of bytes
-        this -> indices = elementbuffer;
+        indices = elementbuffer;
     }
 
     {
@@ -265,13 +284,13 @@ void Simulation::generateBuffers() {
         glGenBuffers(1, &vertexbuffer); // bind cube vertex buffer
         glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
         glBufferData(GL_ARRAY_BUFFER, 3 * masses.size() * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
-        this -> vertices = vertexbuffer;
+        vertices = vertexbuffer;
     }
 }
 
 void Simulation::updateBuffers() {
     {
-        glBindBuffer(GL_ARRAY_BUFFER, this -> colors);
+        glBindBuffer(GL_ARRAY_BUFFER, colors);
         GLfloat *color_buffer_data = (GLfloat *) glMapBufferRange(GL_ARRAY_BUFFER, 0, 3 * masses.size() * sizeof(GLfloat), GL_MAP_WRITE_BIT); // new GLfloat[3 * masses.size()];
 
         for (int i = 0; i < masses.size(); i++) {
@@ -284,7 +303,7 @@ void Simulation::updateBuffers() {
     }
 
     {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->indices);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices);
 
         GLuint *indices = (GLuint *) glMapBufferRange(GL_ELEMENT_ARRAY_BUFFER, 0, 2 * springs.size() * sizeof(GLuint), GL_MAP_WRITE_BIT); // new GLfloat[3 * masses.size()];
 
@@ -297,7 +316,7 @@ void Simulation::updateBuffers() {
     }
 
     {
-        glBindBuffer(GL_ARRAY_BUFFER, this->vertices);
+        glBindBuffer(GL_ARRAY_BUFFER, vertices);
         GLfloat *vertex_data = (GLfloat *) glMapBufferRange(GL_ARRAY_BUFFER, 0, 3 * masses.size() * sizeof(GLfloat), GL_MAP_WRITE_BIT); // new GLfloat[3 * masses.size()];
 
         for (int i = 0; i < masses.size(); i++) {
@@ -313,7 +332,7 @@ void Simulation::updateBuffers() {
 void Simulation::draw() {
     glEnableVertexAttribArray(0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, this -> vertices);
+    glBindBuffer(GL_ARRAY_BUFFER, vertices);
     glPointSize(10);
     glLineWidth(10);
     glVertexAttribPointer(
@@ -326,7 +345,7 @@ void Simulation::draw() {
     );
 
     glEnableVertexAttribArray(1);
-    glBindBuffer(GL_ARRAY_BUFFER, this -> colors);
+    glBindBuffer(GL_ARRAY_BUFFER, colors);
     glVertexAttribPointer(
             1,                                // attribute. No particular reason for 1, but must match the layout in the shader.
             3,                                // size

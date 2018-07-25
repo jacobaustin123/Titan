@@ -6,6 +6,73 @@
 #include <cmath>
 #include "sim.h"
 
+
+#ifdef GRAPHICS
+// Include GLEW
+#include <GL/glew.h>
+
+// Include GLM
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#endif
+
+#ifdef GRAPHICS
+struct GraphicsBall {
+    GraphicsBall() = default;
+
+    GraphicsBall(const Vec & center, double radius) {
+        _center = center;
+        _radius = radius;
+    }
+
+    ~GraphicsBall() {
+        glDeleteBuffers(1, &vertices);
+        glDeleteBuffers(1, &colors);
+    }
+
+    void generateBuffers();
+    void draw();
+
+    void subdivide(GLfloat * arr, GLfloat *v1, GLfloat *v2, GLfloat *v3, int depth);
+    void writeTriangle(GLfloat * arr, GLfloat *v1, GLfloat *v2, GLfloat *v3);
+    void normalize(GLfloat * v);
+
+    int depth = 2;
+
+    GLuint vertices;
+    GLuint colors;
+
+    double _radius;
+    Vec _center;
+};
+#endif
+
+#ifdef GRAPHICS
+struct GraphicsPlane {
+    GraphicsPlane() = default;
+
+    GraphicsPlane(const Vec & normal, double offset) {
+        _normal = normal;
+        _offset = offset;
+    }
+
+    ~GraphicsPlane() {
+        glDeleteBuffers(1, &vertices);
+        glDeleteBuffers(1, &colors);
+    }
+
+    void generateBuffers();
+    void draw();
+
+    GLuint vertices;
+    GLuint colors;
+
+    double _offset;
+    Vec _normal;
+};
+#endif
+
+
 Vec Plane::getForce(const Vec & position) { // returns force on an object based on its position, e.g. plane or
     double disp = dot(position, _normal) - _offset;
 //    if (disp < 0) printf("%.15e\n", round(- disp * DISPL_CONST * _normal, 4)[2]);
@@ -15,6 +82,8 @@ Vec Plane::getForce(const Vec & position) { // returns force on an object based 
 Plane::Plane(const Vec & normal, double d) {
     _offset = d;
     _normal = normal / normal.norm();
+
+    gplane = new GraphicsPlane(_normal, _offset);
 }
 
 void Plane::translate(const Vec & displ) {
@@ -28,6 +97,24 @@ void Ball::translate(const Vec & displ) {
 Ball::Ball(const Vec & center, double r) {
     _center = center;
     _radius = r;
+
+    gball = new GraphicsBall(center, r);
+}
+
+void Ball::generateBuffers() {
+    gball -> generateBuffers();
+}
+
+void Ball::draw() {
+    gball -> draw();
+}
+
+void Plane::generateBuffers() {
+    gplane -> generateBuffers();
+}
+
+void Plane::draw() {
+    gplane -> draw();
 }
 
 void ContainerObject::setMassValue(double m) { // set masses for all Mass objects
@@ -155,7 +242,7 @@ Vec Ball::getForce(const Vec & position) {
 
 #ifdef GRAPHICS
 
-void Ball::normalize(GLfloat * v) {
+void GraphicsBall::normalize(GLfloat * v) {
     GLfloat norm = sqrt(pow(v[0], 2) + pow(v[1], 2) + pow(v[2],2)) / _radius;
 
     for (int i = 0; i < 3; i++) {
@@ -163,7 +250,7 @@ void Ball::normalize(GLfloat * v) {
     }
 }
 
-void Ball::writeTriangle(GLfloat * arr, GLfloat *v1, GLfloat *v2, GLfloat *v3) {
+void GraphicsBall::writeTriangle(GLfloat * arr, GLfloat *v1, GLfloat *v2, GLfloat *v3) {
     for (int j = 0; j < 3; j++) {
         arr[j] = v1[j] + _center[j];
     }
@@ -182,7 +269,7 @@ void Ball::writeTriangle(GLfloat * arr, GLfloat *v1, GLfloat *v2, GLfloat *v3) {
     }
 }
 
-void Ball::subdivide(GLfloat * arr, GLfloat *v1, GLfloat *v2, GLfloat *v3, int depth) {
+void GraphicsBall::subdivide(GLfloat * arr, GLfloat *v1, GLfloat *v2, GLfloat *v3, int depth) {
     GLfloat v12[3], v23[3], v31[3];
 
     if (depth == 0) {
@@ -210,7 +297,7 @@ void Ball::subdivide(GLfloat * arr, GLfloat *v1, GLfloat *v2, GLfloat *v3, int d
 }
 
 
-void Ball::generateBuffers() {
+void GraphicsBall::generateBuffers() {
     glm::vec3 color = {0.22f, 0.71f, 0.0f};
 
     GLfloat * vertex_data = new GLfloat[20 * 3 * 3 * (int) pow(4, depth)]; // times 4 for subdivision
@@ -254,7 +341,7 @@ void Ball::generateBuffers() {
     delete [] vertex_data;
 }
 
-void Ball::draw() {
+void GraphicsBall::draw() {
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, vertices);
 
@@ -289,7 +376,7 @@ void Ball::draw() {
 
 #ifdef GRAPHICS
 
-void Plane::generateBuffers() {
+void GraphicsPlane::generateBuffers() {
     glm::vec3 color = {0.22f, 0.71f, 0.0f};
 
     std::cout << "normal: " << _normal << std::endl;
@@ -376,7 +463,7 @@ void Plane::generateBuffers() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(g_color_buffer_data), g_color_buffer_data, GL_STATIC_DRAW);
 }
 
-void Plane::draw() {
+void GraphicsPlane::draw() {
     // 1st attribute buffer : vertices
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, vertices);

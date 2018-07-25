@@ -8,12 +8,12 @@ set(LOCH_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include/Loch)
 
 message(STATUS ${LOCH_SOURCE_DIR} " " ${LOCH_INCLUDE_DIR})
 
-set(LOCH_SOURCE_FILES ${LOCH_SOURCE_DIR}/vec.cpp ${LOCH_SOURCE_DIR}/sim.cpp ${LOCH_SOURCE_DIR}/shader.cpp
+set(LOCH_SOURCE_FILES ${LOCH_SOURCE_DIR}/vec.cpp ${LOCH_SOURCE_DIR}/sim.cpp
         ${LOCH_SOURCE_DIR}/sim.cpp ${LOCH_SOURCE_DIR}/mass.cpp ${LOCH_SOURCE_DIR}/spring.cpp 
         ${LOCH_SOURCE_DIR}/object.cpp ${LOCH_SOURCE_DIR}/graphics.cpp)
 
 set(LOCH_HEADER_FILES ${LOCH_INCLUDE_DIR}/sim.h ${LOCH_INCLUDE_DIR}/mass.h ${LOCH_INCLUDE_DIR}/object.h
-        ${LOCH_INCLUDE_DIR}/spring.h ${LOCH_INCLUDE_DIR}/vec.h ${LOCH_INCLUDE_DIR}/graphics.h ${LOCH_INCLUDE_DIR}/shader.h)
+        ${LOCH_INCLUDE_DIR}/spring.h ${LOCH_INCLUDE_DIR}/vec.h ${LOCH_INCLUDE_DIR}/graphics.h)
 
 include_directories(${LOCH_INCLUDE_DIR})
 
@@ -45,11 +45,21 @@ if (glm_FOUND)
     link_libraries(${glm_LIBRARIES})
 endif()
 
-add_library(Loch ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
+#Static start
+
+add_library(Loch SHARED ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
+#get_property(Loch_LOC TARGET Loch PROPERTY LOCATION)
+
 target_compile_definitions(Loch PRIVATE GRAPHICS)
 
-#target_link_libraries(Loch PRIVATE glfw)
-#target_link_libraries(Loch PRIVATE glm)
+#set_target_properties(Loch PROPERTIES LINK_SEARCH_START_STATIC 1)
+#set_target_properties(Loch PROPERTIES LINK_SEARCH_END_STATIC 1)
+#set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+
+#set(CMAKE_EXE_LINKER_FLAGS "-static")
+
+target_link_libraries(Loch PRIVATE glfw)
+target_link_libraries(Loch PRIVATE glm)
 
 install(DIRECTORY ${LOCH_INCLUDE_DIR} DESTINATION include/Loch)
 install(TARGETS Loch DESTINATION lib)

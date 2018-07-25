@@ -19,5 +19,6 @@ using namespace glm;
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 GLFWwindow * createGLFWWindow();
 glm::mat4 getProjection();
+GLuint LoadShaders();
 
 #endif //LOCH_GRAPHICS_H

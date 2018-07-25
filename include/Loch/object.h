@@ -6,15 +6,6 @@
 #include "spring.h"
 #include "vec.h"
 
-#ifdef GRAPHICS
-// Include GLEW
-#include <GL/glew.h>
-
-// Include GLM
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#endif
-
 static double NORMAL = 100000;
 
 class BaseObject { // base class for larger objects like Cubes, etc.
@@ -24,8 +15,6 @@ public:
 
 class Constraint : public BaseObject { // constraint like plane or sphere which applies force to masses
 public:
-    virtual ~Constraint() {};
-
     virtual Vec getForce(const Vec & position) = 0; // returns force on an object based on its position, e.g. plane or
 #ifdef GRAPHICS
     virtual void generateBuffers() = 0;
@@ -48,6 +37,10 @@ public:
     std::vector<Spring *> springs;
 };
 
+#ifdef GRAPHICS
+struct GraphicsBall;
+#endif
+
 class Ball : public Constraint { // ball constraint, force is inversely proportional to distance
 public:
     Ball(const Vec & center, double r);
@@ -56,28 +49,20 @@ public:
     Vec getForce(const Vec & position);
     void translate(const Vec & displ);
 
+    double _radius;
+    Vec _center;
+
 #ifdef GRAPHICS
-    virtual ~Ball() {
-        glDeleteBuffers(1, &vertices);
-        glDeleteBuffers(1, &colors);
-    }
+    GraphicsBall * gball;
 
     void generateBuffers();
     void draw();
-
-    void subdivide(GLfloat * arr, GLfloat *v1, GLfloat *v2, GLfloat *v3, int depth);
-    void writeTriangle(GLfloat * arr, GLfloat *v1, GLfloat *v2, GLfloat *v3);
-    void normalize(GLfloat * v);
-
-    int depth = 2;
-
-    GLuint vertices;
-    GLuint colors;
 #endif
-
-    double _radius;
-    Vec _center;
 };
+
+#ifdef GRAPHICS
+struct GraphicsPlane;
+#endif
 
 class Plane : public Constraint { // plane constraint, force is proportional to negative distance wrt plane
 public:
@@ -93,17 +78,9 @@ public:
     double _offset;
 
 #ifdef GRAPHICS
-    virtual ~Plane() {
-        glDeleteBuffers(1, &vertices);
-        glDeleteBuffers(1, &colors);
-    }
-
+    GraphicsPlane * gplane;
     void generateBuffers();
     void draw();
-
-    GLuint vertices;
-    GLuint colors;
-    GLuint normals;
 #endif
 };
 

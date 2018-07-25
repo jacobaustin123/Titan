@@ -15,10 +15,6 @@
 #include <vector>
 #include <set>
 
-#ifdef GRAPHICS
-#include "graphics.h"
-#endif
-
 static double G = 9.81;
 
 class Simulation {
@@ -70,16 +66,6 @@ public:
     Spring * spring_arr;
 
 #ifdef GRAPHICS
-    GLuint VertexArrayID;
-    GLuint programID;
-    GLuint MatrixID;
-    GLFWwindow * window;
-    glm::mat4 MVP;
-
-    GLuint vertices;
-    GLuint colors;
-    GLuint indices;
-
     void clearScreen();
     void renderScreen();
     void updateBuffers();
