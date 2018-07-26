@@ -192,7 +192,7 @@ void Simulation::resume() {
 
         Mass * m = mass_arr;
         for (int i = 0; i < masses.size(); i++) {
-            if (m -> time() <= T) { // !m -> isFixed()
+            if (m -> time() <= T && m -> fixed == false) { // !m -> isFixed()
                 m -> stepTime();
                 m -> update();
             }
@@ -381,6 +381,26 @@ Cube * Simulation::createCube(const Vec & center, double side_length) { // creat
     }
 
     return cube;
+}
+
+Beam * Simulation::createBeam(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
+    Beam * l = new Beam(center, dims, nx, ny, nz);
+
+    for (Mass * m : l -> masses) {
+        masses.push_back(m);
+    }
+
+    for (Spring * s : l -> springs) {
+        springs.push_back(s);
+    }
+
+    objs.push_back(l);
+
+    for (Spring * s : l -> springs) {
+        s -> setRestLength((s -> _right -> getPosition() - s -> _left -> getPosition()).norm());
+    }
+
+    return l;
 }
 
 Lattice * Simulation::createLattice(const Vec & center, const Vec & dims, int nx, int ny, int nz) {

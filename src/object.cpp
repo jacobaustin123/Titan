@@ -83,7 +83,9 @@ Plane::Plane(const Vec & normal, double d) {
     _offset = d;
     _normal = normal / normal.norm();
 
+#ifdef GRAPHICS
     gplane = new GraphicsPlane(_normal, _offset);
+#endif
 }
 
 void Plane::translate(const Vec & displ) {
@@ -97,10 +99,12 @@ void Ball::translate(const Vec & displ) {
 Ball::Ball(const Vec & center, double r) {
     _center = center;
     _radius = r;
-
+#ifdef GRAPHICS
     gball = new GraphicsBall(center, r);
+#endif
 }
 
+#ifdef GRAPHICS
 void Ball::generateBuffers() {
     gball -> generateBuffers();
 }
@@ -116,6 +120,8 @@ void Plane::generateBuffers() {
 void Plane::draw() {
     gplane -> draw();
 }
+
+#endif
 
 void ContainerObject::setMassValue(double m) { // set masses for all Mass objects
     for (Mass * mass : masses) {
@@ -166,6 +172,74 @@ Cube::Cube(const Vec & center, double side_length) {
 void Cube::translate(const Vec & displ) {
     for (Mass * m : masses) {
         m->translate(displ);
+    }
+}
+
+Beam::Beam(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
+    _center = center;
+    _dims = dims;
+    this -> nx = nx;
+    this -> ny = ny;
+    this -> nz = nz;
+
+    for (int i = 0; i < nx; i++) {
+        for (int j = 0; j < ny; j++) {
+            for (int k = 0; k < nz; k++) {
+                masses.push_back(new Mass(Vec((nx > 1) ? (double) i / (nx - 1.0) - 0.5 : 0, (ny > 1) ? j / (ny - 1.0) - 0.5 : 0, (nz > 1) ? k / (nz - 1.0) - 0.5 : 0) * dims + center));
+                if (i == 0) {
+                    masses[masses.size() - 1] -> fixed = true;
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < nx; i++) {
+        for (int j = 0; j < ny; j++) {
+            for (int k = 0; k < nz; k++) {
+                for (int l = 0; l < ((i != nx - 1) ? 2 : 1); l++) {
+                    for (int m = 0; m < ((j != ny - 1) ? 2 : 1); m++) {
+                        for (int n = 0; n < ((k != nz - 1) ? 2 : 1); n++) {
+                            if (l != 0 || m != 0 || n != 0) {
+                                springs.push_back(new Spring(masses[k + j * nz + i * ny * nz],
+                                                             masses[(k + n) + (j + m) * nz + (i + l) * ny * nz]));
+                            }
+                        }
+                    }
+                }
+
+                if (k != nz - 1) {
+                    if (j != ny - 1) {
+                        springs.push_back(new Spring(masses[(k + 1) + j * nz + i * ny * nz], // get the full triangle
+                                                     masses[k + (j + 1) * nz + i * ny * nz]));
+                    }
+
+                    if (i != nx - 1) {
+                        springs.push_back(new Spring(masses[(k + 1) + j * nz + i * ny * nz],
+                                                     masses[k + j * nz + (i + 1) * ny * nz]));
+                    }
+
+                    if (j != ny - 1 && i != nx - 1) {
+                        springs.push_back(new Spring(masses[(k + 1) + j * nz + i * ny * nz],
+                                                     masses[k + (j + 1) * nz + (i + 1) * ny * nz]));
+                        springs.push_back(new Spring(masses[(k + 1) + j * nz + (i + 1) * ny * nz],
+                                                     masses[k + (j + 1) * nz + i * ny * nz]));
+                        springs.push_back(new Spring(masses[(k + 1) + (j + 1) * nz + i * ny * nz],
+                                                     masses[k + j * nz + (i + 1) * ny * nz]));
+                    }
+                }
+
+                if (j != ny - 1 && i != nx - 1) {
+                    springs.push_back(new Spring(masses[k + (j + 1) * nz + i * ny * nz],
+                                                 masses[k + j * nz + (i + 1) * ny * nz]));
+                }
+            }
+        }
+    }
+}
+
+void Beam::translate(const Vec &displ) {
+    for (Mass * m : masses) {
+        m -> pos += displ;
     }
 }
 
@@ -393,55 +467,55 @@ void GraphicsPlane::generateBuffers() {
 
     std::cout << "v1: " << v1 << " v2: " << v2 << std::endl;
 
-    const static GLfloat vertex_buffer_platform[108] = {
+    const static GLfloat vertex_buffer_platform[118] = {
             -1, -1, -1,
-            -1, -1,  0,
-            -1,  1,  0,
+            -1, -1,  1,
+            -1,  1,  1,
             1,  1, -1,
             -1, -1, -1,
             -1,  1, -1,
-            1, -1,  0,
+            1, -1,  1,
             -1, -1, -1,
             1, -1, -1,
             1,  1, -1,
             1, -1, -1,
             -1, -1, -1,
             -1, -1, -1,
-            -1,  1,  0,
+            -1,  1,  1,
             -1,  1, -1,
-            1, -1,  0,
-            -1, -1,  0,
+            1, -1,  1,
+            -1, -1,  1,
             -1, -1, -1,
-            -1,  1,  0,
-            -1, -1,  0,
-            1, -1,  0,
-            1,  1,  0,
+            -1,  1,  1,
+            -1, -1,  1,
+            1, -1,  1,
+            1,  1,  1,
             1, -1, -1,
             1,  1, -1,
             1, -1, -1,
-            1,  1,  0,
-            1, -1,  0,
-            1,  1,  0,
+            1,  1,  1,
+            1, -1,  1,
+            1,  1,  1,
             1,  1, -1,
             -1,  1, -1,
-            1,  1,  0,
+            1,  1,  1,
             -1,  1, -1,
-            -1,  1,  0,
-            1,  1,  0,
-            -1,  1,  0,
-            1, -1,  0
+            -1,  1,  1,
+            1,  1,  1,
+            -1,  1,  1,
+            1, -1,  1
     };
 
     GLfloat vertex_data[108];
 
     for (int i = 0; i < 36; i++) {
         Vec temp = Vec(vertex_buffer_platform[3 * i], vertex_buffer_platform[3 * i + 1], vertex_buffer_platform[3 * i + 2]);
-        Vec vertex = dot(v1, temp) * v1 + dot(v2, temp) * v2 + _normal * (_offset + dot(_normal, temp));
+        Vec vertex = 10 * dot(v1, temp) * v1 + 10 * dot(v2, temp) * v2 + _normal * (_offset + dot(_normal, temp) - 1.0);
 
         std::cout << vertex << std::endl;
 
-        vertex_data[3 * i] = 10 * vertex[0];
-        vertex_data[3 * i + 1] = 10 * vertex[1];
+        vertex_data[3 * i] = vertex[0];
+        vertex_data[3 * i + 1] = vertex[1];
         vertex_data[3 * i + 2] = vertex[2];
     }
 

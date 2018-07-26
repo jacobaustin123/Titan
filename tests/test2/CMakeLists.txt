@@ -12,4 +12,5 @@ endif()
 
 add_executable(test2 ${CMAKE_CURRENT_LIST_DIR}/test2.cpp ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
 
-target_link_libraries(test2 ${Loch_LIBRARIES})
+target_compile_definitions(test2 PRIVATE GRAPHICS)
+target_link_libraries(test2 Loch)

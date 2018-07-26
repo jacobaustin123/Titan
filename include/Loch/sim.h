@@ -32,8 +32,9 @@ public:
 
     Cube * createCube(const Vec & center, double side_length); // creates cube
     Lattice * createLattice(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
+    Beam * createBeam(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
 
-    void setSpringConstant(double k);
+        void setSpringConstant(double k);
     void defaultRestLength();
     void setMass(double m);
     void setMassDeltaT(double dt);

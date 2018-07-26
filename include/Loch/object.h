@@ -2,6 +2,7 @@
 #define LOCH_OBJECT_H
 
 #include <vector>
+
 #include "mass.h"
 #include "spring.h"
 #include "vec.h"
@@ -92,6 +93,16 @@ public:
 
     double _side_length;
     Vec _center;
+};
+
+class Beam : public ContainerObject {
+public:
+    Beam(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
+
+    void translate(const Vec & displ);
+
+    int nx, ny, nz;
+    Vec _center, _dims;
 };
 
 class Lattice : public ContainerObject {
