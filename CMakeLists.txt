@@ -15,40 +15,35 @@ set(LOCH_SOURCE_FILES ${LOCH_SOURCE_DIR}/vec.cpp ${LOCH_SOURCE_DIR}/sim.cpp
 set(LOCH_HEADER_FILES ${LOCH_INCLUDE_DIR}/sim.h ${LOCH_INCLUDE_DIR}/mass.h ${LOCH_INCLUDE_DIR}/object.h
         ${LOCH_INCLUDE_DIR}/spring.h ${LOCH_INCLUDE_DIR}/vec.h ${LOCH_INCLUDE_DIR}/graphics.h)
 
-add_library(Loch ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
+add_library(Loch SHARED ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
 target_compile_definitions(Loch PRIVATE GRAPHICS)
 
 find_package(OPENGL REQUIRED)
 if (OPENGL_FOUND)
     message(STATUS "OPENGL FOUND")
     target_include_directories(Loch PRIVATE ${OPENGL_INCLUDE_DIRS})
-    target_link_libraries(Loch PUBLIC ${OPENGL_LIBRARIES})
+    target_link_libraries(Loch PRIVATE ${OPENGL_LIBRARIES})
 endif()
-
-FIND_LIBRARY(glfw3_LIBRARIES glfw
-        PATHS ${CMAKE_INSTALL_PREFIX}/lib
-        NO_DEFAULT_PATH
-        )
 
 find_package(glfw3 REQUIRED)
 if (glfw3_FOUND)
     message(STATUS "GLFW FOUND")
     target_include_directories(Loch PRIVATE ${glfw3_INCLUDE_DIRS})
-    target_link_libraries(Loch PUBLIC ${glfw3_LIBRARIES} ${glfw3_LIBRARIES})
+    target_link_libraries(Loch PRIVATE ${glfw3_LIBRARIES} glfw)
 endif()
 
 find_package(GLEW REQUIRED)
 if (GLEW_FOUND)
     message(STATUS "GLEW FOUND")
     target_include_directories(Loch PRIVATE ${GLEW_INCLUDE_DIRS})
-    target_link_libraries(Loch PUBLIC ${GLEW_LIBRARIES})
+    target_link_libraries(Loch PRIVATE ${GLEW_LIBRARIES})
 endif()
 
 find_package(glm CONFIG REQUIRED)
 if (glm_FOUND)
     message(STATUS "GLM FOUND")
     target_include_directories(Loch PRIVATE ${glm_INCLUDE_DIRS})
-    target_link_libraries(Loch PUBLIC ${glm_LIBRARIES})
+    target_link_libraries(Loch PRIVATE ${glm_LIBRARIES})
 endif()
 
 target_include_directories(Loch PUBLIC
@@ -60,7 +55,7 @@ set_target_properties(Loch PROPERTIES PUBLIC_HEADER "${LOCH_HEADER_FILES}")
 install(TARGETS Loch
         EXPORT LochTargets
         PUBLIC_HEADER DESTINATION include/Loch
-        LIBRARY DESTINATION lib
+        LIBRARY DESTINATION bin
         ARCHIVE DESTINATION lib
 )
 
