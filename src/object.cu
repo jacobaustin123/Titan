@@ -21,10 +21,10 @@ CUDA_CALLABLE_MEMBER void CudaBall::applyForce(CUDA_MASS * m) {
     m -> force += (dist <= _radius) ? NORMAL * (m -> pos - _center) / dist : Vec(0, 0, 0);
 }
 
-CUDA_CALLABLE_MEMBER CudaContactPlane::CudaContactPlane(const Vec & normal, double offset) {
-    _normal = normal / normal.norm();
-    _offset = offset;
-}
+//CUDA_CALLABLE_MEMBER CudaContactPlane::CudaContactPlane(const Vec & normal, double offset) {
+//    _normal = normal / normal.norm();
+//    _offset = offset;
+//}
 
 CudaContactPlane::CudaContactPlane(const ContactPlane & p) {
     _normal = p._normal;
@@ -202,18 +202,18 @@ Lattice::Lattice(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
 
 #ifdef CONSTRAINTS
 
-void Container::makeFixed() {
-    for (Mass * mass : masses) {
-        mass -> constraints.fixed = true;
-    }
-}
-
+//void Container::makeFixed() {
+//    for (Mass * mass : masses) {
+//        mass -> constraints.fixed = true;
+//    }
+//}
+//
 LOCAL_CONSTRAINTS::LOCAL_CONSTRAINTS() {
 //    constraint_plane = thrust::device_vector<CudaConstraintPlane>(1);
 //    contact_plane = thrust::device_vector<CudaContactPlane>(1);
 //    ball = thrust::device_vector<CudaBall>(1);
 //    direction = thrust::device_vector<CudaDirection>(1);
-
+//
 //    contact_plane_ptr = thrust::raw_pointer_cast(contact_plane.data()); // TODO make sure this is safe
 //    constraint_plane_ptr = thrust::raw_pointer_cast(constraint_plane.data());
 //    ball_ptr = thrust::raw_pointer_cast(ball.data());
@@ -228,20 +228,20 @@ LOCAL_CONSTRAINTS::LOCAL_CONSTRAINTS() {
     fixed = false;
 }
 
-CUDA_LOCAL_CONSTRAINTS::CUDA_LOCAL_CONSTRAINTS(LOCAL_CONSTRAINTS & c) {
-    contact_plane = c.contact_plane_ptr;
-    constraint_plane = c.constraint_plane_ptr;
-    ball = c.ball_ptr;
-    direction = c.direction_ptr;
-
-    num_contact_planes = c.num_contact_planes;
-    num_constraint_planes = c.num_constraint_planes;
-    num_balls = c.num_balls;
-    num_directions = c.num_directions;
-
-    fixed = c.fixed;
-    drag_coefficient = c.drag_coefficient;
-}
+//CUDA_LOCAL_CONSTRAINTS::CUDA_LOCAL_CONSTRAINTS(LOCAL_CONSTRAINTS & c) {
+//    contact_plane = c.contact_plane_ptr;
+//    constraint_plane = c.constraint_plane_ptr;
+//    ball = c.ball_ptr;
+//    direction = c.direction_ptr;
+//
+//    num_contact_planes = c.num_contact_planes;
+//    num_constraint_planes = c.num_constraint_planes;
+//    num_balls = c.num_balls;
+//    num_directions = c.num_directions;
+//
+//    fixed = c.fixed;
+//    drag_coefficient = c.drag_coefficient;
+//}
 
 #endif
 

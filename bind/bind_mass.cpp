@@ -1,31 +1,35 @@
 #include <pybind11/pybind11.h>
+#include <pybind11/iostream.h>
+
 namespace py = pybind11;
 
 #include "mass.h"
 
 void bind_mass(py::module &m){
-    py::class_<Mass>(m, "Mass")
-            .def(py::init<>())
+    py::class_<pyMass>(m, "Mass")
+            .def(py::init<>(), py::return_value_policy::reference)
+//            .def(py::init<Mass *>(), py::return_value_policy::reference)
 
             //properties
-//            .def_readwrite("pointer", &pyMass::pointer)
-//            .def("m", &pyMass::m)
-//            .def("pos", &pyMass::pos)
-//            .def("vel", &pyMass::vel)
-//            .def("acc", &pyMass::acc)
-//            .def("force", &pyMass::force)
-//            .def("dt", &pyMass::dt)
-//            .def("T", &pyMass::T);
+            .def_readwrite("pointer", &pyMass::pointer)
+            .def("m", &pyMass::m)
+            .def("setm", &pyMass::setm)
+            .def("pos", &pyMass::pos)
+            .def("vel", &pyMass::vel)
+            .def("acc", &pyMass::acc)
+            .def("force", &pyMass::force)
+            .def("dt", &pyMass::dt)
+            .def("T", &pyMass::T);
 
 
 //
-            .def_readwrite("m", &Mass::m)
-            .def_readwrite("pos", &Mass::pos)
-            .def_readwrite("vel", &Mass::vel)
-            .def_readwrite("acc", &Mass::acc)
-            .def_readwrite("force", &Mass::force)
-            .def_readwrite("dt", &Mass::dt)
-            .def_readwrite("T", &Mass::T);
+//            .def_readwrite("m", &Mass::m)
+//            .def_readwrite("pos", &Mass::pos)
+//            .def_readwrite("vel", &Mass::vel)
+//            .def_readwrite("acc", &Mass::acc)
+//            .def_readwrite("force", &Mass::force)
+//            .def_readwrite("dt", &Mass::dt)
+//            .def_readwrite("T", &Mass::T);
 
 //Methods (Legacy)
 //            .def("setMass", &Mass::setMass)

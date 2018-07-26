@@ -7,8 +7,8 @@ void bind_sim(py::module &m){
     py::class_<Simulation>(m, "Sim")
             .def(py::init<>())
             //Creators/Destructors
-            .def("createMass", (Mass * (Simulation::*)()) &Simulation::createMass, py::return_value_policy::reference)
-            .def("createMass", (Mass * (Simulation::*)(const Vec & pos)) &Simulation::createMass, py::return_value_policy::reference)
+            .def("createMass", (pyMass (Simulation::*)()) &Simulation::createMass, py::return_value_policy::reference)
+            .def("createMass", (pyMass (Simulation::*)(const Vec & pos)) &Simulation::createMass, py::return_value_policy::reference)
             .def("createSpring", (Spring * (Simulation::*)()) &Simulation::createSpring)
             .def("createSpring", (Spring * (Simulation::*)(Mass * m1, Mass * m2)) &Simulation::createSpring)
             .def("createPlane", &Simulation::createPlane)

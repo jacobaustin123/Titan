@@ -185,7 +185,7 @@ struct ContactPlane : public Constraint {
 
 struct CudaContactPlane {
     CudaContactPlane() = default;
-    CUDA_CALLABLE_MEMBER CudaContactPlane(const Vec & normal, double offset);
+//    CUDA_CALLABLE_MEMBER CudaContactPlane(const Vec & normal, double offset);
     CudaContactPlane(const ContactPlane & p);
 
     CUDA_CALLABLE_MEMBER void applyForce(CUDA_MASS * m);
@@ -230,15 +230,15 @@ struct CUDA_GLOBAL_CONSTRAINTS {
 struct LOCAL_CONSTRAINTS {
     LOCAL_CONSTRAINTS();
 
-    thrust::device_vector<CudaContactPlane> contact_plane;
-    thrust::device_vector<CudaConstraintPlane> constraint_plane;
-    thrust::device_vector<CudaBall> ball;
-    thrust::device_vector<CudaDirection> direction;
+//    thrust::device_vector<CudaContactPlane> contact_plane;
+//    thrust::device_vector<CudaConstraintPlane> constraint_plane;
+//    thrust::device_vector<CudaBall> ball;
+//    thrust::device_vector<CudaDirection> direction;
 
-    CudaContactPlane * contact_plane_ptr;
-    CudaConstraintPlane * constraint_plane_ptr;
-    CudaBall * ball_ptr;
-    CudaDirection * direction_ptr;
+//    CudaContactPlane * contact_plane_ptr;
+//    CudaConstraintPlane * constraint_plane_ptr;
+//    CudaBall * ball_ptr;
+//    CudaDirection * direction_ptr;
 
     int num_contact_planes;
     int num_balls;
@@ -249,24 +249,24 @@ struct LOCAL_CONSTRAINTS {
     bool fixed; // move here from the class itself;
 };
 
-struct CUDA_LOCAL_CONSTRAINTS {
-    CUDA_LOCAL_CONSTRAINTS() = default;
-
-    CUDA_LOCAL_CONSTRAINTS(LOCAL_CONSTRAINTS & c);
-
-    CudaContactPlane * contact_plane;
-    CudaConstraintPlane * constraint_plane;
-    CudaBall * ball;
-    CudaDirection * direction;
-
-    int drag_coefficient;
-    bool fixed; // move here from the class itself;
-
-    int num_contact_planes;
-    int num_balls;
-    int num_constraint_planes;
-    int num_directions; // if this is greater than 1, just make it fixed
-};
+//struct CUDA_LOCAL_CONSTRAINTS {
+//    CUDA_LOCAL_CONSTRAINTS() = default;
+//
+//    CUDA_LOCAL_CONSTRAINTS(LOCAL_CONSTRAINTS & c);
+//
+//    CudaContactPlane * contact_plane;
+//    CudaConstraintPlane * constraint_plane;
+//    CudaBall * ball;
+//    CudaDirection * direction;
+//
+//    int drag_coefficient;
+//    bool fixed; // move here from the class itself;
+//
+//    int num_contact_planes;
+//    int num_balls;
+//    int num_constraint_planes;
+//    int num_directions; // if this is greater than 1, just make it fixed
+//};
 
 #endif
 

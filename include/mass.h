@@ -31,15 +31,15 @@ struct CUDA_MASS {
     bool valid;
 
 #ifdef CONSTRAINTS
-    CUDA_LOCAL_CONSTRAINTS constraints;
+//    CUDA_LOCAL_CONSTRAINTS constraints;
 #endif
 
 };
 
 #ifdef CONSTRAINTS
-enum CONSTRAINT_TYPE {
-    CONSTRAINT_PLANE, CONTACT_PLANE, BALL, DIRECTION
-};
+//enum CONSTRAINT_TYPE {
+//    CONSTRAINT_PLANE, CONTACT_PLANE, BALL, DIRECTION
+//};
 #endif
 
 class Mass {
@@ -60,13 +60,13 @@ public:
 
 #ifdef CONSTRAINTS
     LOCAL_CONSTRAINTS constraints;
-    void addConstraint(CONSTRAINT_TYPE type, const Vec & vec, double num);
-    void clearConstraints(CONSTRAINT_TYPE type);
-    void clearAllConstraints();
-
-    void setDrag(double C);
-    void fix();
-    void unfix();
+//    void addConstraint(CONSTRAINT_TYPE type, const Vec & vec, double num);
+//    void clearConstraints(CONSTRAINT_TYPE type);
+//    void clearAllConstraints();
+//
+//    void setDrag(double C);
+//    void fix();
+//    void unfix();
 #endif
 
 #ifdef GRAPHICS
@@ -94,7 +94,7 @@ class pyMass {
 public:
     //constructor
     pyMass() = default;
-    pyMass(Mass * mass){ pointer = mass;}
+    pyMass(Mass * massp){ pointer = massp;}
 
     //Pointer to real C++ mass object
     Mass * pointer;
@@ -107,6 +107,8 @@ public:
     Vec vel() { return (pointer -> vel);} // velocity in m/s
     Vec acc() { return (pointer -> acc);} // acceleration in m/s^2
     Vec force() { return (pointer -> force);} // force in kg m / s^2
+
+    void setm(double mass) { pointer -> m = mass;}  // mass in kg
 
 };
 #endif //LOCH_MASS_H

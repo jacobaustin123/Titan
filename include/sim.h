@@ -41,8 +41,8 @@
 class Simulation {
 public:
     // Create
-    Mass * createMass();
-    Mass * createMass(const Vec & pos);
+    pyMass createMass();
+    pyMass createMass(const Vec & pos);
 
     Spring * createSpring();
     Spring * createSpring(Mass * m1, Mass * m2);
@@ -120,7 +120,7 @@ private:
     //Prints
     void printSprings();
 
-    Mass * createMass(Mass * m); // utility
+    pyMass createMass(Mass * m); // utility
     Spring * createSpring(Spring * s); // utility
 
     double stop_time;

@@ -148,7 +148,7 @@ Simulation::~Simulation() {
     std::cout << "Simulation destructor done." << std::endl;
 }
 
-Mass * Simulation::createMass(Mass * m) {
+pyMass Simulation::createMass(Mass * m) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
         assert(false);
@@ -177,7 +177,9 @@ Mass * Simulation::createMass(Mass * m) {
 #ifdef GRAPHICS
         resize_buffers = true;
 #endif
-        return m;
+        pyMass mp(m);
+
+        return mp;
     }
 }
 
@@ -199,7 +201,7 @@ Container * Simulation::getContainerByIndex(int i) {
     return objs[i];
 }
 
-Mass * Simulation::createMass() {
+pyMass Simulation::createMass() {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
         assert(false);
@@ -209,7 +211,7 @@ Mass * Simulation::createMass() {
     return createMass(m);
 }
 
-Mass * Simulation::createMass(const Vec & pos) {
+pyMass Simulation::createMass(const Vec & pos) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
         assert(false);
@@ -1030,12 +1032,12 @@ __global__ void computeSpringForces(CUDA_SPRING ** d_spring, int num_springs) {
         Vec force = spring._k * (spring._rest - temp.norm()) * (temp / temp.norm());
 
 #ifdef CONSTRAINTS
-        if (spring._right -> constraints.fixed == false) {
-            spring._right->force.atomicVecAdd(force); // need atomics here
-        }
-        if (spring._left -> constraints.fixed == false) {
-            spring._left->force.atomicVecAdd(-force);
-        }
+//        if (spring._right -> constraints.fixed == false) {
+//            spring._right->force.atomicVecAdd(force); // need atomics here
+//        }
+//        if (spring._left -> constraints.fixed == false) {
+//            spring._left->force.atomicVecAdd(-force);
+//        }
 #else
         spring._right->force.atomicVecAdd(force);
         spring._left->force.atomicVecAdd(-force);
@@ -1051,8 +1053,8 @@ __global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, CUDA_GLOBAL_CONSTRAINTS
         CUDA_MASS &mass = *d_mass[i];
 
 #ifdef CONSTRAINTS
-        if (mass.constraints.fixed == 1)
-            return;
+//        if (mass.constraints.fixed == 1)
+//            return;
 #endif
 
         mass.force += Vec(0, 0, - G * mass.m); // gravity
@@ -1066,25 +1068,25 @@ __global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, CUDA_GLOBAL_CONSTRAINTS
         }
 
 #ifdef CONSTRAINTS
-        for (int j = 0; j < mass.constraints.num_contact_planes; j++) { // local constraints
-            mass.constraints.contact_plane[j].applyForce(&mass);
-        }
-
-        for (int j = 0; j < mass.constraints.num_balls; j++) {
-            mass.constraints.ball[j].applyForce(&mass);
-        }
-
-        for (int j = 0; j < mass.constraints.num_constraint_planes; j++) {
-            mass.constraints.constraint_plane[j].applyForce(&mass);
-        }
-
-        for (int j = 0; j < mass.constraints.num_directions; j++) {
-            mass.constraints.direction[j].applyForce(&mass);
-        }
-
-        if (mass.vel.norm() != 0.0) {
-            mass.force += - mass.constraints.drag_coefficient * pow(mass.vel.norm(), 2) * mass.vel / mass.vel.norm(); // drag
-        }
+//        for (int j = 0; j < mass.constraints.num_contact_planes; j++) { // local constraints
+//            mass.constraints.contact_plane[j].applyForce(&mass);
+//        }
+//
+//        for (int j = 0; j < mass.constraints.num_balls; j++) {
+//            mass.constraints.ball[j].applyForce(&mass);
+//        }
+//
+//        for (int j = 0; j < mass.constraints.num_constraint_planes; j++) {
+//            mass.constraints.constraint_plane[j].applyForce(&mass);
+//        }
+//
+//        for (int j = 0; j < mass.constraints.num_directions; j++) {
+//            mass.constraints.direction[j].applyForce(&mass);
+//        }
+//
+//        if (mass.vel.norm() != 0.0) {
+//            mass.force += - mass.constraints.drag_coefficient * pow(mass.vel.norm(), 2) * mass.vel / mass.vel.norm(); // drag
+//        }
 #endif
 
         mass.acc = mass.force / mass.m;
