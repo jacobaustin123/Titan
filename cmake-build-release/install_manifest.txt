@@ -1,8 +1,10 @@
-C:/Program Files (x86)/Loch/include/Loch/sim.h
-C:/Program Files (x86)/Loch/include/Loch/mass.h
-C:/Program Files (x86)/Loch/include/Loch/object.h
-C:/Program Files (x86)/Loch/include/Loch/spring.h
-C:/Program Files (x86)/Loch/include/Loch/vec.h
-C:/Program Files (x86)/Loch/include/Loch/graphics.h
-C:/Program Files (x86)/Loch/lib/cmake/Loch/LochConfig.cmake
-C:/Program Files (x86)/Loch/lib/cmake/Loch/LochConfig-release.cmake
+C:/Users/CreativeMachines/Desktop/lib/Loch.lib
+C:/Users/CreativeMachines/Desktop/bin/Loch.dll
+C:/Users/CreativeMachines/Desktop/include/Loch/sim.h
+C:/Users/CreativeMachines/Desktop/include/Loch/mass.h
+C:/Users/CreativeMachines/Desktop/include/Loch/object.h
+C:/Users/CreativeMachines/Desktop/include/Loch/spring.h
+C:/Users/CreativeMachines/Desktop/include/Loch/vec.h
+C:/Users/CreativeMachines/Desktop/include/Loch/graphics.h
+C:/Users/CreativeMachines/Desktop/lib/cmake/Loch/LochConfig.cmake
+C:/Users/CreativeMachines/Desktop/lib/cmake/Loch/LochConfig-release.cmake

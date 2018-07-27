@@ -1,16 +1,40 @@
 The system is: Windows - 10.0.15063 - AMD64
-Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
-Compiler: C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.14.26428/bin/Hostx64/x64/cl.exe 
+Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+Compiler: C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.13.26128/bin/HostX64/x64/cl.exe 
 Build flags: 
 Id flags:  
 
 The output was:
 0
-Microsoft (R) C/C++ Optimizing Compiler Version 19.14.26433 for x64
+Microsoft (R) C/C++ Optimizing Compiler Version 19.13.26130.2 for x64
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+CMakeCCompilerId.c
+Microsoft (R) Incremental Linker Version 14.13.26130.2
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+/out:CMakeCCompilerId.exe 
+CMakeCCompilerId.obj 
+
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CMakeCCompilerId.exe"
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CMakeCCompilerId.obj"
+
+The C compiler identification is MSVC, found in "C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/3.12.0/CompilerIdC/CMakeCCompilerId.exe"
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+Compiler: C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.13.26128/bin/HostX64/x64/cl.exe 
+Build flags: 
+Id flags:  
+
+The output was:
+0
+Microsoft (R) C/C++ Optimizing Compiler Version 19.13.26130.2 for x64
 Copyright (C) Microsoft Corporation.  All rights reserved.
 
 CMakeCXXCompilerId.cpp
-Microsoft (R) Incremental Linker Version 14.14.26433.0
+Microsoft (R) Incremental Linker Version 14.13.26130.2
 Copyright (C) Microsoft Corporation.  All rights reserved.
 
 /out:CMakeCXXCompilerId.exe 
@@ -21,32 +45,75 @@ Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" p
 
 Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CMakeCXXCompilerId.obj"
 
-The CXX compiler identification is MSVC, found in "C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/3.10.3/CompilerIdCXX/CMakeCXXCompilerId.exe"
+The CXX compiler identification is MSVC, found in "C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/3.12.0/CompilerIdCXX/CMakeCXXCompilerId.exe"
 
+Determining if the C compiler works passed with the following output:
+Change Dir: C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp
+
+Run Build Command:"nmake" "/nologo" "cmTC_5a994\fast"
+	"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.14.26428\bin\HostX64\x64\nmake.exe" -f CMakeFiles\cmTC_5a994.dir\build.make /nologo -L                  CMakeFiles\cmTC_5a994.dir\build
+Building C object CMakeFiles/cmTC_5a994.dir/testCCompiler.c.obj
+	C:\PROGRA~2\MIB055~1\2017\COMMUN~1\VC\Tools\MSVC\1413~1.261\bin\HostX64\x64\cl.exe @C:\Users\CREATI~2\AppData\Local\Temp\nm6C2C.tmp
+testCCompiler.c
+Linking C executable cmTC_5a994.exe
+	"C:\Program Files\JetBrains\CLion 2018.1.5\bin\cmake\win\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_5a994.dir --manifests  -- C:\PROGRA~2\MIB055~1\2017\COMMUN~1\VC\Tools\MSVC\1413~1.261\bin\HostX64\x64\link.exe /nologo @CMakeFiles\cmTC_5a994.dir\objects1.rsp @C:\Users\CREATI~2\AppData\Local\Temp\nm6E12.tmp
+	powershell -noprofile -executionpolicy Bypass -file C:/Users/CreativeMachines/Desktop/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp/cmTC_5a994.exe -installedDir C:/Users/CreativeMachines/Desktop/vcpkg/installed/x64-windows/debug/bin -OutVariable out
+
+
+Detecting C compiler ABI info compiled with the following output:
+Change Dir: C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp
+
+Run Build Command:"nmake" "/nologo" "cmTC_d4846\fast"
+	"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.14.26428\bin\HostX64\x64\nmake.exe" -f CMakeFiles\cmTC_d4846.dir\build.make /nologo -L                  CMakeFiles\cmTC_d4846.dir\build
+Building C object CMakeFiles/cmTC_d4846.dir/CMakeCCompilerABI.c.obj
+	C:\PROGRA~2\MIB055~1\2017\COMMUN~1\VC\Tools\MSVC\1413~1.261\bin\HostX64\x64\cl.exe @C:\Users\CREATI~2\AppData\Local\Temp\nm738F.tmp
+CMakeCCompilerABI.c
+Linking C executable cmTC_d4846.exe
+	"C:\Program Files\JetBrains\CLion 2018.1.5\bin\cmake\win\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_d4846.dir --manifests  -- C:\PROGRA~2\MIB055~1\2017\COMMUN~1\VC\Tools\MSVC\1413~1.261\bin\HostX64\x64\link.exe /nologo @CMakeFiles\cmTC_d4846.dir\objects1.rsp @C:\Users\CREATI~2\AppData\Local\Temp\nm73DF.tmp
+	powershell -noprofile -executionpolicy Bypass -file C:/Users/CreativeMachines/Desktop/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp/cmTC_d4846.exe -installedDir C:/Users/CreativeMachines/Desktop/vcpkg/installed/x64-windows/debug/bin -OutVariable out
+
+
+
+
+Detecting C [] compiler features compiled with the following output:
+Change Dir: C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp
+
+Run Build Command:"nmake" "/nologo" "cmTC_3970c\fast"
+	"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.14.26428\bin\HostX64\x64\nmake.exe" -f CMakeFiles\cmTC_3970c.dir\build.make /nologo -L                  CMakeFiles\cmTC_3970c.dir\build
+Building C object CMakeFiles/cmTC_3970c.dir/feature_tests.c.obj
+	C:\PROGRA~2\MIB055~1\2017\COMMUN~1\VC\Tools\MSVC\1413~1.261\bin\HostX64\x64\cl.exe @C:\Users\CREATI~2\AppData\Local\Temp\nm795B.tmp
+feature_tests.c
+Linking C executable cmTC_3970c.exe
+	"C:\Program Files\JetBrains\CLion 2018.1.5\bin\cmake\win\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_3970c.dir --manifests  -- C:\PROGRA~2\MIB055~1\2017\COMMUN~1\VC\Tools\MSVC\1413~1.261\bin\HostX64\x64\link.exe /nologo @CMakeFiles\cmTC_3970c.dir\objects1.rsp @C:\Users\CREATI~2\AppData\Local\Temp\nm79AA.tmp
+	powershell -noprofile -executionpolicy Bypass -file C:/Users/CreativeMachines/Desktop/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp/cmTC_3970c.exe -installedDir C:/Users/CreativeMachines/Desktop/vcpkg/installed/x64-windows/debug/bin -OutVariable out
+
+
+    Feature record: C_FEATURE:1c_function_prototypes
+    Feature record: C_FEATURE:1c_variadic_macros
 Determining if the CXX compiler works passed with the following output:
 Change Dir: C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp
 
-Run Build Command:"nmake" "/NOLOGO" "cmTC_ae5ee\fast"
-	"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.14.26428\bin\HostX64\x64\nmake.exe" -f CMakeFiles\cmTC_ae5ee.dir\build.make /nologo -L                  CMakeFiles\cmTC_ae5ee.dir\build
-Building CXX object CMakeFiles/cmTC_ae5ee.dir/testCXXCompiler.cxx.obj
-	C:\PROGRA~2\MIB055~1\2017\COMMUN~1\VC\Tools\MSVC\1414~1.264\bin\Hostx64\x64\cl.exe @C:\Users\CREATI~2\AppData\Local\Temp\nm4CA6.tmp
+Run Build Command:"nmake" "/nologo" "cmTC_6fae9\fast"
+	"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.14.26428\bin\HostX64\x64\nmake.exe" -f CMakeFiles\cmTC_6fae9.dir\build.make /nologo -L                  CMakeFiles\cmTC_6fae9.dir\build
+Building CXX object CMakeFiles/cmTC_6fae9.dir/testCXXCompiler.cxx.obj
+	C:\PROGRA~2\MIB055~1\2017\COMMUN~1\VC\Tools\MSVC\1413~1.261\bin\HostX64\x64\cl.exe @C:\Users\CREATI~2\AppData\Local\Temp\nm7E6C.tmp
 testCXXCompiler.cxx
-Linking CXX executable cmTC_ae5ee.exe
-	"C:\Program Files\JetBrains\CLion 2018.1.5\bin\cmake\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_ae5ee.dir --manifests  -- C:\PROGRA~2\MIB055~1\2017\COMMUN~1\VC\Tools\MSVC\1414~1.264\bin\Hostx64\x64\link.exe /nologo @CMakeFiles\cmTC_ae5ee.dir\objects1.rsp @C:\Users\CREATI~2\AppData\Local\Temp\nm4ED9.tmp
-	powershell -noprofile -executionpolicy Bypass -file C:/Users/CreativeMachines/Desktop/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp/cmTC_ae5ee.exe -installedDir C:/Users/CreativeMachines/Desktop/vcpkg/installed/x64-windows/debug/bin -OutVariable out
+Linking CXX executable cmTC_6fae9.exe
+	"C:\Program Files\JetBrains\CLion 2018.1.5\bin\cmake\win\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_6fae9.dir --manifests  -- C:\PROGRA~2\MIB055~1\2017\COMMUN~1\VC\Tools\MSVC\1413~1.261\bin\HostX64\x64\link.exe /nologo @CMakeFiles\cmTC_6fae9.dir\objects1.rsp @C:\Users\CREATI~2\AppData\Local\Temp\nm7ECB.tmp
+	powershell -noprofile -executionpolicy Bypass -file C:/Users/CreativeMachines/Desktop/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp/cmTC_6fae9.exe -installedDir C:/Users/CreativeMachines/Desktop/vcpkg/installed/x64-windows/debug/bin -OutVariable out
 
 
 Detecting CXX compiler ABI info compiled with the following output:
 Change Dir: C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp
 
-Run Build Command:"nmake" "/NOLOGO" "cmTC_6bc43\fast"
-	"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.14.26428\bin\HostX64\x64\nmake.exe" -f CMakeFiles\cmTC_6bc43.dir\build.make /nologo -L                  CMakeFiles\cmTC_6bc43.dir\build
-Building CXX object CMakeFiles/cmTC_6bc43.dir/CMakeCXXCompilerABI.cpp.obj
-	C:\PROGRA~2\MIB055~1\2017\COMMUN~1\VC\Tools\MSVC\1414~1.264\bin\Hostx64\x64\cl.exe @C:\Users\CREATI~2\AppData\Local\Temp\nm5699.tmp
+Run Build Command:"nmake" "/nologo" "cmTC_cbd60\fast"
+	"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.14.26428\bin\HostX64\x64\nmake.exe" -f CMakeFiles\cmTC_cbd60.dir\build.make /nologo -L                  CMakeFiles\cmTC_cbd60.dir\build
+Building CXX object CMakeFiles/cmTC_cbd60.dir/CMakeCXXCompilerABI.cpp.obj
+	C:\PROGRA~2\MIB055~1\2017\COMMUN~1\VC\Tools\MSVC\1413~1.261\bin\HostX64\x64\cl.exe @C:\Users\CREATI~2\AppData\Local\Temp\nm83BC.tmp
 CMakeCXXCompilerABI.cpp
-Linking CXX executable cmTC_6bc43.exe
-	"C:\Program Files\JetBrains\CLion 2018.1.5\bin\cmake\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_6bc43.dir --manifests  -- C:\PROGRA~2\MIB055~1\2017\COMMUN~1\VC\Tools\MSVC\1414~1.264\bin\Hostx64\x64\link.exe /nologo @CMakeFiles\cmTC_6bc43.dir\objects1.rsp @C:\Users\CREATI~2\AppData\Local\Temp\nm5717.tmp
-	powershell -noprofile -executionpolicy Bypass -file C:/Users/CreativeMachines/Desktop/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp/cmTC_6bc43.exe -installedDir C:/Users/CreativeMachines/Desktop/vcpkg/installed/x64-windows/debug/bin -OutVariable out
+Linking CXX executable cmTC_cbd60.exe
+	"C:\Program Files\JetBrains\CLion 2018.1.5\bin\cmake\win\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_cbd60.dir --manifests  -- C:\PROGRA~2\MIB055~1\2017\COMMUN~1\VC\Tools\MSVC\1413~1.261\bin\HostX64\x64\link.exe /nologo @CMakeFiles\cmTC_cbd60.dir\objects1.rsp @C:\Users\CREATI~2\AppData\Local\Temp\nm841B.tmp
+	powershell -noprofile -executionpolicy Bypass -file C:/Users/CreativeMachines/Desktop/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp/cmTC_cbd60.exe -installedDir C:/Users/CreativeMachines/Desktop/vcpkg/installed/x64-windows/debug/bin -OutVariable out
 
 
 
@@ -54,14 +121,14 @@ Linking CXX executable cmTC_6bc43.exe
 Detecting CXX [] compiler features compiled with the following output:
 Change Dir: C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp
 
-Run Build Command:"nmake" "/NOLOGO" "cmTC_0c204\fast"
-	"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.14.26428\bin\HostX64\x64\nmake.exe" -f CMakeFiles\cmTC_0c204.dir\build.make /nologo -L                  CMakeFiles\cmTC_0c204.dir\build
-Building CXX object CMakeFiles/cmTC_0c204.dir/feature_tests.cxx.obj
-	C:\PROGRA~2\MIB055~1\2017\COMMUN~1\VC\Tools\MSVC\1414~1.264\bin\Hostx64\x64\cl.exe @C:\Users\CREATI~2\AppData\Local\Temp\nm5DCD.tmp
+Run Build Command:"nmake" "/nologo" "cmTC_05070\fast"
+	"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.14.26428\bin\HostX64\x64\nmake.exe" -f CMakeFiles\cmTC_05070.dir\build.make /nologo -L                  CMakeFiles\cmTC_05070.dir\build
+Building CXX object CMakeFiles/cmTC_05070.dir/feature_tests.cxx.obj
+	C:\PROGRA~2\MIB055~1\2017\COMMUN~1\VC\Tools\MSVC\1413~1.261\bin\HostX64\x64\cl.exe @C:\Users\CREATI~2\AppData\Local\Temp\nm89C6.tmp
 feature_tests.cxx
-Linking CXX executable cmTC_0c204.exe
-	"C:\Program Files\JetBrains\CLion 2018.1.5\bin\cmake\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_0c204.dir --manifests  -- C:\PROGRA~2\MIB055~1\2017\COMMUN~1\VC\Tools\MSVC\1414~1.264\bin\Hostx64\x64\link.exe /nologo @CMakeFiles\cmTC_0c204.dir\objects1.rsp @C:\Users\CREATI~2\AppData\Local\Temp\nm5EA8.tmp
-	powershell -noprofile -executionpolicy Bypass -file C:/Users/CreativeMachines/Desktop/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp/cmTC_0c204.exe -installedDir C:/Users/CreativeMachines/Desktop/vcpkg/installed/x64-windows/debug/bin -OutVariable out
+Linking CXX executable cmTC_05070.exe
+	"C:\Program Files\JetBrains\CLion 2018.1.5\bin\cmake\win\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_05070.dir --manifests  -- C:\PROGRA~2\MIB055~1\2017\COMMUN~1\VC\Tools\MSVC\1413~1.261\bin\HostX64\x64\link.exe /nologo @CMakeFiles\cmTC_05070.dir\objects1.rsp @C:\Users\CREATI~2\AppData\Local\Temp\nm8A26.tmp
+	powershell -noprofile -executionpolicy Bypass -file C:/Users/CreativeMachines/Desktop/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp/cmTC_05070.exe -installedDir C:/Users/CreativeMachines/Desktop/vcpkg/installed/x64-windows/debug/bin -OutVariable out
 
 
     Feature record: CXX_FEATURE:1cxx_aggregate_default_initializers
@@ -76,6 +143,7 @@ Linking CXX executable cmTC_0c204.exe
     Feature record: CXX_FEATURE:1cxx_contextual_conversions
     Feature record: CXX_FEATURE:1cxx_decltype
     Feature record: CXX_FEATURE:1cxx_decltype_auto
+    Feature record: CXX_FEATURE:1cxx_decltype_incomplete_return_types
     Feature record: CXX_FEATURE:1cxx_default_function_template_args
     Feature record: CXX_FEATURE:1cxx_defaulted_functions
     Feature record: CXX_FEATURE:1cxx_defaulted_move_initializers
@@ -119,53 +187,3 @@ Linking CXX executable cmTC_0c204.exe
     Feature record: CXX_FEATURE:1cxx_variable_templates
     Feature record: CXX_FEATURE:1cxx_variadic_macros
     Feature record: CXX_FEATURE:1cxx_variadic_templates
-Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
-Compiler: C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.14.26428/bin/Hostx64/x64/cl.exe 
-Build flags: 
-Id flags:  
-
-The output was:
-0
-Microsoft (R) C/C++ Optimizing Compiler Version 19.14.26433 for x64
-Copyright (C) Microsoft Corporation.  All rights reserved.
-
-CMakeCCompilerId.c
-Microsoft (R) Incremental Linker Version 14.14.26433.0
-Copyright (C) Microsoft Corporation.  All rights reserved.
-
-/out:CMakeCCompilerId.exe 
-CMakeCCompilerId.obj 
-
-
-Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CMakeCCompilerId.exe"
-
-Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CMakeCCompilerId.obj"
-
-The C compiler identification is MSVC, found in "C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/3.10.3/CompilerIdC/CMakeCCompilerId.exe"
-
-Determining if the C compiler works passed with the following output:
-Change Dir: C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp
-
-Run Build Command:"nmake" "/NOLOGO" "cmTC_c52d7\fast"
-	"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.14.26428\bin\HostX64\x64\nmake.exe" -f CMakeFiles\cmTC_c52d7.dir\build.make /nologo -L                  CMakeFiles\cmTC_c52d7.dir\build
-Building C object CMakeFiles/cmTC_c52d7.dir/testCCompiler.c.obj
-	C:\PROGRA~2\MIB055~1\2017\COMMUN~1\VC\Tools\MSVC\1414~1.264\bin\Hostx64\x64\cl.exe @C:\Users\CREATI~2\AppData\Local\Temp\nmA1E3.tmp
-testCCompiler.c
-Linking C executable cmTC_c52d7.exe
-	"C:\Program Files\JetBrains\CLion 2018.1.5\bin\cmake\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_c52d7.dir --manifests  -- C:\PROGRA~2\MIB055~1\2017\COMMUN~1\VC\Tools\MSVC\1414~1.264\bin\Hostx64\x64\link.exe /nologo @CMakeFiles\cmTC_c52d7.dir\objects1.rsp @C:\Users\CREATI~2\AppData\Local\Temp\nmA242.tmp
-	powershell -noprofile -executionpolicy Bypass -file C:/Users/CreativeMachines/Desktop/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp/cmTC_c52d7.exe -installedDir C:/Users/CreativeMachines/Desktop/vcpkg/installed/x64-windows/debug/bin -OutVariable out
-
-
-Detecting C compiler ABI info compiled with the following output:
-Change Dir: C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp
-
-Run Build Command:"nmake" "/NOLOGO" "cmTC_dffa6\fast"
-	"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.14.26428\bin\HostX64\x64\nmake.exe" -f CMakeFiles\cmTC_dffa6.dir\build.make /nologo -L                  CMakeFiles\cmTC_dffa6.dir\build
-Building C object CMakeFiles/cmTC_dffa6.dir/CMakeCCompilerABI.c.obj
-	C:\PROGRA~2\MIB055~1\2017\COMMUN~1\VC\Tools\MSVC\1414~1.264\bin\Hostx64\x64\cl.exe @C:\Users\CREATI~2\AppData\Local\Temp\nmA87B.tmp
-CMakeCCompilerABI.c
-Linking C executable cmTC_dffa6.exe
-	"C:\Program Files\JetBrains\CLion 2018.1.5\bin\cmake\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_dffa6.dir --manifests  -- C:\PROGRA~2\MIB055~1\2017\COMMUN~1\VC\Tools\MSVC\1414~1.264\bin\Hostx64\x64\link.exe /nologo @CMakeFiles\cmTC_dffa6.dir\objects1.rsp @C:\Users\CREATI~2\AppData\Local\Temp\nmA937.tmp
-	powershell -noprofile -executionpolicy Bypass -file C:/Users/CreativeMachines/Desktop/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp/cmTC_dffa6.exe -installedDir C:/Users/CreativeMachines/Desktop/vcpkg/installed/x64-windows/debug/bin -OutVariable out
-
-

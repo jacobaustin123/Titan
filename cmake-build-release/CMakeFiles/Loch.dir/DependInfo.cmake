@@ -21,8 +21,8 @@ set(CMAKE_TARGET_DEFINITIONS_CXX
 
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
-  "C:/Users/CreativeMachines/Desktop/vcpkg/installed/x64-windows/include"
   "../include/Loch"
+  "C:/Users/CreativeMachines/Desktop/vcpkg/installed/x64-windows/include"
   )
 
 # Targets to which this target links.

@@ -2,7 +2,7 @@
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/Loch")
+  set(CMAKE_INSTALL_PREFIX "C:/Users/CreativeMachines/Desktop")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -37,6 +37,10 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" TYPE SHARED_LIBRARY FILES "C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/Loch.dll")
+endif()
+
+if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include/Loch" TYPE FILE FILES
     "C:/Users/CreativeMachines/Desktop/Loch/include/Loch/sim.h"
     "C:/Users/CreativeMachines/Desktop/Loch/include/Loch/mass.h"
@@ -64,12 +68,6 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if("${CMAKE_INSTALL_CONFIG_NAME}" MATCHES "^([Rr][Ee][Ll][Ee][Aa][Ss][Ee])$")
     file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/Loch" TYPE FILE FILES "C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/Export/lib/cmake/Loch/LochConfig-release.cmake")
   endif()
-endif()
-
-if(NOT CMAKE_INSTALL_LOCAL_ONLY)
-  # Include the install script for each subdirectory.
-  include("C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/tests/test1/cmake_install.cmake")
-
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)

@@ -85,6 +85,13 @@
 #endif
 "cxx_decltype_auto\n"
 "CXX_FEATURE:"
+#if _MSC_VER >= 1911
+"1"
+#else
+"0"
+#endif
+"cxx_decltype_incomplete_return_types\n"
+"CXX_FEATURE:"
 #if _MSC_VER >= 1800
 "1"
 #else

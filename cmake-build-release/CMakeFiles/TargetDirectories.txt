@@ -4,9 +4,3 @@ C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/install.di
 C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/edit_cache.dir
 C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/rebuild_cache.dir
 C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/list_install_components.dir
-C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/tests/test1/CMakeFiles/test1.dir
-C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/tests/test1/CMakeFiles/install/local.dir
-C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/tests/test1/CMakeFiles/install.dir
-C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/tests/test1/CMakeFiles/edit_cache.dir
-C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/tests/test1/CMakeFiles/rebuild_cache.dir
-C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/tests/test1/CMakeFiles/list_install_components.dir

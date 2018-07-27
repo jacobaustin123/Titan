@@ -1,12 +1,23 @@
-"C:\Program Files\JetBrains\CLion 2018.1.5\bin\cmake\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Release -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=C:/Users/CreativeMachines/Desktop/vcpkg/scripts/buildsystems/vcpkg.cmake -G "CodeBlocks - NMake Makefiles" C:\Users\CreativeMachines\Desktop\Loch
+"C:\Program Files\JetBrains\CLion 2018.1.5\bin\cmake\win\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Release "-DCMAKE_C_COMPILER=C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.13.26128/bin/HostX64/x64/cl.exe" "-DCMAKE_CXX_COMPILER=C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.13.26128/bin/HostX64/x64/cl.exe" -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=C:/Users/CreativeMachines/Desktop/vcpkg/scripts/buildsystems/vcpkg.cmake -G "CodeBlocks - NMake Makefiles" C:\Users\CreativeMachines\Desktop\Loch
+-- The C compiler identification is MSVC 19.13.26130.2
+-- The CXX compiler identification is MSVC 19.13.26130.2
+-- Check for working C compiler: C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.13.26128/bin/HostX64/x64/cl.exe
+-- Check for working C compiler: C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.13.26128/bin/HostX64/x64/cl.exe -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.13.26128/bin/HostX64/x64/cl.exe
+-- Check for working CXX compiler: C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.13.26128/bin/HostX64/x64/cl.exe -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
 -- C:/Users/CreativeMachines/Desktop/Loch/src C:/Users/CreativeMachines/Desktop/Loch/include/Loch
+-- Found OpenGL: opengl32   
 -- OPENGL FOUND
 -- GLFW FOUND
--- GLEW FOUND
--- GLM FOUND
--- C:/Users/CreativeMachines/Desktop/Loch/tests/test1/../../src C:/Users/CreativeMachines/Desktop/Loch/tests/test1/../../include/Loch
--- OPENGL FOUND
--- GLFW FOUND
+-- Found GLEW: C:/Users/CreativeMachines/Desktop/vcpkg/installed/x64-windows/include  
 -- GLEW FOUND
 -- GLM FOUND
 -- Configuring done
