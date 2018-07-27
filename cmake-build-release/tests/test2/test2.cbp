@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="test2"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="msvc8"/>
+		<Option virtualFolders="CMake Files\;CMake Files\..\;CMake Files\..\vcpkg\;CMake Files\..\vcpkg\scripts\;CMake Files\..\vcpkg\scripts\buildsystems\;CMake Files\..\vcpkg\installed\;CMake Files\..\vcpkg\installed\x64-windows\;CMake Files\..\vcpkg\installed\x64-windows\share\;CMake Files\..\vcpkg\installed\x64-windows\share\glfw3\;CMake Files\..\vcpkg\installed\x64-windows\share\glm\;CMake Files\..\..\;CMake Files\..\..\..\;CMake Files\..\..\..\..\;CMake Files\..\..\..\..\Program Files\;CMake Files\..\..\..\..\Program Files\Loch\;CMake Files\..\..\..\..\Program Files\Loch\lib\;CMake Files\..\..\..\..\Program Files\Loch\lib\cmake\;CMake Files\..\..\..\..\Program Files\Loch\lib\cmake\Loch\;CMake Files\tests\;CMake Files\tests\test2\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/tests/test2"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="nmake /NOLOGO /f C:\Users\CreativeMachines\Desktop\Loch\cmake-build-release\tests\test2\Makefile VERBOSE=1 all"/>
+					<CompileFile command="nmake /NOLOGO /f C:\Users\CreativeMachines\Desktop\Loch\cmake-build-release\tests\test2\Makefile VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="nmake /NOLOGO /f C:\Users\CreativeMachines\Desktop\Loch\cmake-build-release\tests\test2\Makefile VERBOSE=1 clean"/>
+					<DistClean command="nmake /NOLOGO /f C:\Users\CreativeMachines\Desktop\Loch\cmake-build-release\tests\test2\Makefile VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test2">
+				<Option output="C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/tests/test2/test2.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/tests/test2"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="msvc8"/>
+				<Compiler>
+					<Add directory="C:/Users/CreativeMachines/Desktop/Loch/include/Loch"/>
+					<Add directory="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.14.26428\ATLMFC\include"/>
+					<Add directory="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.14.26428\include"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\include\um"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.17134.0\ucrt"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.17134.0\shared"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.17134.0\um"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.17134.0\winrt"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.17134.0\cppwinrt"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="nmake /NOLOGO /f C:\Users\CreativeMachines\Desktop\Loch\cmake-build-release\tests\test2\Makefile VERBOSE=1 test2"/>
+					<CompileFile command="nmake /NOLOGO /f C:\Users\CreativeMachines\Desktop\Loch\cmake-build-release\tests\test2\Makefile VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="nmake /NOLOGO /f C:\Users\CreativeMachines\Desktop\Loch\cmake-build-release\tests\test2\Makefile VERBOSE=1 clean"/>
+					<DistClean command="nmake /NOLOGO /f C:\Users\CreativeMachines\Desktop\Loch\cmake-build-release\tests\test2\Makefile VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test2/fast">
+				<Option output="C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/tests/test2/test2.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/tests/test2"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="msvc8"/>
+				<Compiler>
+					<Add directory="C:/Users/CreativeMachines/Desktop/Loch/include/Loch"/>
+					<Add directory="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.14.26428\ATLMFC\include"/>
+					<Add directory="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.14.26428\include"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\NETFXSDK\4.6.1\include\um"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.17134.0\ucrt"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.17134.0\shared"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.17134.0\um"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.17134.0\winrt"/>
+					<Add directory="C:\Program Files (x86)\Windows Kits\10\include\10.0.17134.0\cppwinrt"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="nmake /NOLOGO /f C:\Users\CreativeMachines\Desktop\Loch\cmake-build-release\tests\test2\Makefile VERBOSE=1 test2/fast"/>
+					<CompileFile command="nmake /NOLOGO /f C:\Users\CreativeMachines\Desktop\Loch\cmake-build-release\tests\test2\Makefile VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="nmake /NOLOGO /f C:\Users\CreativeMachines\Desktop\Loch\cmake-build-release\tests\test2\Makefile VERBOSE=1 clean"/>
+					<DistClean command="nmake /NOLOGO /f C:\Users\CreativeMachines\Desktop\Loch\cmake-build-release\tests\test2\Makefile VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="C:/Users/CreativeMachines/Desktop/Loch/include/Loch/graphics.h">
+			<Option target="test2"/>
+		</Unit>
+		<Unit filename="C:/Users/CreativeMachines/Desktop/Loch/include/Loch/mass.h">
+			<Option target="test2"/>
+		</Unit>
+		<Unit filename="C:/Users/CreativeMachines/Desktop/Loch/include/Loch/object.h">
+			<Option target="test2"/>
+		</Unit>
+		<Unit filename="C:/Users/CreativeMachines/Desktop/Loch/include/Loch/sim.h">
+			<Option target="test2"/>
+		</Unit>
+		<Unit filename="C:/Users/CreativeMachines/Desktop/Loch/include/Loch/spring.h">
+			<Option target="test2"/>
+		</Unit>
+		<Unit filename="C:/Users/CreativeMachines/Desktop/Loch/include/Loch/vec.h">
+			<Option target="test2"/>
+		</Unit>
+		<Unit filename="C:/Users/CreativeMachines/Desktop/Loch/src/graphics.cpp">
+			<Option target="test2"/>
+		</Unit>
+		<Unit filename="C:/Users/CreativeMachines/Desktop/Loch/src/mass.cpp">
+			<Option target="test2"/>
+		</Unit>
+		<Unit filename="C:/Users/CreativeMachines/Desktop/Loch/src/object.cpp">
+			<Option target="test2"/>
+		</Unit>
+		<Unit filename="C:/Users/CreativeMachines/Desktop/Loch/src/sim.cpp">
+			<Option target="test2"/>
+		</Unit>
+		<Unit filename="C:/Users/CreativeMachines/Desktop/Loch/src/spring.cpp">
+			<Option target="test2"/>
+		</Unit>
+		<Unit filename="C:/Users/CreativeMachines/Desktop/Loch/src/vec.cpp">
+			<Option target="test2"/>
+		</Unit>
+		<Unit filename="C:/Users/CreativeMachines/Desktop/Loch/tests/test2/test2.cpp">
+			<Option target="test2"/>
+		</Unit>
+		<Unit filename="C:/Users/CreativeMachines/Desktop/Loch/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="C:/Users/CreativeMachines/Desktop/Loch/../vcpkg/scripts/buildsystems/vcpkg.cmake">
+			<Option virtualFolder="CMake Files\..\vcpkg\scripts\buildsystems\"/>
+		</Unit>
+		<Unit filename="C:/Users/CreativeMachines/Desktop/Loch/../vcpkg/installed/x64-windows/share/glfw3/glfw3Config.cmake">
+			<Option virtualFolder="CMake Files\..\vcpkg\installed\x64-windows\share\glfw3\"/>
+		</Unit>
+		<Unit filename="C:/Users/CreativeMachines/Desktop/Loch/../vcpkg/installed/x64-windows/share/glfw3/glfw3ConfigVersion.cmake">
+			<Option virtualFolder="CMake Files\..\vcpkg\installed\x64-windows\share\glfw3\"/>
+		</Unit>
+		<Unit filename="C:/Users/CreativeMachines/Desktop/Loch/../vcpkg/installed/x64-windows/share/glfw3/glfw3Targets-debug.cmake">
+			<Option virtualFolder="CMake Files\..\vcpkg\installed\x64-windows\share\glfw3\"/>
+		</Unit>
+		<Unit filename="C:/Users/CreativeMachines/Desktop/Loch/../vcpkg/installed/x64-windows/share/glfw3/glfw3Targets-release.cmake">
+			<Option virtualFolder="CMake Files\..\vcpkg\installed\x64-windows\share\glfw3\"/>
+		</Unit>
+		<Unit filename="C:/Users/CreativeMachines/Desktop/Loch/../vcpkg/installed/x64-windows/share/glfw3/glfw3Targets.cmake">
+			<Option virtualFolder="CMake Files\..\vcpkg\installed\x64-windows\share\glfw3\"/>
+		</Unit>
+		<Unit filename="C:/Users/CreativeMachines/Desktop/Loch/../vcpkg/installed/x64-windows/share/glm/glmConfig.cmake">
+			<Option virtualFolder="CMake Files\..\vcpkg\installed\x64-windows\share\glm\"/>
+		</Unit>
+		<Unit filename="C:/Users/CreativeMachines/Desktop/Loch/../vcpkg/installed/x64-windows/share/glm/glmConfigVersion.cmake">
+			<Option virtualFolder="CMake Files\..\vcpkg\installed\x64-windows\share\glm\"/>
+		</Unit>
+		<Unit filename="C:/Users/CreativeMachines/Desktop/Loch/../vcpkg/installed/x64-windows/share/glm/glmTargets.cmake">
+			<Option virtualFolder="CMake Files\..\vcpkg\installed\x64-windows\share\glm\"/>
+		</Unit>
+		<Unit filename="C:/Users/CreativeMachines/Desktop/Loch/../../../../Program Files/Loch/lib/cmake/Loch/LochConfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\Program Files\Loch\lib\cmake\Loch\"/>
+		</Unit>
+		<Unit filename="C:/Users/CreativeMachines/Desktop/Loch/tests/test2/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\tests\test2\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

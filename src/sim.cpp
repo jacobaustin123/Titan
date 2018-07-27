@@ -57,6 +57,13 @@ Mass * Simulation::createMass() {
     return m;
 }
 
+
+Mass * Simulation::createMass(const Vec & v) {
+    Mass * m = new Mass(v);
+    masses.push_back(m);
+    return m;
+}
+
 Spring * Simulation::createSpring() {
     Spring * s = new Spring();
     springs.push_back(s);

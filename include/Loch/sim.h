@@ -24,6 +24,8 @@ public:
     ~Simulation();
 
     Mass * createMass(); // create objects
+    Mass * createMass(const Vec & position); // create objects
+
     Spring * createSpring();
     Spring * createSpring(Mass * m1, Mass * m2, double k = 1.0, double len = 1.0);
 
