@@ -16,6 +16,12 @@ set(LOCH_HEADER_FILES ${LOCH_INCLUDE_DIR}/sim.h ${LOCH_INCLUDE_DIR}/mass.h ${LOC
         ${LOCH_INCLUDE_DIR}/spring.h ${LOCH_INCLUDE_DIR}/vec.h ${LOCH_INCLUDE_DIR}/graphics.h)
 
 add_library(Loch SHARED ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
+
+if (WIN32)
+    set_target_properties(Loch PROPERTIES BUILD_SHARED_LIBS ON)
+    set_target_properties(Loch PROPERTIES CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
+
 target_compile_definitions(Loch PRIVATE GRAPHICS)
 
 find_package(OPENGL REQUIRED)
