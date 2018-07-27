@@ -1,50 +1,28 @@
 # Loch
-A CUDA-based physics simulation sandbox written in C++ which uses springs and masses to simulate flexible robots and other mechanical objects. 
+**Loch** is a versitile CUDA-based physics simulation library that provides a powerful GPU-accelerated simulation environment for physics primatives like springs and masses. Library users can create masses, springs, and more complicated objects, apply constraints, and modify simulation parameters in real time, while the simulation runs asynchronous on the GPU.
 
-## To compile and run
+## Installation
 
-The project currently has two branches, the master branch (CPU based) and the CUDA branch (GPU based). While both branches have graphics-free executables, they currently still depend on graphics packages, namely glfw3, glm, and GLEW. On Mac OS and Linux, dependencies should be handled using homebrew and apt-get respectively. For Mac OS, run
+Detailed instructions can be found in the [user wiki](https://github.com/ja3067/Loch/wiki/Set-Up) for building and installing the Loch physics library.
 
-```$ brew install glm glfw3 GLEW```
+**Try a simple Loch physics simulation**
 
-and for Linux run
+```C++
+#include <Loch/sim.h>
 
-```$ sudo apt-get install glm glfw3 GLEW```
-
-On Windows, these dependencies should be installed using Microsoft vcpkg. To set up vcpkg, run the following from Microsoft Powershell.
-
-```PS> cd ~
-PS> mkdir tools
-PS> cd tools
-PS> git clone https://github.com/Microsoft/vcpkg.git
-PS> cd vcpkg
-PS> .\bootstrap-vckpg.bat
-PS> .\vcpkg integrate install # Keep the output showing `CMAKE_TOOLCHAIN_FILE` variable
-PS> .\vcpkg integrate powershell # You may need to 
-PS> Set-ExecutionPolicy Unrestricted -Scope CurrentUser # May need to run this to allow the vcpkg powershell integration to work
+int main() {
+  sim.createLattice(Vec(0, 0, 10), Vec(5, 5, 5), 5, 5, 5); // create lattice with center at (0, 0, 10) and given dimensions
+  sim.createPlane(Vec(0, 0, 1), 0); // create constraint plane
+  sim.start(10); // run for 10 seconds;
+}
 ```
 
-Then to install the dependencies run
+This simple program produces a large lattice bouncing on the given plane:
 
-```PS>./vcpkg --triplet x64-windows install glfw3 GLEW glm```
+<img src="https://i.imgur.com/zdB0ZPg.gif" width="400" height="400">
 
-from the vcpkg directory. Then build and install Loch as follows:
+For more examples and troubleshooting, see the [github wiki](https://github.com/ja3067/Loch/wiki/Using-CMake-or-Visual-Studio). 
 
-```$ git clone https://github.com/ja3067/Loch.git
-$ cd Loch
-$ mkdir build
-$ cd build
-$ cmake .. -G Ninja -DCMAKE_TOOLCHAIN_FILE=[path to vcpkg root]/scripts/buildsystems/vcpkg.cmake
-$ make
-$ ./graphics
-```
+## License
 
-For the CUDA branch, CUDA 9.2 also must be installed, as well as the Windows VS compiler. The CUDAgraphics branch has the same requirements as above.
-
-## Troubleshooting
-
-### Using with CLion
-
-To build and run with CLion, several settings changes need to be made. First, in Settings/Build, Execution, Deployment/CMake, make sure CMake Options is set to "-DCMAKE_TOOLCHAIN_FILE=[path to vcpkg root]/scripts/buildsystems/vcpkg.cmake" (no quotes). Also, make sure the compiler in Settings/Build, Execution, Deployment/Toolchains is set to Visual Studio 2015 or 2017 (14.0). 
-
-Also, to run in CLion, you need to edit the configuration in Run/Edit Configurations by setting the working directory to the \[Loch root\]/src. Note that there is a bug in CLion with CUDA support that causes it to run the wrong executable - if CLion is unable to start the executable, manually run the graphics or nographics executables in .../Loch/cmake-build-debug. If the program is unable to find the shaders, manually copy the Loch/src/shaders directory to cmake-build-debug.
+This software was written by Jacob Austin and Rafael Corrales Fatou as part of a project led by Professor Hod Lipson at Columbia University. The software is currently closed-source, but may be open-sourced in the future. Please do not redistribute until that time.
