@@ -36,7 +36,7 @@ target_compile_features(Loch PUBLIC cxx_std_11) # same as above, may be unnecess
 find_package(CUDA REQUIRED) # find and include CUDA
 if (CUDA_FOUND)
     message(STATUS "CUDA FOUND")
-    target_include_directories(Loch PRIVATE ${CUDA_INCLUDE_DIRS})
+    target_include_directories(Loch PUBLIC ${CUDA_INCLUDE_DIRS})
     target_link_libraries(Loch PRIVATE ${CUDA_LIBRARIES} cuda cudart)
 else()
     message(STATUS "CUDA NOT FOUND")
@@ -85,7 +85,7 @@ install(TARGETS Loch
         )
 
 install(EXPORT LochTargets
-        FILE LochTargets.cmake
+        FILE LochConfig.cmake
         DESTINATION share/Loch)
 
 #install(DIRECTORY ${LOCH_INCLUDE_DIR} DESTINATION include/Loch)
@@ -94,8 +94,8 @@ install(EXPORT LochTargets
 #set(Loch_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/include/Loch)
 #set(Loch_LIBRARIES ${CMAKE_INSTALL_PREFIX}/lib/Loch)
 
-configure_file(cmake/LochConfig.cmake.in2
-        ${CMAKE_INSTALL_PREFIX}/share/Loch/LochConfig.cmake @ONLY)
+#configure_file(cmake/LochConfig.cmake.in2
+#        ${CMAKE_INSTALL_PREFIX}/share/Loch/LochConfig.cmake @ONLY)
 
 #add_subdirectory(tests/test1)
 #add_subdirectory(tests/test2)
