@@ -28,13 +28,14 @@
 
 #endif
 
+#include <cuda_runtime.h>
+#include <cuda.h>
+#include <cuda_device_runtime_api.h>
+
 #include <algorithm>
 #include <list>
 #include <vector>
 #include <set>
-#include <cuda_runtime.h>
-#include <cuda.h>
-#include <cuda_device_runtime_api.h>
 #include <thread>
 
 

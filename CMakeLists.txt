@@ -95,7 +95,7 @@ install(EXPORT LochTargets
 #set(Loch_LIBRARIES ${CMAKE_INSTALL_PREFIX}/lib/Loch)
 
 configure_file(cmake/LochConfig.cmake.in2
-        ${CMAKE_INSTALL_PREFIX}/lib/cmake/Loch/LochConfig.cmake @ONLY)
+        ${CMAKE_INSTALL_PREFIX}/share/Loch/LochConfig.cmake @ONLY)
 
 #add_subdirectory(tests/test1)
 #add_subdirectory(tests/test2)
