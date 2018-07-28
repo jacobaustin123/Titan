@@ -1,8 +1,0 @@
-C:/Program Files (x86)/Loch/include/Loch/sim.h
-C:/Program Files (x86)/Loch/include/Loch/mass.h
-C:/Program Files (x86)/Loch/include/Loch/object.h
-C:/Program Files (x86)/Loch/include/Loch/spring.h
-C:/Program Files (x86)/Loch/include/Loch/vec.h
-C:/Program Files (x86)/Loch/include/Loch/graphics.h
-C:/Program Files (x86)/Loch/lib/cmake/Loch/LochConfig.cmake
-C:/Program Files (x86)/Loch/lib/cmake/Loch/LochConfig-release.cmake
