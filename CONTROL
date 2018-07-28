@@ -1,4 +1,0 @@
-Source: loch
-Version: 1.0
-Description: A CUDA-accelerated physics library
-Build-Depends: glfw3, glew, glm
