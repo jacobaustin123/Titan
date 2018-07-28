@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.11)
 project(Loch LANGUAGES CXX CUDA) # use CXX, CUDA by default (since CUDA is a language, don't need cuda_add_executable)
 
-set(CMAKE_GENERATOR_TOOLSET version=14.13)
+#set(CMAKE_GENERATOR_TOOLSET version=14.13)
 
 set(CMAKE_CXX_STANDARD 14) # set C++ standard to C++11
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++14") # same thing, may be unnecessary
@@ -21,15 +21,15 @@ set(LOCH_HEADER_FILES ${LOCH_INCLUDE_DIR}/sim.h ${LOCH_INCLUDE_DIR}/mass.h ${LOC
 if (LOCH_SHARED_BUILD)
     set(BUILD_SHARED_LIBS ON)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+    set(POSITION_INDEPENDENT_CODE ON)
 endif()
 
 add_library(Loch ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
 set_target_properties(Loch PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-set_target_properties(Loch PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(Loch PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 
 target_compile_definitions(Loch PRIVATE GRAPHICS)
-target_compile_definitions(Loch PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
+#target_compile_definitions(Loch PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
 
 target_compile_features(Loch PUBLIC cxx_std_11) # same as above, may be unnecessary
 

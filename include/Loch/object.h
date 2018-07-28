@@ -19,8 +19,10 @@
 #endif
 
 #include <vector>
-#include <thrust/device_vector.h>
 
+#ifdef CONSTRAINTS
+#include <thrust/device_vector.h>
+#endif
 
 struct CUDA_MASS;
 class Spring;
@@ -37,8 +39,6 @@ class Mass;
 #else
 #define CUDA_DEVICE
 #endif
-
-__device__ const double NORMAL = 100000;
 
 class Constraint { // constraint like plane or sphere which applies force to masses
 public:

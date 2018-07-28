@@ -17,7 +17,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 using namespace glm;
 
-glm::mat4 getProjection();
+glm::mat4 getProjection(const Vec & camera, const Vec & looks_at, const Vec & up);
 
 #endif //LOCH_GRAPHICS_H
 #endif

@@ -18,7 +18,7 @@ using namespace glm;
 
 #include "graphics.h"
 
-glm::mat4 getProjection() {
+glm::mat4 getProjection(const Vec & camera, const Vec & looks_at, const Vec & up) {
     // Projection matrix : 45∞ Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
     glm::mat4 Projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
     // Or, for an ortho camera :
@@ -26,9 +26,9 @@ glm::mat4 getProjection() {
 
     // Camera matrix
     glm::mat4 View = glm::lookAt(
-            glm::vec3(30, 30, 10), // Camera is at (4,3,3), in World Space
-            glm::vec3(0,0,10), // and looks at the origin
-            glm::vec3(0,0,1)  // Head is up (set to 0,-1,0 to look upside-down)
+            glm::vec3(camera[0], camera[1], camera[2]), // Camera is at (4,3,3), in World Space
+            glm::vec3(looks_at[0], looks_at[1], looks_at[2]), // and looks at the origin
+            glm::vec3(up[0], up[1], up[2])  // Head is up (set to 0,-1,0 to look upside-down)
     );
     // Model matrix : an identity matrix (model will be at the origin)
     glm::mat4 Model = glm::mat4(1.0f);

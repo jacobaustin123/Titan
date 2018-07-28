@@ -11,6 +11,27 @@
 #include <GLFW/glfw3.h>
 #endif
 
+#include <cuda_runtime.h>
+#include <cuda.h>
+#include <cuda_device_runtime_api.h>
+#include <cuda_gl_interop.h>
+
+#ifdef GRAPHICS
+#ifndef SDL2
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+#endif
+#endif
+
+__global__ void createSpringPointers(CUDA_SPRING ** ptrs, CUDA_SPRING * data, int size);
+__global__ void createMassPointers(CUDA_MASS ** ptrs, CUDA_MASS * data, int size);
+
+__global__ void computeSpringForces(CUDA_SPRING * device_springs, int num_springs);
+//__global__ void computeMassForces(CUDA_MASS * device_masses, int num_masses);
+__global__ void massForcesAndUpdate(CUDA_SPRING * device_springs, Constraint ** d_constraints, int num_springs, int num_constraints);
+//__global__ void update(CUDA_MASS * d_mass, int num_masses);
+
+
+
 __device__ const double G = 9.81;
 
 bool Simulation::RUNNING;

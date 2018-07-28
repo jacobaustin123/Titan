@@ -6,14 +6,16 @@
 #include <cmath>
 #include "sim.h"
 
+__device__ const double NORMAL = 100000;
+
 #ifdef CONSTRAINTS
-void Constraint::addConstraint(CONSTRAINT_TYPE type, const Vec & v, double d) {
+void Container::addConstraint(CONSTRAINT_TYPE type, const Vec & v, double d) {
     for (Mass * m : masses) {
         m -> addConstraint(type, v, d);
     }
 }
 
-void Constraint::clearConstraints() {
+void Container::clearConstraints() {
     for (Mass * m : masses) {
         m -> clearConstraints();
     }
