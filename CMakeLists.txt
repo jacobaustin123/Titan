@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.7)
-project(Loch)
+project(vcpkg)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -22,45 +22,45 @@ if (LOCH_SHARED_BUILD)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
 
-add_library(Loch ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
+add_library(vcpkg ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
 
-target_compile_definitions(Loch PRIVATE GRAPHICS)
+target_compile_definitions(vcpkg PRIVATE GRAPHICS)
 
 find_package(OPENGL REQUIRED)
 if (OPENGL_FOUND)
     message(STATUS "OPENGL FOUND")
-    target_include_directories(Loch PRIVATE ${OPENGL_INCLUDE_DIRS})
-    target_link_libraries(Loch PRIVATE ${OPENGL_LIBRARIES})
+    target_include_directories(vcpkg PRIVATE ${OPENGL_INCLUDE_DIRS})
+    target_link_libraries(vcpkg PRIVATE ${OPENGL_LIBRARIES})
 endif()
 
 find_package(glfw3 REQUIRED)
 if (glfw3_FOUND)
     message(STATUS "GLFW FOUND")
-    target_include_directories(Loch PRIVATE ${glfw3_INCLUDE_DIRS})
-    target_link_libraries(Loch PRIVATE ${glfw3_LIBRARIES} glfw)
+    target_include_directories(vcpkg PRIVATE ${glfw3_INCLUDE_DIRS})
+    target_link_libraries(vcpkg PRIVATE ${glfw3_LIBRARIES} glfw)
 endif()
 
 find_package(GLEW REQUIRED)
 if (GLEW_FOUND)
     message(STATUS "GLEW FOUND")
-    target_include_directories(Loch PRIVATE ${GLEW_INCLUDE_DIRS})
-    target_link_libraries(Loch PRIVATE ${GLEW_LIBRARIES})
+    target_include_directories(vcpkg PRIVATE ${GLEW_INCLUDE_DIRS})
+    target_link_libraries(vcpkg PRIVATE ${GLEW_LIBRARIES})
 endif()
 
 find_package(glm CONFIG REQUIRED)
 if (glm_FOUND)
     message(STATUS "GLM FOUND")
-    target_include_directories(Loch PRIVATE ${glm_INCLUDE_DIRS})
-    target_link_libraries(Loch PRIVATE ${glm_LIBRARIES})
+    target_include_directories(vcpkg PRIVATE ${glm_INCLUDE_DIRS})
+    target_link_libraries(vcpkg PRIVATE ${glm_LIBRARIES})
 endif()
 
-target_include_directories(Loch PUBLIC
+target_include_directories(vcpkg PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Loch>
         $<INSTALL_INTERFACE:include>)
 
-set_target_properties(Loch PROPERTIES PUBLIC_HEADER "${LOCH_HEADER_FILES}")
+set_target_properties(vcpkg PROPERTIES PUBLIC_HEADER "${LOCH_HEADER_FILES}")
 
-install(TARGETS Loch
+install(TARGETS vcpkg
         EXPORT LochTargets
         PUBLIC_HEADER DESTINATION include/Loch
         LIBRARY DESTINATION bin
