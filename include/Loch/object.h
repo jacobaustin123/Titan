@@ -16,6 +16,7 @@ public:
 
 class Constraint : public BaseObject { // constraint like plane or sphere which applies force to masses
 public:
+    virtual ~Constraint() {};
     virtual Vec getForce(const Vec & position) = 0; // returns force on an object based on its position, e.g. plane or
 #ifdef GRAPHICS
     virtual void generateBuffers() = 0;
@@ -45,6 +46,8 @@ struct GraphicsBall;
 class Ball : public Constraint { // ball constraint, force is inversely proportional to distance
 public:
     Ball(const Vec & center, double r);
+    ~Ball();
+
     void setRadius(double r) { _radius = r; }
     void setCenter(const Vec & center) { _center = center; }
     Vec getForce(const Vec & position);
@@ -68,6 +71,7 @@ struct GraphicsPlane;
 class Plane : public Constraint { // plane constraint, force is proportional to negative distance wrt plane
 public:
     Plane(const Vec & normal, double d);
+    ~Plane();
 
     Vec getForce(const Vec & position);
     void translate(const Vec & displ);

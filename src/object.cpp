@@ -316,6 +316,8 @@ Vec Ball::getForce(const Vec & position) {
 
 #ifdef GRAPHICS
 
+Ball::~Ball() { delete gball; }
+
 void GraphicsBall::normalize(GLfloat * v) {
     GLfloat norm = sqrt(pow(v[0], 2) + pow(v[1], 2) + pow(v[2],2)) / _radius;
 
@@ -449,6 +451,8 @@ void GraphicsBall::draw() {
 #endif
 
 #ifdef GRAPHICS
+
+Plane::~Plane() { delete gplane; }
 
 void GraphicsPlane::generateBuffers() {
     glm::vec3 color = {0.22f, 0.71f, 0.0f};
