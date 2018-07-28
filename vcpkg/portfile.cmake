@@ -48,20 +48,16 @@ find_program(NVCC
 
 set(CMAKE_CUDA_COMPILER:FILEPATH ${NVCC})
 
-#message(STATUS ${NVCC})
-
-#message(STATUS ${TARGET_TRIPLET} ${VCPKG_TARGET_ARCHITECTURE})
-
 if(VCPKG_LIBRARY_LINKAGE STREQUAL "static")
     message(FATAL_ERROR "The Loch library does not currently support static compilation. Please use the x64-windows or x64-osx triplets")
 
-    vcpkg_configure_cmake(
-            SOURCE_PATH ${SOURCE_PATH}
-            PREFER_NINJA
-            OPTIONS
-            -DLOCH_SHARED_BUILD=OFF
-            -DCMAKE_CUDA_COMPILER:FILEPATH=${NVCC}
-    )
+#    vcpkg_configure_cmake(
+#            SOURCE_PATH ${SOURCE_PATH}
+#            PREFER_NINJA
+#            OPTIONS
+#            -DLOCH_SHARED_BUILD=OFF
+#            -DCMAKE_CUDA_COMPILER:FILEPATH=${NVCC}
+#    )
 else()
     message(STATUS ${VCPKG_LIBRARY_LINKAGE})
     vcpkg_configure_cmake(
@@ -82,4 +78,4 @@ file(
 )
 
 # Handle copyright
-file(INSTALL ${SOURCE_PATH}/copyright.txt DESTINATION ${CURRENT_PACKAGES_DIR}/share/lochgpu RENAME copyright)
+file(INSTALL ${SOURCE_PATH}/vcpkg/copyright.txt DESTINATION ${CURRENT_PACKAGES_DIR}/share/loch RENAME copyright)
