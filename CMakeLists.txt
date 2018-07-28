@@ -9,18 +9,18 @@ set(LOCH_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include/Loch)
 message(STATUS ${LOCH_SOURCE_DIR} " " ${LOCH_INCLUDE_DIR})
 
 set(LOCH_SOURCE_FILES ${LOCH_SOURCE_DIR}/vec.cpp ${LOCH_SOURCE_DIR}/sim.cpp
-        ${LOCH_SOURCE_DIR}/sim.cpp ${LOCH_SOURCE_DIR}/mass.cpp ${LOCH_SOURCE_DIR}/spring.cpp 
+        ${LOCH_SOURCE_DIR}/sim.cpp ${LOCH_SOURCE_DIR}/mass.cpp ${LOCH_SOURCE_DIR}/spring.cpp
         ${LOCH_SOURCE_DIR}/object.cpp ${LOCH_SOURCE_DIR}/graphics.cpp)
 
 set(LOCH_HEADER_FILES ${LOCH_INCLUDE_DIR}/sim.h ${LOCH_INCLUDE_DIR}/mass.h ${LOCH_INCLUDE_DIR}/object.h
         ${LOCH_INCLUDE_DIR}/spring.h ${LOCH_INCLUDE_DIR}/vec.h ${LOCH_INCLUDE_DIR}/graphics.h)
 
-add_library(Loch SHARED ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
-
-if (WIN32)
-    set_target_properties(Loch PROPERTIES BUILD_SHARED_LIBS ON)
-    set_target_properties(Loch PROPERTIES CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+if (LOCH_SHARED_BUILD)
+    set(BUILD_SHARED_LIBS ON)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
+
+add_library(Loch ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
 
 target_compile_definitions(Loch PRIVATE GRAPHICS)
 
@@ -63,11 +63,12 @@ install(TARGETS Loch
         PUBLIC_HEADER DESTINATION include/Loch
         LIBRARY DESTINATION bin
         ARCHIVE DESTINATION lib
-)
+        RUNTIME DESTINATION bin
+        )
 
 install(EXPORT LochTargets
-        FILE LochConfig.cmake
-        DESTINATION lib/cmake/Loch)
+        FILE LochTargets.cmake
+        DESTINATION share/Loch)
 
 #install(DIRECTORY ${LOCH_INCLUDE_DIR} DESTINATION include/Loch)
 #install(TARGETS Loch DESTINATION lib)
@@ -76,8 +77,8 @@ install(EXPORT LochTargets
 #set(Loch_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/include/Loch)
 #set(Loch_LIBRARIES ${CMAKE_INSTALL_PREFIX}/lib/Loch)
 
-#configure_file(cmake/LochConfig.cmake.in
-#        ${CMAKE_INSTALL_PREFIX}/lib/cmake/Loch/LochConfig.cmake @ONLY)
+configure_file(cmake/LochConfig.cmake.in2
+        ${CMAKE_INSTALL_PREFIX}/share/Loch/LochConfig.cmake @ONLY)
 
-add_subdirectory(tests/test1)
+#add_subdirectory(tests/test1)
 #add_subdirectory(tests/test2)
