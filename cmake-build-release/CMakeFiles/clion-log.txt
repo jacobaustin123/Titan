@@ -1,9 +1,0 @@
-"C:\Program Files\JetBrains\CLion 2018.1.5\bin\cmake\win\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Release -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=C:/Users/CreativeMachines/Desktop/vcpkg/scripts/buildsystems/vcpkg.cmake -G "CodeBlocks - NMake Makefiles" C:\Users\CreativeMachines\Desktop\Loch
--- C:/Users/CreativeMachines/Desktop/Loch/src C:/Users/CreativeMachines/Desktop/Loch/include/Loch
--- OPENGL FOUND
--- GLFW FOUND
--- GLEW FOUND
--- GLM FOUND
--- Configuring done
--- Generating done
--- Build files have been written to: C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release
