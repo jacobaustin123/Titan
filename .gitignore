@@ -6,6 +6,7 @@
 cmake-build-debug
 cmake-build-release
 .idea
+build
 
 # Compiled Object files
 *.slo
