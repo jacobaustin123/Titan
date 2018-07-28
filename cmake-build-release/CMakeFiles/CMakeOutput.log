@@ -1,0 +1,189 @@
+The system is: Windows - 10.0.15063 - AMD64
+Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+Compiler: C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin/amd64/cl.exe 
+Build flags: 
+Id flags:  
+
+The output was:
+0
+Microsoft (R) C/C++ Optimizing Compiler Version 19.00.24215.1 for x64
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+CMakeCCompilerId.c
+Microsoft (R) Incremental Linker Version 14.00.24215.1
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+/out:CMakeCCompilerId.exe 
+CMakeCCompilerId.obj 
+
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CMakeCCompilerId.exe"
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CMakeCCompilerId.obj"
+
+The C compiler identification is MSVC, found in "C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/3.12.0/CompilerIdC/CMakeCCompilerId.exe"
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+Compiler: C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin/amd64/cl.exe 
+Build flags: 
+Id flags:  
+
+The output was:
+0
+Microsoft (R) C/C++ Optimizing Compiler Version 19.00.24215.1 for x64
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+CMakeCXXCompilerId.cpp
+Microsoft (R) Incremental Linker Version 14.00.24215.1
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+/out:CMakeCXXCompilerId.exe 
+CMakeCXXCompilerId.obj 
+
+
+Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CMakeCXXCompilerId.exe"
+
+Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CMakeCXXCompilerId.obj"
+
+The CXX compiler identification is MSVC, found in "C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/3.12.0/CompilerIdCXX/CMakeCXXCompilerId.exe"
+
+Determining if the C compiler works passed with the following output:
+Change Dir: C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp
+
+Run Build Command:"nmake" "/nologo" "cmTC_bbd84\fast"
+	"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\BIN\amd64\nmake.exe" -f CMakeFiles\cmTC_bbd84.dir\build.make /nologo -L                  CMakeFiles\cmTC_bbd84.dir\build
+Building C object CMakeFiles/cmTC_bbd84.dir/testCCompiler.c.obj
+	C:\PROGRA~2\MICROS~1.0\VC\bin\amd64\cl.exe @C:\Users\CREATI~2\AppData\Local\Temp\nmA576.tmp
+testCCompiler.c
+Linking C executable cmTC_bbd84.exe
+	"C:\Program Files\JetBrains\CLion 2018.1.5\bin\cmake\win\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_bbd84.dir --manifests  -- C:\PROGRA~2\MICROS~1.0\VC\bin\amd64\link.exe /nologo @CMakeFiles\cmTC_bbd84.dir\objects1.rsp @C:\Users\CREATI~2\AppData\Local\Temp\nmA613.tmp
+	powershell -noprofile -executionpolicy Bypass -file C:/Users/CreativeMachines/Desktop/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp/cmTC_bbd84.exe -installedDir C:/Users/CreativeMachines/Desktop/vcpkg/installed/x64-windows/debug/bin -OutVariable out
+
+
+Detecting C compiler ABI info compiled with the following output:
+Change Dir: C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp
+
+Run Build Command:"nmake" "/nologo" "cmTC_f4b60\fast"
+	"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\BIN\amd64\nmake.exe" -f CMakeFiles\cmTC_f4b60.dir\build.make /nologo -L                  CMakeFiles\cmTC_f4b60.dir\build
+Building C object CMakeFiles/cmTC_f4b60.dir/CMakeCCompilerABI.c.obj
+	C:\PROGRA~2\MICROS~1.0\VC\bin\amd64\cl.exe @C:\Users\CREATI~2\AppData\Local\Temp\nmAB14.tmp
+CMakeCCompilerABI.c
+Linking C executable cmTC_f4b60.exe
+	"C:\Program Files\JetBrains\CLion 2018.1.5\bin\cmake\win\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_f4b60.dir --manifests  -- C:\PROGRA~2\MICROS~1.0\VC\bin\amd64\link.exe /nologo @CMakeFiles\cmTC_f4b60.dir\objects1.rsp @C:\Users\CREATI~2\AppData\Local\Temp\nmAB73.tmp
+	powershell -noprofile -executionpolicy Bypass -file C:/Users/CreativeMachines/Desktop/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp/cmTC_f4b60.exe -installedDir C:/Users/CreativeMachines/Desktop/vcpkg/installed/x64-windows/debug/bin -OutVariable out
+
+
+
+
+Detecting C [] compiler features compiled with the following output:
+Change Dir: C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp
+
+Run Build Command:"nmake" "/nologo" "cmTC_8672e\fast"
+	"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\BIN\amd64\nmake.exe" -f CMakeFiles\cmTC_8672e.dir\build.make /nologo -L                  CMakeFiles\cmTC_8672e.dir\build
+Building C object CMakeFiles/cmTC_8672e.dir/feature_tests.c.obj
+	C:\PROGRA~2\MICROS~1.0\VC\bin\amd64\cl.exe @C:\Users\CREATI~2\AppData\Local\Temp\nmAFF6.tmp
+feature_tests.c
+Linking C executable cmTC_8672e.exe
+	"C:\Program Files\JetBrains\CLion 2018.1.5\bin\cmake\win\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_8672e.dir --manifests  -- C:\PROGRA~2\MICROS~1.0\VC\bin\amd64\link.exe /nologo @CMakeFiles\cmTC_8672e.dir\objects1.rsp @C:\Users\CREATI~2\AppData\Local\Temp\nmB054.tmp
+	powershell -noprofile -executionpolicy Bypass -file C:/Users/CreativeMachines/Desktop/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp/cmTC_8672e.exe -installedDir C:/Users/CreativeMachines/Desktop/vcpkg/installed/x64-windows/debug/bin -OutVariable out
+
+
+    Feature record: C_FEATURE:1c_function_prototypes
+    Feature record: C_FEATURE:1c_variadic_macros
+Determining if the CXX compiler works passed with the following output:
+Change Dir: C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp
+
+Run Build Command:"nmake" "/nologo" "cmTC_b1844\fast"
+	"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\BIN\amd64\nmake.exe" -f CMakeFiles\cmTC_b1844.dir\build.make /nologo -L                  CMakeFiles\cmTC_b1844.dir\build
+Building CXX object CMakeFiles/cmTC_b1844.dir/testCXXCompiler.cxx.obj
+	C:\PROGRA~2\MICROS~1.0\VC\bin\amd64\cl.exe @C:\Users\CREATI~2\AppData\Local\Temp\nmB4A9.tmp
+testCXXCompiler.cxx
+Linking CXX executable cmTC_b1844.exe
+	"C:\Program Files\JetBrains\CLion 2018.1.5\bin\cmake\win\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_b1844.dir --manifests  -- C:\PROGRA~2\MICROS~1.0\VC\bin\amd64\link.exe /nologo @CMakeFiles\cmTC_b1844.dir\objects1.rsp @C:\Users\CREATI~2\AppData\Local\Temp\nmB527.tmp
+	powershell -noprofile -executionpolicy Bypass -file C:/Users/CreativeMachines/Desktop/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp/cmTC_b1844.exe -installedDir C:/Users/CreativeMachines/Desktop/vcpkg/installed/x64-windows/debug/bin -OutVariable out
+
+
+Detecting CXX compiler ABI info compiled with the following output:
+Change Dir: C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp
+
+Run Build Command:"nmake" "/nologo" "cmTC_2fe94\fast"
+	"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\BIN\amd64\nmake.exe" -f CMakeFiles\cmTC_2fe94.dir\build.make /nologo -L                  CMakeFiles\cmTC_2fe94.dir\build
+Building CXX object CMakeFiles/cmTC_2fe94.dir/CMakeCXXCompilerABI.cpp.obj
+	C:\PROGRA~2\MICROS~1.0\VC\bin\amd64\cl.exe @C:\Users\CREATI~2\AppData\Local\Temp\nmB8EF.tmp
+CMakeCXXCompilerABI.cpp
+Linking CXX executable cmTC_2fe94.exe
+	"C:\Program Files\JetBrains\CLion 2018.1.5\bin\cmake\win\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_2fe94.dir --manifests  -- C:\PROGRA~2\MICROS~1.0\VC\bin\amd64\link.exe /nologo @CMakeFiles\cmTC_2fe94.dir\objects1.rsp @C:\Users\CREATI~2\AppData\Local\Temp\nmB94D.tmp
+	powershell -noprofile -executionpolicy Bypass -file C:/Users/CreativeMachines/Desktop/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp/cmTC_2fe94.exe -installedDir C:/Users/CreativeMachines/Desktop/vcpkg/installed/x64-windows/debug/bin -OutVariable out
+
+
+
+
+Detecting CXX [] compiler features compiled with the following output:
+Change Dir: C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp
+
+Run Build Command:"nmake" "/nologo" "cmTC_7c9f5\fast"
+	"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\BIN\amd64\nmake.exe" -f CMakeFiles\cmTC_7c9f5.dir\build.make /nologo -L                  CMakeFiles\cmTC_7c9f5.dir\build
+Building CXX object CMakeFiles/cmTC_7c9f5.dir/feature_tests.cxx.obj
+	C:\PROGRA~2\MICROS~1.0\VC\bin\amd64\cl.exe @C:\Users\CREATI~2\AppData\Local\Temp\nmC1A9.tmp
+feature_tests.cxx
+Linking CXX executable cmTC_7c9f5.exe
+	"C:\Program Files\JetBrains\CLion 2018.1.5\bin\cmake\win\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_7c9f5.dir --manifests  -- C:\PROGRA~2\MICROS~1.0\VC\bin\amd64\link.exe /nologo @CMakeFiles\cmTC_7c9f5.dir\objects1.rsp @C:\Users\CREATI~2\AppData\Local\Temp\nmC256.tmp
+	powershell -noprofile -executionpolicy Bypass -file C:/Users/CreativeMachines/Desktop/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary C:/Users/CreativeMachines/Desktop/Loch/cmake-build-release/CMakeFiles/CMakeTmp/cmTC_7c9f5.exe -installedDir C:/Users/CreativeMachines/Desktop/vcpkg/installed/x64-windows/debug/bin -OutVariable out
+
+
+    Feature record: CXX_FEATURE:0cxx_aggregate_default_initializers
+    Feature record: CXX_FEATURE:1cxx_alias_templates
+    Feature record: CXX_FEATURE:1cxx_alignas
+    Feature record: CXX_FEATURE:1cxx_alignof
+    Feature record: CXX_FEATURE:1cxx_attributes
+    Feature record: CXX_FEATURE:1cxx_attribute_deprecated
+    Feature record: CXX_FEATURE:1cxx_auto_type
+    Feature record: CXX_FEATURE:1cxx_binary_literals
+    Feature record: CXX_FEATURE:1cxx_constexpr
+    Feature record: CXX_FEATURE:1cxx_contextual_conversions
+    Feature record: CXX_FEATURE:1cxx_decltype
+    Feature record: CXX_FEATURE:1cxx_decltype_auto
+    Feature record: CXX_FEATURE:0cxx_decltype_incomplete_return_types
+    Feature record: CXX_FEATURE:1cxx_default_function_template_args
+    Feature record: CXX_FEATURE:1cxx_defaulted_functions
+    Feature record: CXX_FEATURE:1cxx_defaulted_move_initializers
+    Feature record: CXX_FEATURE:1cxx_delegating_constructors
+    Feature record: CXX_FEATURE:1cxx_deleted_functions
+    Feature record: CXX_FEATURE:1cxx_digit_separators
+    Feature record: CXX_FEATURE:1cxx_enum_forward_declarations
+    Feature record: CXX_FEATURE:1cxx_explicit_conversions
+    Feature record: CXX_FEATURE:1cxx_extended_friend_declarations
+    Feature record: CXX_FEATURE:1cxx_extern_templates
+    Feature record: CXX_FEATURE:1cxx_final
+    Feature record: CXX_FEATURE:1cxx_func_identifier
+    Feature record: CXX_FEATURE:1cxx_generalized_initializers
+    Feature record: CXX_FEATURE:1cxx_generic_lambdas
+    Feature record: CXX_FEATURE:1cxx_inheriting_constructors
+    Feature record: CXX_FEATURE:1cxx_inline_namespaces
+    Feature record: CXX_FEATURE:1cxx_lambdas
+    Feature record: CXX_FEATURE:1cxx_lambda_init_captures
+    Feature record: CXX_FEATURE:1cxx_local_type_template_args
+    Feature record: CXX_FEATURE:1cxx_long_long_type
+    Feature record: CXX_FEATURE:1cxx_noexcept
+    Feature record: CXX_FEATURE:1cxx_nonstatic_member_init
+    Feature record: CXX_FEATURE:1cxx_nullptr
+    Feature record: CXX_FEATURE:1cxx_override
+    Feature record: CXX_FEATURE:1cxx_range_for
+    Feature record: CXX_FEATURE:1cxx_raw_string_literals
+    Feature record: CXX_FEATURE:1cxx_reference_qualified_functions
+    Feature record: CXX_FEATURE:1cxx_return_type_deduction
+    Feature record: CXX_FEATURE:1cxx_right_angle_brackets
+    Feature record: CXX_FEATURE:1cxx_rvalue_references
+    Feature record: CXX_FEATURE:1cxx_sizeof_member
+    Feature record: CXX_FEATURE:1cxx_static_assert
+    Feature record: CXX_FEATURE:1cxx_strong_enums
+    Feature record: CXX_FEATURE:1cxx_template_template_parameters
+    Feature record: CXX_FEATURE:1cxx_thread_local
+    Feature record: CXX_FEATURE:1cxx_trailing_return_types
+    Feature record: CXX_FEATURE:1cxx_unicode_literals
+    Feature record: CXX_FEATURE:1cxx_uniform_initialization
+    Feature record: CXX_FEATURE:1cxx_unrestricted_unions
+    Feature record: CXX_FEATURE:1cxx_user_literals
+    Feature record: CXX_FEATURE:1cxx_variable_templates
+    Feature record: CXX_FEATURE:1cxx_variadic_macros
+    Feature record: CXX_FEATURE:1cxx_variadic_templates
