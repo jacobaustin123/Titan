@@ -46,12 +46,18 @@ find_program(NVCC
         NO_DEFAULT_PATH
         )
 
+if (NVCC)
+    message(STATUS "Found CUDA compiler at " ${NVCC})
+else()
+    message(FATAL_ERROR "CUDA compiler not found")
+endif()
+
 set(CMAKE_CUDA_COMPILER:FILEPATH ${NVCC})
 
 if(VCPKG_LIBRARY_LINKAGE STREQUAL "static")
     message(FATAL_ERROR "The Loch library does not currently support static compilation. Please use the x64-windows or x64-osx triplets")
 
-    vcpkg_configure_cmake(
+    vcpkg_configure_cmake( # may be added later
             SOURCE_PATH ${SOURCE_PATH}
             PREFER_NINJA
             OPTIONS
@@ -59,7 +65,7 @@ if(VCPKG_LIBRARY_LINKAGE STREQUAL "static")
             -DCMAKE_CUDA_COMPILER:FILEPATH=${NVCC}
     )
 else()
-    message(STATUS ${VCPKG_LIBRARY_LINKAGE})
+    message(STATUS "Building SHARED library")
     vcpkg_configure_cmake(
             SOURCE_PATH ${SOURCE_PATH}
             PREFER_NINJA
@@ -68,7 +74,6 @@ else()
             -DCMAKE_CUDA_COMPILER:FILEPATH=${NVCC}
     )
 endif()
-
 
 vcpkg_install_cmake()
 file(
