@@ -197,7 +197,7 @@ Simulation::~Simulation() {
 Mass * Simulation::createMass(Mass * m) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     m -> ref_count++;
@@ -207,7 +207,8 @@ Mass * Simulation::createMass(Mass * m) {
         return m;
     } else {
         if (RUNNING) {
-            assert(false);
+            std::cerr << "simulation is running. stop the simulation make changes" << std::endl;
+            exit(1);
         }
 
         masses.push_back(m);
@@ -248,7 +249,7 @@ Container * Simulation::getContainerByIndex(int i) {
 Mass * Simulation::createMass() {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     Mass * m = new Mass();
@@ -258,7 +259,7 @@ Mass * Simulation::createMass() {
 Mass * Simulation::createMass(const Vec & pos) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     Mass * m = new Mass(pos);
@@ -268,7 +269,7 @@ Mass * Simulation::createMass(const Vec & pos) {
 Spring * Simulation::createSpring(Spring * s) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     if (s -> _right) { s -> _right -> ref_count++; }
@@ -279,7 +280,7 @@ Spring * Simulation::createSpring(Spring * s) {
         return s;
     } else {
         if (RUNNING) {
-            assert(false);
+            exit(1);
         }
 
         springs.push_back(s);
@@ -302,7 +303,7 @@ Spring * Simulation::createSpring(Spring * s) {
 Spring * Simulation::createSpring() {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     Spring * s = new Spring();
@@ -312,7 +313,7 @@ Spring * Simulation::createSpring() {
 Spring * Simulation::createSpring(Mass * m1, Mass * m2) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     Spring * s = new Spring(m1, m2);
@@ -332,7 +333,7 @@ __global__ void invalidate(CUDA_MASS ** ptrs, CUDA_MASS * m, int size) {
 void Simulation::deleteMass(Mass * m) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     if (!STARTED) {
@@ -340,7 +341,7 @@ void Simulation::deleteMass(Mass * m) {
         m -> decrementRefCount();
     } else {
         if (RUNNING) {
-            assert(false);
+            exit(1);
         }
 
         updateCudaParameters();
@@ -365,7 +366,7 @@ void Simulation::deleteMass(Mass * m) {
 void Simulation::deleteSpring(Spring * s) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     if (!STARTED) {
@@ -376,7 +377,7 @@ void Simulation::deleteSpring(Spring * s) {
 
     } else {
         if (RUNNING) {
-            assert(false);
+            exit(1);
         }
 
         gpuErrchk(cudaFree(s -> arrayptr));
@@ -468,12 +469,12 @@ struct host_spring_in_list {
 void Simulation::deleteContainer(Container * c) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     if (RUNNING) {
         std::cerr << "simulation is running." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     if (!STARTED) {
@@ -557,7 +558,7 @@ void Simulation::deleteContainer(Container * c) {
 
 //void Simulation::deleteContainer(Container * c) {
 //    if (RUNNING) {
-//        assert(false);
+//        exit(1);
 //    }
 //
 //    std::cout << c -> masses.size() << " " << c -> springs.size() << std::endl;
@@ -586,7 +587,7 @@ void Simulation::get(Mass * m) {
 
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     CUDA_MASS temp;
@@ -602,7 +603,7 @@ void Simulation::set(Mass * m) {
 
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     CUDA_MASS temp = CUDA_MASS(*m);
@@ -617,7 +618,7 @@ void Simulation::get(Spring * s) {
 
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     CUDA_SPRING temp;
@@ -643,7 +644,7 @@ void Simulation::getAll() {
 
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     massFromArray(); // TODO make a note of this
@@ -653,7 +654,7 @@ void Simulation::set(Container * c) {
     {
         if (ENDED) {
             std::cerr << "simulation has ended." << std::endl;
-            assert(false);
+            exit(1);
         }
 
         CUDA_MASS * h_data = new CUDA_MASS[c -> masses.size()]; // copy masses into single array for copying to the GPU, set GPU pointers
@@ -712,7 +713,7 @@ void Simulation::set(Container * c) {
 void Simulation::setAll() {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     {
@@ -762,7 +763,7 @@ void Simulation::setAll() {
 void Simulation::setSpringConstant(double k) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     for (Spring * s : springs) {
@@ -773,7 +774,7 @@ void Simulation::setSpringConstant(double k) {
 void Simulation::defaultRestLength() {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     for (Spring * s : springs) {
@@ -784,7 +785,7 @@ void Simulation::defaultRestLength() {
 void Simulation::setMassValues(double m) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     for (Mass * mass : masses) {
@@ -794,7 +795,7 @@ void Simulation::setMassValues(double m) {
 void Simulation::setDeltaT(double dt) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     for (Mass * m : masses) {
@@ -805,7 +806,7 @@ void Simulation::setDeltaT(double dt) {
 void Simulation::setBreakpoint(double time) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     bpts.insert(time); // TODO mutex breakpoints
@@ -875,7 +876,7 @@ __global__ void createSpringPointers(CUDA_SPRING ** ptrs, CUDA_SPRING * data, in
 CUDA_SPRING ** Simulation::springToArray() {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     CUDA_SPRING ** d_ptrs = new CUDA_SPRING * [springs.size()]; // array of pointers
@@ -924,7 +925,7 @@ CUDA_SPRING ** Simulation::springToArray() {
 void Simulation::toArray() {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     CUDA_MASS ** d_mass = massToArray(); // must come first
@@ -942,7 +943,7 @@ __global__ void fromMassPointers(CUDA_MASS ** d_mass, CUDA_MASS * data, int size
 void Simulation::get(Container *c) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     CUDA_MASS ** temp;
@@ -998,7 +999,7 @@ void Simulation::get(Container *c) {
 void Simulation::massFromArray() {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     CUDA_MASS * temp;
@@ -1035,7 +1036,7 @@ void Simulation::constraintsFromArray() {
 void Simulation::fromArray() {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     massFromArray();
@@ -1254,7 +1255,7 @@ void Simulation::createGLFWWindow() {
     {
         fprintf( stderr, "Failed to initialize GLFW\n" );
         getchar();
-        assert(false);
+        exit(1);
     }
 
     glfwWindowHint(GLFW_SAMPLES, 4);
@@ -1274,7 +1275,7 @@ void Simulation::createGLFWWindow() {
                 "Failed to open GLFW window. If you have an Intel GPU, they are not 3.3 compatible. Try the 2.1 version of the tutorials.\n");
         getchar();
         glfwTerminate();
-        assert(false);
+        exit(1);
     }
 
     glfwMakeContextCurrent(window);
@@ -1290,7 +1291,7 @@ void Simulation::createGLFWWindow() {
         fprintf(stderr, "Failed to initialize GLEW\n");
         getchar();
         glfwTerminate();
-        assert(false);
+        exit(1);
     }
 
 
@@ -1307,7 +1308,7 @@ void Simulation::createGLFWWindow() {
 void Simulation::stop() {
     if (RUNNING) {
         std::cerr << "simulation is running." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     ENDED = true;
@@ -1324,7 +1325,7 @@ void Simulation::stop() {
 void Simulation::stop(double time) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     stop_time = time;
@@ -1340,12 +1341,12 @@ void Simulation::stop(double time) {
 void Simulation::start(double time) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     if (masses.size() == 0) {
         std::cerr << "No masses have been added. Please add masses before starting the simulation." << std::endl;
-        assert(false);
+        exit(1);
     }
 
 
@@ -1391,7 +1392,7 @@ void Simulation::start(double time) {
 void Simulation::_run() { // repeatedly start next
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
 #ifdef GRAPHICS
@@ -1432,7 +1433,7 @@ void Simulation::_run() { // repeatedly start next
 void Simulation::updateCudaParameters() {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     massBlocksPerGrid = (masses.size() + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK;
@@ -1453,17 +1454,17 @@ void Simulation::updateCudaParameters() {
 void Simulation::resume() {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     if (!STARTED) {
         std::cerr << "simulation has not started." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     if (masses.size() == 0) {
         std::cerr << "No masses have been added. Please add masses before starting the simulation." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     updateCudaParameters();
@@ -1556,6 +1557,7 @@ void Simulation::execute() {
 #ifndef SDL2
             if (glfwGetKey(window, GLFW_KEY_ESCAPE ) == GLFW_PRESS || glfwWindowShouldClose(window) != 0) {
                 RUNNING = 0;
+                ENDED = 1;
                 break;
             }
 #endif
@@ -1568,7 +1570,7 @@ void Simulation::execute() {
 void Simulation::pause(double t) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     setBreakpoint(t);
@@ -1578,7 +1580,7 @@ void Simulation::pause(double t) {
 void Simulation::wait(double t) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
 
@@ -1591,7 +1593,7 @@ void Simulation::wait(double t) {
 void Simulation::waitUntil(double t) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
 
@@ -1603,7 +1605,7 @@ void Simulation::waitUntil(double t) {
 void Simulation::waitForEvent() {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     while (RUNNING) {
@@ -1791,7 +1793,7 @@ Container * Simulation::createContainer() {
 Cube * Simulation::createCube(const Vec & center, double side_length) { // creates half-space ax + by + cz < d
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     Cube * cube = new Cube(center, side_length);
@@ -1815,7 +1817,7 @@ Cube * Simulation::createCube(const Vec & center, double side_length) { // creat
 Lattice * Simulation::createLattice(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     Lattice * l = new Lattice(center, dims, nx, ny, nz);
@@ -1841,7 +1843,7 @@ Lattice * Simulation::createLattice(const Vec & center, const Vec & dims, int nx
 void Simulation::createPlane(const Vec & abc, double d ) { // creates half-space ax + by + cz < d
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     ContactPlane * new_plane = new ContactPlane(abc, d);
@@ -1854,7 +1856,7 @@ void Simulation::createPlane(const Vec & abc, double d ) { // creates half-space
 void Simulation::createBall(const Vec & center, double r ) { // creates ball with radius r at position center
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     Ball * new_ball = new Ball(center, r);
@@ -1872,7 +1874,7 @@ void Simulation::clearConstraints() { // clears global constraints only
 void Simulation::printPositions() {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
 
@@ -1896,7 +1898,7 @@ void Simulation::printPositions() {
 void Simulation::printForces() {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
 
@@ -1918,7 +1920,7 @@ void Simulation::printForces() {
 void Simulation::printSprings() {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+        exit(1);
     }
 
     if (RUNNING) {

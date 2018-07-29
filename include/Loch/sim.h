@@ -88,7 +88,7 @@ public:
     void pause(double t); // pause at time t
     void resume();
 
-    void setBreakpoint(double time);
+    void setBreakpoint(double time); // tell the program to stop at a fixed time (doesn't hang).
 
     void wait(double t); // wait fixed time without stopping
     void waitUntil(double t);
