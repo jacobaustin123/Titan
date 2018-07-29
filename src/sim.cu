@@ -1334,7 +1334,8 @@ void Simulation::start(double time) {
         exit(1);
     }
 
-
+    std::cout << "Starting simulation with " << masses.size() << " masses and " << springs.size() << " springs." << std::endl;
+    
     setBreakpoint(time);
     stop_time = time;
 
@@ -1473,8 +1474,6 @@ void Simulation::execute() {
                 return;
             }
 
-            std::cout << "SLEEPING!" << std::endl;
-
             while (!RUNNING) {
                 std::this_thread::sleep_for(std::chrono::microseconds(1));
                 if (ENDED) {
@@ -1483,8 +1482,6 @@ void Simulation::execute() {
                     return;
                 }
             }
-
-            std::cout << "restarting" << std::endl;
 
 #ifdef GRAPHICS
             if (resize_buffers) {
