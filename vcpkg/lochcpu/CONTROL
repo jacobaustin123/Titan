@@ -1,0 +1,4 @@
+Source: lochcpu
+Version: 1.0
+Description: A limited CPU version of the Loch physics library
+Build-Depends: glfw3, glew, glm

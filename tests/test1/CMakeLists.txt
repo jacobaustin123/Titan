@@ -4,7 +4,7 @@ project(test1)
 set(CMAKE_CXX_STANDARD 17)
 
 set(LOCH_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../src)
-set(LOCH_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../include/Loch)
+set(LOCH_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../include/LochCPU)
 
 message(STATUS ${LOCH_SOURCE_DIR} " " ${LOCH_INCLUDE_DIR})
 
