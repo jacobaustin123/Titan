@@ -28,8 +28,8 @@ add_library(Loch ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
 set_target_properties(Loch PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 set_target_properties(Loch PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 
-target_compile_definitions(Loch PRIVATE GRAPHICS)
-#target_compile_definitions(Loch PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
+target_compile_definitions(Loch PUBLIC GRAPHICS)
+target_compile_definitions(Loch PUBLIC CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
 
 target_compile_features(Loch PUBLIC cxx_std_11) # same as above, may be unnecessary
 

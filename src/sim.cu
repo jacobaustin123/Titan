@@ -948,20 +948,13 @@ void Simulation::get(Container *c) {
 
     CUDA_MASS ** temp;
 
-    std::cout << "HI" << std::endl;
-
     gpuErrchk(cudaMalloc((void **) &temp, sizeof(CUDA_MASS *) * c -> masses.size()));
-
-    std::cout << "HI" << std::endl;
 
     CUDA_MASS ** d_ptrs = new CUDA_MASS * [c -> masses.size()];
 
     for (int i = 0; i < c -> masses.size(); i++) {
         d_ptrs[i] = c -> masses[i] -> arrayptr;
     }
-
-    std::cout << "HI" << std::endl;
-
 
     gpuErrchk(cudaMemcpy(temp, d_ptrs, c -> masses.size() * sizeof(CUDA_MASS *), cudaMemcpyHostToDevice));
 
@@ -970,13 +963,9 @@ void Simulation::get(Container *c) {
     CUDA_MASS * temp_data;
     gpuErrchk(cudaMalloc((void **) &temp_data, sizeof(CUDA_MASS) * c -> masses.size()));
 
-    std::cout << "HI" << std::endl;
-
     updateCudaParameters();
     fromMassPointers<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(temp, temp_data, c -> masses.size());
     gpuErrchk(cudaFree(temp));
-
-    std::cout << "HI" << std::endl;
 
     CUDA_MASS * h_mass = new CUDA_MASS[masses.size()];
     gpuErrchk(cudaMemcpy(h_mass, temp_data, sizeof(CUDA_MASS) * masses.size(), cudaMemcpyDeviceToHost));
@@ -984,16 +973,12 @@ void Simulation::get(Container *c) {
 
     int count = 0;
 
-    std::cout << "HI" << std::endl;
-
     for (Mass * m : c -> masses) {
         *m = h_mass[count];
         count++;
     }
 
     delete [] h_mass;
-    std::cout << "HI" << std::endl;
-
 }
 
 void Simulation::massFromArray() {
@@ -1718,8 +1703,6 @@ __global__ void updateColors(float * gl_ptr, CUDA_MASS ** d_mass, int num_masses
 
 void Simulation::updateBuffers() {
     if (update_colors) {
-        std::cout << "updating colors" << std::endl;
-
         glBindBuffer(GL_ARRAY_BUFFER, colors);
         void *colorPointer; // if no masses, springs, or colors are changed/deleted, this can be start only once
         cudaGLMapBufferObject(&colorPointer, colors);
@@ -1730,8 +1713,6 @@ void Simulation::updateBuffers() {
 
 
     if (update_indices) {
-        std::cout << "updating indices" << std::endl;
-
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices);
         void *indexPointer; // if no masses or springs are deleted, this can be start only once
         cudaGLMapBufferObject(&indexPointer, indices);
@@ -1824,8 +1805,6 @@ Lattice * Simulation::createLattice(const Vec & center, const Vec & dims, int nx
 
     d_masses.reserve(masses.size() + l -> masses.size());
     d_springs.reserve(springs.size() + l -> springs.size());
-
-    std::cout << "creating lattice" << std::endl;
 
     for (Mass * m : l -> masses) {
         createMass(m);
