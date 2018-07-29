@@ -72,6 +72,7 @@ if (LOCH_SHARED_BUILD)
             DESTINATION share/lochcpu)
 else()
     message(STATUS "EXPORTING AS SHARED")
+
     install(EXPORT LochCPUTargets
             FILE LochCPUTargets.cmake
             DESTINATION share/lochcpu)

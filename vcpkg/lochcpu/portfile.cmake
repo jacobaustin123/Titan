@@ -34,7 +34,7 @@ vcpkg_extract_source_archive(${VCPKG_ROOT_DIR}/downloads/Loch.zip)
 #        HEAD_REF master
 #        )
 
-set(SOURCE_PATH ${VCPKG_BUILDTREES_DIR}/src/Loch)
+set(SOURCE_PATH ${CURRENT_BUILDTREES_DIR}/src/Loch)
 
 message(STATUS ${VCPKG_LIBRARY_LINKAGE})
 
