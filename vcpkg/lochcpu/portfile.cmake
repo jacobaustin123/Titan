@@ -40,16 +40,16 @@ message(STATUS ${VCPKG_LIBRARY_LINKAGE})
 
 if(VCPKG_LIBRARY_LINKAGE STREQUAL "static")
     message(STATUS "BUILDING AS STATIC LIBRARY")
-#    if (${TARGET_TRIPLET} STREQUAL "x64-windows-static")
-#        message(FATAL_ERROR "Loch currently does not support static linkage on Windows. Please use the x64-windows triplet!")
-#    else()
+    if (${TARGET_TRIPLET} STREQUAL "x64-windows-static")
+        message(FATAL_ERROR "Loch currently does not support static linkage on Windows. Please use the x64-windows triplet!")
+    else()
         vcpkg_configure_cmake(
                 SOURCE_PATH ${SOURCE_PATH}
                 PREFER_NINJA
                 OPTIONS
                 -DLOCH_SHARED_BUILD=OFF
         )
-#    endif()
+    endif()
 else()
     message(STATUS "BUILDING AS SHARED LIBRARY")
     vcpkg_configure_cmake(

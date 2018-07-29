@@ -67,11 +67,13 @@ install(TARGETS LochCPU
 )
 
 if (LOCH_SHARED_BUILD)
+    message(STATUS "EXPORTING AS SHARED")
+
     install(EXPORT LochCPUTargets
             FILE LochCPUConfig.cmake
             DESTINATION share/lochcpu)
 else()
-    message(STATUS "EXPORTING AS SHARED")
+    message(STATUS "EXPORTING AS STATIC")
 
     install(EXPORT LochCPUTargets
             FILE LochCPUTargets.cmake
