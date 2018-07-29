@@ -18,7 +18,7 @@ include(vcpkg_common_functions)
 #    SHA512 9069fe4a9bfae1d45bcf000404c9f89605741b67987b8ca412b84ba937ed1b7bba4b8b174b6f9bc6814776def5f4b34ec7785cd84aa410002d87ddd1b507f11a
 #)
 
-vcpkg_extract_source_archive(${VCPKG_ROOT_DIR}/downloads/Loch-package.zip)
+vcpkg_extract_source_archive(${VCPKG_ROOT_DIR}/downloads/Loch.zip)
 
 #vcpkg_from_github(OUT_SOURCE_PATH SOURCE_PATH
 #        REPO ja3067/Loch
@@ -34,7 +34,7 @@ vcpkg_extract_source_archive(${VCPKG_ROOT_DIR}/downloads/Loch-package.zip)
 #        HEAD_REF master
 #        )
 
-set(SOURCE_PATH ${CURRENT_BUILDTREES_DIR}/src/Loch-package)
+set(SOURCE_PATH ${CURRENT_BUILDTREES_DIR}/src/Loch)
 
 find_program(NVCC
         NAMES nvcc nvcc.exe
@@ -51,13 +51,13 @@ set(CMAKE_CUDA_COMPILER:FILEPATH ${NVCC})
 if(VCPKG_LIBRARY_LINKAGE STREQUAL "static")
     message(FATAL_ERROR "The Loch library does not currently support static compilation. Please use the x64-windows or x64-osx triplets")
 
-#    vcpkg_configure_cmake(
-#            SOURCE_PATH ${SOURCE_PATH}
-#            PREFER_NINJA
-#            OPTIONS
-#            -DLOCH_SHARED_BUILD=OFF
-#            -DCMAKE_CUDA_COMPILER:FILEPATH=${NVCC}
-#    )
+    vcpkg_configure_cmake(
+            SOURCE_PATH ${SOURCE_PATH}
+            PREFER_NINJA
+            OPTIONS
+            -DLOCH_SHARED_BUILD=OFF
+            -DCMAKE_CUDA_COMPILER:FILEPATH=${NVCC}
+    )
 else()
     message(STATUS ${VCPKG_LIBRARY_LINKAGE})
     vcpkg_configure_cmake(

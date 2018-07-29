@@ -84,9 +84,18 @@ install(TARGETS Loch
         RUNTIME DESTINATION bin
         )
 
-install(EXPORT LochTargets
-        FILE LochConfig.cmake
-        DESTINATION share/Loch)
+if (LOCH_SHARED_BUILD)
+    install(EXPORT LochTargets
+            FILE LochConfig.cmake
+            DESTINATION share/loch)
+else()
+    install(EXPORT LochTargets
+            FILE LochTargets.cmake
+            DESTINATION share/loch)
+
+    configure_file(cmake/LochConfig.cmake.in2
+            ${CMAKE_INSTALL_PREFIX}/share/loch/LochConfig.cmake @ONLY)
+endif()
 
 #install(DIRECTORY ${LOCH_INCLUDE_DIR} DESTINATION include/Loch)
 #install(TARGETS Loch DESTINATION lib)
