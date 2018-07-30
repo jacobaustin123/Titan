@@ -94,8 +94,8 @@ public:
     void waitUntil(double t);
     void waitForEvent();
 
-    double time() { return T; }
-    double running() { return RUNNING; }
+    double time();
+    bool running();
 
     void printPositions();
     void printForces();

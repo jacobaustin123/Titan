@@ -90,7 +90,7 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=f
 //}
 
 Simulation::Simulation() {
-    dt = 0;
+    dt = 0.0;
     RUNNING = false;
     STARTED = false;
     ENDED = false;
@@ -803,15 +803,13 @@ void Simulation::setMassValues(double m) {
         mass -> m += m;
     }
 }
-void Simulation::setDeltaT(double dt) {
+void Simulation::setDeltaT(double delta_t) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
         exit(1);
     }
 
-    for (Mass * m : masses) {
-        m -> dt += dt;
-    }
+    this -> dt = delta_t;
 }
 
 void Simulation::setBreakpoint(double time) {
@@ -1081,7 +1079,7 @@ __global__ void computeSpringForces(CUDA_SPRING ** d_spring, int num_springs) {
     if ( i < num_springs ) {
         CUDA_SPRING & spring = *d_spring[i];
 
-        if (spring._left == nullptr || spring._right == nullptr || ! spring._left -> valid || ! spring._right -> valid)
+        if (spring._left == nullptr || spring._right == nullptr || ! spring._left -> valid || ! spring._right -> valid) // TODO might be expensive with CUDA instruction set
             return;
 
         Vec temp = (spring._right -> pos) - (spring._left -> pos);
@@ -1100,6 +1098,14 @@ __global__ void computeSpringForces(CUDA_SPRING ** d_spring, int num_springs) {
 #endif
 
     }
+}
+
+double Simulation::time() {
+    return this -> T;
+}
+
+bool Simulation::running() {
+    return this -> RUNNING;
 }
 
 __global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, CUDA_GLOBAL_CONSTRAINTS c, int num_masses) {
@@ -1349,11 +1355,13 @@ void Simulation::start() {
 
     T = 0;
 
-    dt = 0.01; // min delta
+    if (this -> dt == 0.0) { // if dt hasn't been set by the user.
+        dt = 0.01; // min delta
 
-    for (Mass * m : masses) {
-        if (m -> dt < dt)
-            dt = m -> dt;
+        for (Mass * m : masses) {
+            if (m -> dt < dt)
+                dt = m -> dt;
+        }
     }
 
 #ifdef GRAPHICS // SDL2 window needs to be created here for Mac OS
