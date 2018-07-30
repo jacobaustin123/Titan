@@ -25,7 +25,8 @@ if (LOCH_SHARED_BUILD)
 endif()
 
 add_library(Loch ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
-set_target_properties(Loch PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+
+set_target_properties(Loch PROPERTIES CUDA_SEPARABLE_COMPILATION ON) # needed for library compilation
 set_target_properties(Loch PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 
 target_compile_definitions(Loch PUBLIC GRAPHICS)

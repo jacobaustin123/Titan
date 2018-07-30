@@ -179,17 +179,20 @@ void Simulation::freeGPU() {
 Simulation::~Simulation() {
     std::cerr << "Simulation destructor called." << std::endl;
 
+    while (RUNNING) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+
     if (gpu_thread.joinable()) {
         gpu_thread.join();
     } else {
         std::cout << "could not join GPU thread." << std::endl;
     }
 
-    if (!FREED)
-        freeGPU();
+    ENDED = true; // TODO maybe race condition
+    freeGPU();
 
     FREED = true;
-    ENDED = true; // just to be safe
 
     std::cout << "Simulation destructor done." << std::endl;
 }
@@ -1323,7 +1326,7 @@ void Simulation::stop(double time) {
     return;
 }
 
-void Simulation::start(double time) {
+void Simulation::start() {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
         exit(1);
@@ -1337,7 +1340,6 @@ void Simulation::start(double time) {
     std::cout << "Starting simulation with " << masses.size() << " masses and " << springs.size() << " springs." << std::endl;
     
     setBreakpoint(time);
-    stop_time = time;
 
     RUNNING = true;
     STARTED = true;
@@ -1468,17 +1470,11 @@ void Simulation::execute() {
             bpts.erase(bpts.begin());
             RUNNING = false;
 
-            if (T >= stop_time) {
-                ENDED = true;
-                freeGPU();
-                return;
-            }
-
             while (!RUNNING) {
                 std::this_thread::sleep_for(std::chrono::microseconds(1));
+
                 if (ENDED) {
                     std::cout << "End of program reached. Exiting GPU thread." << std::endl;
-                    freeGPU();
                     return;
                 }
             }

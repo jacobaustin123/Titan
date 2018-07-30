@@ -80,7 +80,7 @@ public:
     void defaultRestLength();
 
     // Control
-    void start(double time = 1E20); // start simulation, run until simulation time T
+    void start(); // start simulation
 
     void stop(); // stop simulation while paused, free all memory.
     void stop(double time); // stop simulation at time
@@ -121,8 +121,6 @@ private:
 
     Mass * createMass(Mass * m); // utility
     Spring * createSpring(Spring * s); // utility
-
-    double stop_time;
 
     double dt; // set to 0 by default, when start is called will be set to min(mass dt) unless previously set
     double T; // global simulation time
