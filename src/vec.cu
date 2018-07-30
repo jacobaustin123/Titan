@@ -143,3 +143,7 @@ atomicDoubleAdd(&data[2], (double) v.data[2]);
 CUDA_CALLABLE_MEMBER double dot(const Vec & a, const Vec & b) {
     return (a * b).sum();
 }
+
+CUDA_CALLABLE_MEMBER Vec cross(const Vec &v1, const Vec &v2) {
+    return Vec(v1[1] * v2[2] - v1[2] * v2[1], v2[0] * v1[2] - v1[0] * v2[2], v1[0] * v2[1] - v1[1] * v2[0]);
+}
