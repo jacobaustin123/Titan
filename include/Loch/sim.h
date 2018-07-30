@@ -34,7 +34,6 @@
 #include <set>
 #include <thread>
 
-
 class Simulation {
 public:
     // Create
@@ -71,6 +70,7 @@ public:
 
     Cube * createCube(const Vec & center, double side_length); // creates cube
     Lattice * createLattice(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
+    Beam * createBeam(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
 
     // Bulk modifications, only update CPU
     void setSpringConstant(double k);
@@ -107,12 +107,13 @@ public:
     Mass * getMassByIndex(int i);
     Container * getContainerByIndex(int i);
 
+    std::vector<Mass *> masses;
+    std::vector<Spring *> springs;
+    std::vector<Container *> containers;
+
 private:
-
     void freeGPU();
-
     void _run();
-
 
     void execute(); // same as above but w/out reset
 
@@ -130,10 +131,7 @@ private:
     static bool ENDED;
     static bool FREED;
 
-    std::vector<Mass *> masses;
-    std::vector<Spring *> springs;
     std::vector<Constraint *> constraints;
-    std::vector<Container *> objs;
 
     thrust::device_vector<CUDA_MASS *> d_masses;
     thrust::device_vector<CUDA_SPRING *> d_springs;

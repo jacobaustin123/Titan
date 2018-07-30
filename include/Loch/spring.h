@@ -53,6 +53,7 @@ private:
     friend class Container;
     friend class Lattice;
     friend class Cube;
+    friend class Beam;
 };
 
 struct CUDA_SPRING {

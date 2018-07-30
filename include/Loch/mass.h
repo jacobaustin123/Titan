@@ -47,12 +47,7 @@ public:
     Vec acc; // acceleration in m/s^2
     Vec force; // force in kg m / s^2
 
-    bool valid;
-
-    int ref_count;
-
 #ifdef CONSTRAINTS
-    LOCAL_CONSTRAINTS constraints;
     void addConstraint(CONSTRAINT_TYPE type, const Vec & vec, double num);
     void clearConstraints(CONSTRAINT_TYPE type);
     void clearConstraints();
@@ -62,13 +57,12 @@ public:
     void unfix();
 #endif
 
-#ifdef GRAPHICS
-    Vec color;
-#endif
+private:
+    bool valid;
+    int ref_count;
 
     Mass(const Vec & position, double mass = 0.1, bool fixed = false, double dt = 0.0001);
 
-private:
     void decrementRefCount();
 
     CUDA_MASS * arrayptr; //Pointer to struct version for GPU cudaMemAlloc
@@ -79,9 +73,20 @@ private:
     friend class Simulation;
     friend class Spring;
     friend struct CUDA_SPRING;
+    friend struct CUDA_MASS;
     friend class Container;
     friend class Lattice;
+    friend class Beam;
     friend class Cube;
+
+#ifdef CONSTRAINTS
+    LOCAL_CONSTRAINTS constraints;
+
+#endif
+
+#ifdef GRAPHICS
+    Vec color;
+#endif
 };
 
 #endif //LOCH_MASS_H

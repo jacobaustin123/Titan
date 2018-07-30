@@ -263,4 +263,13 @@ public:
     Vec _center, _dims;
 };
 
+class Beam : public Container {
+public:
+    ~Beam() {};
+
+    Beam(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
+
+    int nx, ny, nz;
+    Vec _center, _dims;
+};
 #endif //LOCH_OBJECT_H

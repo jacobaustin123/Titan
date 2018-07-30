@@ -139,7 +139,7 @@ void Simulation::freeGPU() {
         delete c;
     }
 
-    for (Container * c : objs) {
+    for (Container * c : containers) {
         delete c;
     }
 
@@ -252,9 +252,9 @@ Mass * Simulation::getMassByIndex(int i) {
 }
 
 Container * Simulation::getContainerByIndex(int i) {
-    assert(i < objs.size() && i >= 0);
+    assert(i < containers.size() && i >= 0);
 
-    return objs[i];
+    return containers[i];
 }
 
 Mass * Simulation::createMass() {
@@ -498,7 +498,7 @@ void Simulation::deleteContainer(Container * c) {
         }
 
         delete c;
-        objs.resize(std::remove(objs.begin(), objs.end(), c) - objs.begin());
+        containers.resize(std::remove(containers.begin(), containers.end(), c) - containers.begin());
 
         return;
     }
@@ -564,7 +564,7 @@ void Simulation::deleteContainer(Container * c) {
 #endif
 
     delete c;
-    objs.resize(std::remove(objs.begin(), objs.end(), c) - objs.begin());
+    containers.resize(std::remove(containers.begin(), containers.end(), c) - containers.begin());
 }
 
 //void Simulation::deleteContainer(Container * c) {
@@ -587,7 +587,7 @@ void Simulation::deleteContainer(Container * c) {
 //#endif
 //
 //    delete c;
-//    objs.remove(c);
+//    containers.remove(c);
 //}
 
 void Simulation::get(Mass * m) {
@@ -1771,7 +1771,7 @@ void Simulation::draw() {
 
 Container * Simulation::createContainer() {
     Container * c = new Container();
-    objs.push_back(c);
+    containers.push_back(c);
     return c;
 }
 
@@ -1794,7 +1794,7 @@ Cube * Simulation::createCube(const Vec & center, double side_length) { // creat
         createSpring(s);
     }
 
-    objs.push_back(cube);
+    containers.push_back(cube);
 
     return cube;
 }
@@ -1818,7 +1818,31 @@ Lattice * Simulation::createLattice(const Vec & center, const Vec & dims, int nx
         createSpring(s);
     }
 
-    objs.push_back(l);
+    containers.push_back(l);
+
+    return l;
+}
+
+Beam * Simulation::createBeam(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        exit(1);
+    }
+
+    Beam * l = new Beam(center, dims, nx, ny, nz);
+
+    d_masses.reserve(masses.size() + l -> masses.size());
+    d_springs.reserve(springs.size() + l -> springs.size());
+
+    for (Mass * m : l -> masses) {
+        createMass(m);
+    }
+
+    for (Spring * s : l -> springs) {
+        createSpring(s);
+    }
+
+    containers.push_back(l);
 
     return l;
 }

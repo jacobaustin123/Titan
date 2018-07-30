@@ -217,6 +217,72 @@ Lattice::Lattice(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
     }
 }
 
+Beam::Beam(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
+    _center = center;
+    _dims = dims;
+    this -> nx = nx;
+    this -> ny = ny;
+    this -> nz = nz;
+
+    for (int i = 0; i < nx; i++) {
+        for (int j = 0; j < ny; j++) {
+            for (int k = 0; k < nz; k++) {
+                masses.push_back(new Mass(Vec((nx > 1) ? (double) i / (nx - 1.0) - 0.5 : 0, (ny > 1) ? j / (ny - 1.0) - 0.5 : 0, (nz > 1) ? k / (nz - 1.0) - 0.5 : 0) * dims + center));
+                if (i == 0) {
+                    masses[masses.size() - 1] -> constraints.fixed = true;
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < nx; i++) {
+        for (int j = 0; j < ny; j++) {
+            for (int k = 0; k < nz; k++) {
+                for (int l = 0; l < ((i != nx - 1) ? 2 : 1); l++) {
+                    for (int m = 0; m < ((j != ny - 1) ? 2 : 1); m++) {
+                        for (int n = 0; n < ((k != nz - 1) ? 2 : 1); n++) {
+                            if (l != 0 || m != 0 || n != 0) {
+                                springs.push_back(new Spring(masses[k + j * nz + i * ny * nz],
+                                                             masses[(k + n) + (j + m) * nz + (i + l) * ny * nz]));
+                            }
+                        }
+                    }
+                }
+
+                if (k != nz - 1) {
+                    if (j != ny - 1) {
+                        springs.push_back(new Spring(masses[(k + 1) + j * nz + i * ny * nz], // get the full triangle
+                                                     masses[k + (j + 1) * nz + i * ny * nz]));
+                    }
+
+                    if (i != nx - 1) {
+                        springs.push_back(new Spring(masses[(k + 1) + j * nz + i * ny * nz],
+                                                     masses[k + j * nz + (i + 1) * ny * nz]));
+                    }
+
+                    if (j != ny - 1 && i != nx - 1) {
+                        springs.push_back(new Spring(masses[(k + 1) + j * nz + i * ny * nz],
+                                                     masses[k + (j + 1) * nz + (i + 1) * ny * nz]));
+                        springs.push_back(new Spring(masses[(k + 1) + j * nz + (i + 1) * ny * nz],
+                                                     masses[k + (j + 1) * nz + i * ny * nz]));
+                        springs.push_back(new Spring(masses[(k + 1) + (j + 1) * nz + i * ny * nz],
+                                                     masses[k + j * nz + (i + 1) * ny * nz]));
+                    }
+                }
+
+                if (j != ny - 1 && i != nx - 1) {
+                    springs.push_back(new Spring(masses[k + (j + 1) * nz + i * ny * nz],
+                                                 masses[k + j * nz + (i + 1) * ny * nz]));
+                }
+            }
+        }
+    }
+
+    for (Spring * s : springs) {
+        s -> setRestLength((s -> _right -> pos - s -> _left -> pos).norm());
+    }
+}
+
 #ifdef CONSTRAINTS
 
 void Container::makeFixed() {
