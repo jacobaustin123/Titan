@@ -465,99 +465,76 @@ void Ball::draw() {
 #ifdef GRAPHICS
 
 void ContactPlane::generateBuffers() {
-
-    float length = 5;
-    float width = 5;
-    float depth = 1;
     glm::vec3 color = {0.22f, 0.71f, 0.0f};
+    Vec temp = (dot(_normal, Vec(0, 1, 0)) < 0.8) ? Vec(0, 1, 0) : Vec(1, 0, 0);
 
-    GLfloat vertex_buffer_platform[108] = {
-            -length, -width,-depth,
-            -length, -width,0.0f,
-            -length, width,0.0f,
-            length, width,-depth,
-            -length, -width,-depth,
-            -length, width,-depth,
-            length, -width,0.0f,
-            -length, -width,-depth,
-            length, -width,-depth,
-            length, width,-depth,
-            length, -width,-depth,
-            -length, -width,-depth,
-            -length, -width,-depth,
-            -length, width, 0.0f,
-            -length, width,-depth,
-            length, -width, 0.0f,
-            -length, -width, 0.0f,
-            -length, -width,-depth,
-            -length, width, 0.0f,
-            -length, -width, 0.0f,
-            length, -width, 0.0f,
-            length, width, 0.0f,
-            length, -width,-depth,
-            length, width,-depth,
-            length, -width,-depth,
-            length, width, 0.0f,
-            length, -width, 0.0f,
-            length, width, 0.0f,
-            length, width,-depth,
-            -length, width,-depth,
-            length, width, 0.0f,
-            -length, width,-depth,
-            -length, width, 0.0f,
-            length, width, 0.0f,
-            -length, width, 0.0f,
-            length, -width, 0.0f
+    Vec v1 = cross(_normal, temp); // two unit vectors along plane
+    v1 = v1 / v1.norm();
+
+    Vec v2 = cross(_normal, v1);
+    v2 = v2 / v2.norm();
+
+    const static GLfloat vertex_buffer_platform[118] = {
+            -1, -1, -1,
+            -1, -1,  1,
+            -1,  1,  1,
+            1,  1, -1,
+            -1, -1, -1,
+            -1,  1, -1,
+            1, -1,  1,
+            -1, -1, -1,
+            1, -1, -1,
+            1,  1, -1,
+            1, -1, -1,
+            -1, -1, -1,
+            -1, -1, -1,
+            -1,  1,  1,
+            -1,  1, -1,
+            1, -1,  1,
+            -1, -1,  1,
+            -1, -1, -1,
+            -1,  1,  1,
+            -1, -1,  1,
+            1, -1,  1,
+            1,  1,  1,
+            1, -1, -1,
+            1,  1, -1,
+            1, -1, -1,
+            1,  1,  1,
+            1, -1,  1,
+            1,  1,  1,
+            1,  1, -1,
+            -1,  1, -1,
+            1,  1,  1,
+            -1,  1, -1,
+            -1,  1,  1,
+            1,  1,  1,
+            -1,  1,  1,
+            1, -1,  1
     };
+
+    GLfloat vertex_data[108];
+
+    for (int i = 0; i < 36; i++) {
+        Vec temp = Vec(vertex_buffer_platform[3 * i], vertex_buffer_platform[3 * i + 1], vertex_buffer_platform[3 * i + 2]);
+        Vec vertex = 10 * dot(v1, temp) * v1 + 10 * dot(v2, temp) * v2 + _normal * (_offset + dot(_normal, temp) - 1.0);
+
+        vertex_data[3 * i] = vertex[0];
+        vertex_data[3 * i + 1] = vertex[1];
+        vertex_data[3 * i + 2] = vertex[2];
+    }
 
     glGenBuffers(1, &vertices); // create buffer for these vertices
     glBindBuffer(GL_ARRAY_BUFFER, vertices);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_buffer_platform), vertex_buffer_platform, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
 
-    GLfloat g_color_buffer_data[] = {
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-            color[0], color[1], color[2],
-    };
+    GLfloat g_color_buffer_data[108];
+
+    for (int i = 0; i < 36; i++) {
+        g_color_buffer_data[3 * i] = color[0];
+        g_color_buffer_data[3 * i + 1] = color[1];
+        g_color_buffer_data[3 * i + 2] = color[2];
+    }
 
     glGenBuffers(1, &colors);
     glBindBuffer(GL_ARRAY_BUFFER, colors);
