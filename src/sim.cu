@@ -183,16 +183,20 @@ Simulation::~Simulation() {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
+    ENDED = true; // TODO maybe race condition
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
     if (gpu_thread.joinable()) {
         gpu_thread.join();
     } else {
         std::cout << "could not join GPU thread." << std::endl;
     }
 
-    ENDED = true; // TODO maybe race condition
-    freeGPU();
-
-    FREED = true;
+    if (!FREED) {
+        freeGPU();
+        FREED = true;
+    }
 
     std::cout << "Simulation destructor done." << std::endl;
 }
@@ -1295,17 +1299,15 @@ void Simulation::createGLFWWindow() {
 
 void Simulation::stop() {
     if (RUNNING) {
-        std::cerr << "simulation is running." << std::endl;
-        exit(1);
+        setBreakpoint(time());
+        waitForEvent();
     }
 
     ENDED = true;
 
-    while (!FREED) {
-        std::this_thread::sleep_for(std::chrono::microseconds(10));
-    }
+    freeGPU()
 
-    std::cout << "freed!" << std::endl;
+    FREED = true;
 
     return;
 }
