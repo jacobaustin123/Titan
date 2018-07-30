@@ -66,5 +66,21 @@ if(VCPKG_LIBRARY_LINKAGE STREQUAL "static")
     )
 else()
     message(STATUS "Building SHARED library")
-
+    vcpkg_configure_cmake(
+            SOURCE_PATH ${SOURCE_PATH}
+            PREFER_NINJA
+            OPTIONS
+            -DLOCH_SHARED_BUILD=ON
+            -DCMAKE_CUDA_COMPILER:FILEPATH=${NVCC}
+    )
 endif()
+
+vcpkg_install_cmake()
+file(
+        REMOVE_RECURSE
+        ${CURRENT_PACKAGES_DIR}/debug/include
+        ${CURRENT_PACKAGES_DIR}/debug/share
+)
+
+# Handle copyright
+file(INSTALL ${SOURCE_PATH}/vcpkg/copyright.txt DESTINATION ${CURRENT_PACKAGES_DIR}/share/loch RENAME copyright)
