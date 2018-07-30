@@ -179,13 +179,13 @@ void Simulation::freeGPU() {
 Simulation::~Simulation() {
     std::cerr << "Simulation destructor called." << std::endl;
 
-    while (RUNNING) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    }
+    waitForEvent();
 
     ENDED = true; // TODO maybe race condition
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    std::this_thread::sleep_for(std::chrono::milliseconds(10)); // wait for the GPU thread to exit.
+
+    std::cerr << "Joining GPU thread." << std::endl;
 
     if (gpu_thread.joinable()) {
         gpu_thread.join();
@@ -193,7 +193,11 @@ Simulation::~Simulation() {
         std::cout << "could not join GPU thread." << std::endl;
     }
 
+    std::cerr << "Freeing GPU resources." << std::endl;
+
     if (!FREED) {
+        std::cerr << "Actually freeing GPU resources." << std::endl;
+
         freeGPU();
         FREED = true;
     }
