@@ -1316,9 +1316,9 @@ void Simulation::stop() {
     return;
 }
 
-void Simulation::stop(double time) {
+void Simulation::stop(double t) {
     if (RUNNING) {
-        setBreakpoint(time(time));
+        setBreakpoint(t);
         waitForEvent();
     }
 
@@ -1343,8 +1343,6 @@ void Simulation::start() {
     }
 
     std::cout << "Starting simulation with " << masses.size() << " masses and " << springs.size() << " springs." << std::endl;
-    
-    setBreakpoint(time);
 
     RUNNING = true;
     STARTED = true;
