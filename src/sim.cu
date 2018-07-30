@@ -1309,7 +1309,7 @@ void Simulation::stop() {
 
     ENDED = true;
 
-    freeGPU()
+    freeGPU();
 
     FREED = true;
 
