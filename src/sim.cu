@@ -1317,17 +1317,16 @@ void Simulation::stop() {
 }
 
 void Simulation::stop(double time) {
-    if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+    if (RUNNING) {
+        setBreakpoint(time(time));
+        waitForEvent();
     }
 
-    stop_time = time;
-    pause(time);
+    ENDED = true;
 
-    while (!ENDED) {
-        std::this_thread::sleep_for(std::chrono::microseconds(10));
-    }
+    freeGPU();
+
+    FREED = true;
 
     return;
 }
