@@ -758,6 +758,10 @@ void Simulation::setDeltaT(double delta_t) {
     }
 
     this -> dt = delta_t;
+
+    for (Mass * m : masses) {
+        m -> dt = delta_t;
+    }
 }
 
 void Simulation::setBreakpoint(double time) {
@@ -1502,7 +1506,7 @@ void Simulation::execute() {
 #endif
 
 #ifdef GRAPHICS
-        if (fmod(T, 250 * dt) < dt) {
+        if (fmod(T, 0.01) < dt) {
             clearScreen();
 
             updateBuffers();
