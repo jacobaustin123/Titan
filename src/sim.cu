@@ -87,8 +87,6 @@ Simulation::Simulation() {
 }
 
 void Simulation::freeGPU() {
-    std::cout << "Freeing springs." << std::endl;
-
     for (Spring * s : springs) {
         if (s -> _left && ! s -> _left -> valid) {
             if (s -> _left -> arrayptr) {
@@ -113,13 +111,9 @@ void Simulation::freeGPU() {
         delete m;
     }
 
-    std::cout << "Freeing containers" << std::endl;
-
     for (Container * c : containers) {
         delete c;
     }
-
-    std::cout << "Freeing masses" << std::endl;
 
     d_balls.clear();
     d_balls.shrink_to_fit();
@@ -130,13 +124,8 @@ void Simulation::freeGPU() {
 //    freeSprings<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(d_spring, springs.size()); // MUST COME BEFORE freeMasses
 //    freeMasses<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, masses.size());
 
-    std::cout << "Freeing graphics" << std::endl;
-
-
     FREED = true; // just to be safe
     ENDED = true; // just to be safe
-
-    std::cout << "All memory successfully freed!" << std::endl;
 }
 
 Simulation::~Simulation() {
@@ -152,24 +141,17 @@ Simulation::~Simulation() {
 
     std::this_thread::sleep_for(std::chrono::milliseconds(10)); // TODO fix race condition
 
-    std::cerr << "Joining GPU thread." << std::endl;
-
     if (gpu_thread.joinable()) {
         gpu_thread.join();
     } else {
         std::cout << "could not join GPU thread." << std::endl;
+        exit(1);
     }
 
-    std::cerr << "Freeing GPU resources." << std::endl;
-
     if (!FREED) {
-        std::cerr << "Actually freeing GPU resources." << std::endl;
-
         freeGPU();
         FREED = true;
     }
-
-    std::cout << "Simulation destructor done." << std::endl;
 }
 
 Mass * Simulation::createMass(Mass * m) {
@@ -1394,7 +1376,6 @@ void Simulation::_run() { // repeatedly start next
 
     execute();
 
-    std::cout << "EXITING GPU" << std::endl;
     GPU_DONE = true;
 }
 
@@ -1454,8 +1435,6 @@ void Simulation::execute() {
                 std::this_thread::sleep_for(std::chrono::microseconds(1));
 
                 if (ENDED) {
-                    std::cout << "End of program reached. Exiting GPU thread." << std::endl;
-
                     for (Constraint * c : constraints)  {
                         delete c;
                     }
