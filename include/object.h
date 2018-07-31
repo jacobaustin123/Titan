@@ -21,7 +21,6 @@
 #include <vector>
 #include <thrust/device_vector.h>
 
-
 struct CUDA_MASS;
 class Spring;
 class Mass;
