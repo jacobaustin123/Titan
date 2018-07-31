@@ -110,7 +110,7 @@ Simulation::Simulation() {
 }
 
 void Simulation::freeGPU() {
-    std::cout << "Freeing GPU and CPU resources." << std::endl;
+    std::cout << "Freeing springs." << std::endl;
 
     for (Spring * s : springs) {
         if (s -> _left && ! s -> _left -> valid) {
@@ -132,17 +132,28 @@ void Simulation::freeGPU() {
         delete s;
     }
 
+    std::cout << "Freeing masses" << std::endl;
+
     for (Mass * m : masses) {
+        if (! m -> valid) {
+            std::cout << "woah this mass is still valid!" << std::endl;
+        }
         delete m;
     }
+
+    std::cout << "Freeing constraints" << std::endl;
 
     for (Constraint * c : constraints)  {
         delete c;
     }
 
+    std::cout << "Freeing containers" << std::endl;
+
     for (Container * c : containers) {
         delete c;
     }
+
+    std::cout << "Freeing masses" << std::endl;
 
     d_balls.clear();
     d_balls.shrink_to_fit();
@@ -152,6 +163,8 @@ void Simulation::freeGPU() {
 
 //    freeSprings<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(d_spring, springs.size()); // MUST COME BEFORE freeMasses
 //    freeMasses<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, masses.size());
+
+    std::cout << "Freeing graphics" << std::endl;
 
 #ifdef GRAPHICS
     glDeleteBuffers(1, &vertices);
@@ -371,7 +384,6 @@ void Simulation::deleteMass(Mass * m) {
         d_masses.resize(masses.size());
 
         m -> decrementRefCount();
-
 
 #ifdef GRAPHICS
         resize_buffers = true;
@@ -1312,7 +1324,7 @@ void Simulation::createGLFWWindow() {
 #endif
 #endif
 
-void Simulation::stop() {
+void Simulation::stop() { // no race condition actually
     if (RUNNING) {
         setBreakpoint(time());
         waitForEvent();
