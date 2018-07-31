@@ -12,7 +12,11 @@ void bind_mass(py::module &m){
 
             //properties
             .def_readwrite("pointer", &pyMass::pointer)
-            .def("m", &pyMass::m)
+//            .def("m", &pyMass::m)
+
+            .def("m", (double (pyMass::*)()) &pyMass::m, py::return_value_policy::reference)
+            .def("m", (void (pyMass::*)(int m)) &pyMass::m, py::return_value_policy::reference)
+
             .def("setm", &pyMass::setm)
             .def("pos", &pyMass::pos)
             .def("vel", &pyMass::vel)

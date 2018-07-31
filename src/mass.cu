@@ -31,7 +31,7 @@ void Mass::operator=(CUDA_MASS & mass) {
     arrayptr = this -> arrayptr;
 
 #ifdef CONSTRAINTS
-//    constraints = this -> constraints;
+    constraints = this -> constraints;
 #endif
 
 #ifdef GRAPHICS
@@ -68,7 +68,7 @@ CUDA_MASS::CUDA_MASS(Mass &mass) {
 
 
 #ifdef CONSTRAINTS
-//    constraints = CUDA_LOCAL_CONSTRAINTS(mass.constraints);
+    constraints = CUDA_LOCAL_CONSTRAINTS(mass.constraints);
 #endif
 
 #ifdef GRAPHICS
@@ -78,64 +78,120 @@ CUDA_MASS::CUDA_MASS(Mass &mass) {
 
 
 #ifdef CONSTRAINTS
-//void Mass::addConstraint(CONSTRAINT_TYPE type, const Vec & vec, double num) { // TODO make this more efficient
-//    if (type == 0) {
-//        this -> constraints.constraint_plane.push_back(CudaConstraintPlane(vec, num));
-//        this -> constraints.num_constraint_planes++;
-//        this -> constraints.constraint_plane_ptr = thrust::raw_pointer_cast(constraints.constraint_plane.data());
-//    } else if (type == 1) {
-//        this -> constraints.contact_plane.push_back(CudaContactPlane(vec, num));
-//        this -> constraints.num_contact_planes++;
-//        this -> constraints.contact_plane_ptr = thrust::raw_pointer_cast(constraints.contact_plane.data());
-//    } else if (type == 2) {
-//        this -> constraints.ball.push_back(CudaBall(vec, num));
-//        this -> constraints.num_balls++;
-//        this -> constraints.ball_ptr = thrust::raw_pointer_cast(constraints.ball.data());
-//    } else if (type == 3) {
-//        this -> constraints.direction.push_back(CudaDirection(vec, num));
-//        this -> constraints.num_directions++;
-//        this -> constraints.direction_ptr = thrust::raw_pointer_cast(constraints.direction.data());
-//    }
-//}
-//
-//void Mass::clearConstraints(CONSTRAINT_TYPE type) {
-//    if (type == 0) {
-//        this -> constraints.constraint_plane.clear();
-//        this -> constraints.constraint_plane.shrink_to_fit();
-//        this -> constraints.num_constraint_planes = 0;
-//    } else if (type == 1) {
-//        this -> constraints.contact_plane.clear();
-//        this -> constraints.contact_plane.shrink_to_fit();
-//        this -> constraints.num_contact_planes = 0;
-//    } else if (type == 2) {
-//        this -> constraints.ball.clear();
-//        this -> constraints.ball.shrink_to_fit();
-//        this -> constraints.num_balls = 0;
-//    } else if (type == 3) {
-//        this -> constraints.direction.clear();
-//        this -> constraints.direction.shrink_to_fit();
-//        this -> constraints.num_directions = 0;
-//    }
-//}
-//
-//void Mass::clearAllConstraints() {
-//    clearConstraints(CONSTRAINT_PLANE);
-//    clearConstraints(CONTACT_PLANE);
-//    clearConstraints(DIRECTION);
-//    clearConstraints(BALL);
-//}
-//
-//void Mass::fix() {
-//    this -> constraints.fixed = true;
-//}
-//void Mass::unfix() {
-//    this -> constraints.fixed = false;
-//}
-//
-//void Mass::setDrag(double C) {
-//    this -> constraints.drag_coefficient = C;
-//}
-//
+
+void Mass::addConstraint(CONSTRAINT_TYPE type, const Vec & vec, double num) { // TODO make this more efficient
+
+    if (type == 0) {
+
+        this -> constraints.constraint_plane.push_back(CudaConstraintPlane(vec, num));
+
+        this -> constraints.num_constraint_planes++;
+
+        this -> constraints.constraint_plane_ptr = thrust::raw_pointer_cast(constraints.constraint_plane.data());
+
+    } else if (type == 1) {
+
+        this -> constraints.contact_plane.push_back(CudaContactPlane(vec, num));
+
+        this -> constraints.num_contact_planes++;
+
+        this -> constraints.contact_plane_ptr = thrust::raw_pointer_cast(constraints.contact_plane.data());
+
+    } else if (type == 2) {
+
+        this -> constraints.ball.push_back(CudaBall(vec, num));
+
+        this -> constraints.num_balls++;
+
+        this -> constraints.ball_ptr = thrust::raw_pointer_cast(constraints.ball.data());
+
+    } else if (type == 3) {
+
+        this -> constraints.direction.push_back(CudaDirection(vec, num));
+
+        this -> constraints.num_directions++;
+
+        this -> constraints.direction_ptr = thrust::raw_pointer_cast(constraints.direction.data());
+
+    }
+
+}
+
+
+
+void Mass::clearConstraints(CONSTRAINT_TYPE type) {
+
+    if (type == 0) {
+
+        this -> constraints.constraint_plane.clear();
+
+        this -> constraints.constraint_plane.shrink_to_fit();
+
+        this -> constraints.num_constraint_planes = 0;
+
+    } else if (type == 1) {
+
+        this -> constraints.contact_plane.clear();
+
+        this -> constraints.contact_plane.shrink_to_fit();
+
+        this -> constraints.num_contact_planes = 0;
+
+    } else if (type == 2) {
+
+        this -> constraints.ball.clear();
+
+        this -> constraints.ball.shrink_to_fit();
+
+        this -> constraints.num_balls = 0;
+
+    } else if (type == 3) {
+
+        this -> constraints.direction.clear();
+
+        this -> constraints.direction.shrink_to_fit();
+
+        this -> constraints.num_directions = 0;
+
+    }
+
+}
+
+
+
+void Mass::clearAllConstraints() {
+
+    clearConstraints(CONSTRAINT_PLANE);
+
+    clearConstraints(CONTACT_PLANE);
+
+    clearConstraints(DIRECTION);
+
+    clearConstraints(BALL);
+
+}
+
+
+
+void Mass::fix() {
+
+    this -> constraints.fixed = true;
+
+}
+
+void Mass::unfix() {
+
+    this -> constraints.fixed = false;
+
+}
+
+
+
+void Mass::setDrag(double C) {
+
+    this -> constraints.drag_coefficient = C;
+
+}
 
 #endif
 

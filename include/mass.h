@@ -31,15 +31,20 @@ struct CUDA_MASS {
     bool valid;
 
 #ifdef CONSTRAINTS
-//    CUDA_LOCAL_CONSTRAINTS constraints;
+    CUDA_LOCAL_CONSTRAINTS constraints;
 #endif
 
 };
 
+
 #ifdef CONSTRAINTS
-//enum CONSTRAINT_TYPE {
-//    CONSTRAINT_PLANE, CONTACT_PLANE, BALL, DIRECTION
-//};
+
+enum CONSTRAINT_TYPE {
+
+    CONSTRAINT_PLANE, CONTACT_PLANE, BALL, DIRECTION
+
+};
+
 #endif
 
 class Mass {
@@ -60,13 +65,13 @@ public:
 
 #ifdef CONSTRAINTS
     LOCAL_CONSTRAINTS constraints;
-//    void addConstraint(CONSTRAINT_TYPE type, const Vec & vec, double num);
-//    void clearConstraints(CONSTRAINT_TYPE type);
-//    void clearAllConstraints();
-//
-//    void setDrag(double C);
-//    void fix();
-//    void unfix();
+    void addConstraint(CONSTRAINT_TYPE type, const Vec & vec, double num);
+    void clearConstraints(CONSTRAINT_TYPE type);
+    void clearAllConstraints();
+
+    void setDrag(double C);
+    void fix();
+    void unfix();
 #endif
 
 #ifdef GRAPHICS
@@ -90,7 +95,7 @@ private:
     friend class Cube;
 };
 
-class pyMass {
+class pyMass { // user mass class used to store real mass class properties in python and avoid ownership issues
 public:
     //constructor
     pyMass() = default;
@@ -101,6 +106,7 @@ public:
 
     //Properties
     double m() { return (pointer -> m);}  // mass in kg
+    void m(int m) {pointer -> m = m;} // set mass
     double dt() { return (pointer -> dt);} // update interval
     double T() { return (pointer -> T);} // local time
     Vec pos() { return (pointer -> pos);} // position in m

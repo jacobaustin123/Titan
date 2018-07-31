@@ -21,6 +21,7 @@
 #include <vector>
 #include <thrust/device_vector.h>
 
+
 struct CUDA_MASS;
 class Spring;
 class Mass;
@@ -49,66 +50,6 @@ public:
     virtual void draw() = 0;
 #endif
 };
-
-//class CudaBall : public Constraint { // ball constraint, force is inversely proportional to distance
-//public:
-//    CudaBall(const Vec & center, double r);
-//    void setRadius(double r) { _radius = r; }
-//    void setCenter(const Vec & center) { _center = center; }
-//    Vec getForce(const Vec & position);
-//    void translate(const Vec & displ);
-//
-//#ifdef GRAPHICS
-//    virtual ~CudaBall() {
-//        //glDeleteBuffers(1, &vertices);
-//        //glDeleteBuffers(1, &colors);
-//    }
-//
-//    void generateBuffers();
-//    void draw();
-//
-//    void subdivide(GLfloat * arr, GLfloat *v1, GLfloat *v2, GLfloat *v3, int depth);
-//    void writeTriangle(GLfloat * arr, GLfloat *v1, GLfloat *v2, GLfloat *v3);
-//    void tangentize(GLfloat * v);
-//
-//    int depth = 2;
-//
-//    GLuint vertices;
-//    GLuint colors;
-//#endif
-//
-//    double _radius;
-//    Vec _center;
-//};
-//
-//
-//class Plane : public Constraint { // plane constraint, force is proportional to negative distance wrt plane
-//public:
-//    Plane() {};
-//    Plane(const Vec & tangent, double d);
-//
-//    Vec getForce(const Vec & position);
-//    void translate(const Vec & displ);
-//
-//    void settangent(const Vec & tangent) { _tangent = tangent; }; // tangent is (a, b, c)
-//    void setOffset(double d) { _offset = d; }; // ax + by + cz < d
-//
-//    Vec _tangent;
-//    double _offset;
-//
-//#ifdef GRAPHICS
-//    virtual ~Plane() {
-//        glDeleteBuffers(1, &vertices);
-//        glDeleteBuffers(1, &colors);
-//    }
-//
-//    void generateBuffers();
-//    void draw();
-//
-//    GLuint vertices;
-//    GLuint colors;
-//#endif
-//};
 
 struct Ball : public Constraint {
     Ball(const Vec & center, double radius) {
@@ -184,7 +125,7 @@ struct ContactPlane : public Constraint {
 
 struct CudaContactPlane {
     CudaContactPlane() = default;
-//    CUDA_CALLABLE_MEMBER CudaContactPlane(const Vec & normal, double offset);
+    CUDA_CALLABLE_MEMBER CudaContactPlane(const Vec & normal, double offset);
     CudaContactPlane(const ContactPlane & p);
 
     CUDA_CALLABLE_MEMBER void applyForce(CUDA_MASS * m);
@@ -229,15 +170,15 @@ struct CUDA_GLOBAL_CONSTRAINTS {
 struct LOCAL_CONSTRAINTS {
     LOCAL_CONSTRAINTS();
 
-//    thrust::device_vector<CudaContactPlane> contact_plane;
-//    thrust::device_vector<CudaConstraintPlane> constraint_plane;
-//    thrust::device_vector<CudaBall> ball;
-//    thrust::device_vector<CudaDirection> direction;
+    thrust::device_vector<CudaContactPlane> contact_plane;
+    thrust::device_vector<CudaConstraintPlane> constraint_plane;
+    thrust::device_vector<CudaBall> ball;
+    thrust::device_vector<CudaDirection> direction;
 
-//    CudaContactPlane * contact_plane_ptr;
-//    CudaConstraintPlane * constraint_plane_ptr;
-//    CudaBall * ball_ptr;
-//    CudaDirection * direction_ptr;
+    CudaContactPlane * contact_plane_ptr;
+    CudaConstraintPlane * constraint_plane_ptr;
+    CudaBall * ball_ptr;
+    CudaDirection * direction_ptr;
 
     int num_contact_planes;
     int num_balls;
@@ -248,26 +189,27 @@ struct LOCAL_CONSTRAINTS {
     bool fixed; // move here from the class itself;
 };
 
-//struct CUDA_LOCAL_CONSTRAINTS {
-//    CUDA_LOCAL_CONSTRAINTS() = default;
-//
-//    CUDA_LOCAL_CONSTRAINTS(LOCAL_CONSTRAINTS & c);
-//
-//    CudaContactPlane * contact_plane;
-//    CudaConstraintPlane * constraint_plane;
-//    CudaBall * ball;
-//    CudaDirection * direction;
-//
-//    int drag_coefficient;
-//    bool fixed; // move here from the class itself;
-//
-//    int num_contact_planes;
-//    int num_balls;
-//    int num_constraint_planes;
-//    int num_directions; // if this is greater than 1, just make it fixed
-//};
+struct CUDA_LOCAL_CONSTRAINTS {
+    CUDA_LOCAL_CONSTRAINTS() = default;
+
+    CUDA_LOCAL_CONSTRAINTS(LOCAL_CONSTRAINTS & c);
+
+    CudaContactPlane * contact_plane;
+    CudaConstraintPlane * constraint_plane;
+    CudaBall * ball;
+    CudaDirection * direction;
+
+    int drag_coefficient;
+    bool fixed; // move here from the class itself;
+
+    int num_contact_planes;
+    int num_balls;
+    int num_constraint_planes;
+    int num_directions; // if this is greater than 1, just make it fixed
+};
 
 #endif
+
 
 
 class Container { // contains and manipulates groups of masses and springs
