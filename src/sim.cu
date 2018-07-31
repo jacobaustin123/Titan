@@ -38,6 +38,7 @@ bool Simulation::RUNNING;
 bool Simulation::STARTED;
 bool Simulation::ENDED;
 bool Simulation::FREED;
+bool Simulation::GPU_DONE;
 
 #ifdef GRAPHICS
 GLFWwindow * Simulation::window;
@@ -170,7 +171,7 @@ void Simulation::freeGPU() {
 #endif
 #endif
 
-    FREED = true;
+    FREED = true; // just to be safe
     ENDED = true; // just to be safe
 
     std::cout << "All memory successfully freed!" << std::endl;
@@ -182,6 +183,10 @@ Simulation::~Simulation() {
     waitForEvent();
 
     ENDED = true; // TODO maybe race condition
+
+    while (!GPU_DONE) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(10)); // wait for the GPU thread to exit.
 
@@ -1427,6 +1432,9 @@ void Simulation::_run() { // repeatedly start next
 #endif
 
     execute();
+
+    std::cout << "EXITING GPU" << std::endl;
+    GPU_DONE = true;
 }
 
 void Simulation::updateCudaParameters() {

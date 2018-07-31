@@ -130,6 +130,7 @@ private:
     static bool STARTED;
     static bool ENDED;
     static bool FREED;
+    static bool GPU_DONE;
 
     std::vector<Constraint *> constraints;
 
