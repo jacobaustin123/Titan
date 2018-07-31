@@ -66,36 +66,13 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=f
     }
 }
 
-//__global__ void freeMasses(CUDA_MASS ** ptr, int size) {
-//    int i = blockDim.x * blockIdx.x + threadIdx.x;
-//
-//    if (i < size) {
-//        free(ptr[i]);
-//    }
-//}
-//
-//__global__ void freeSprings(CUDA_SPRING ** ptr, int size) {
-//    int i = blockDim.x * blockIdx.x + threadIdx.x;
-//
-//    if (i < size) {
-//        if (ptr[i] -> _left && ! (ptr[i] -> _left -> valid)) {
-//                free(ptr[i] -> _left);
-//        }
-//
-//        if (ptr[i] -> _right && ! (ptr[i] -> _right -> valid)) {
-//            free(ptr[i] -> _right);
-//        }
-//
-//        free(ptr[i]);
-//    }
-//}
-
 Simulation::Simulation() {
     dt = 0.0;
     RUNNING = false;
     STARTED = false;
     ENDED = false;
     FREED = false;
+    GPU_DONE = false;
 
     update_constraints = true;
 
@@ -132,20 +109,9 @@ void Simulation::freeGPU() {
         delete s;
     }
 
-    std::cout << "Freeing masses" << std::endl;
-
     for (Mass * m : masses) {
-        if (! m -> valid) {
-            std::cout << "woah this mass is still valid!" << std::endl;
-        }
         delete m;
     }
-
-    std::cout << "Freeing constraints" << std::endl;
-
-//    for (Constraint * c : constraints)  {
-//        delete c;
-//    }
 
     std::cout << "Freeing containers" << std::endl;
 
@@ -166,23 +132,6 @@ void Simulation::freeGPU() {
 
     std::cout << "Freeing graphics" << std::endl;
 
-#ifdef GRAPHICS
-//    glDeleteBuffers(1, &vertices);
-//    glDeleteBuffers(1, &colors);
-//    glDeleteBuffers(1, &indices);
-    glDeleteProgram(programID);
-//    glDeleteVertexArrays(1, &VertexArrayID);
-
-//     Close OpenGL window and terminate GLFW
-#ifdef SDL2
-    SDL_GL_DeleteContext(context);
-    SDL_DestroyWindow(window);
-
-    SDL_Quit();
-#else
-    glfwTerminate();
-#endif
-#endif
 
     FREED = true; // just to be safe
     ENDED = true; // just to be safe
@@ -201,7 +150,7 @@ Simulation::~Simulation() {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(10)); // wait for the GPU thread to exit.
+    std::this_thread::sleep_for(std::chrono::milliseconds(10)); // TODO fix race condition
 
     std::cerr << "Joining GPU thread." << std::endl;
 
@@ -1506,6 +1455,29 @@ void Simulation::execute() {
 
                 if (ENDED) {
                     std::cout << "End of program reached. Exiting GPU thread." << std::endl;
+
+                    for (Constraint * c : constraints)  {
+                        delete c;
+                    }
+
+#ifdef GRAPHICS
+                    glDeleteBuffers(1, &vertices);
+                    glDeleteBuffers(1, &colors);
+                    glDeleteBuffers(1, &indices);
+                    glDeleteProgram(programID);
+                    glDeleteVertexArrays(1, &VertexArrayID);
+
+//     Close OpenGL window and terminate GLFW
+#ifdef SDL2
+                    SDL_GL_DeleteContext(context);
+                    SDL_DestroyWindow(window);
+
+                    SDL_Quit();
+#else
+                    glfwTerminate();
+#endif
+#endif
+
                     return;
                 }
             }
