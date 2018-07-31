@@ -143,9 +143,9 @@ void Simulation::freeGPU() {
 
     std::cout << "Freeing constraints" << std::endl;
 
-    for (Constraint * c : constraints)  {
-        delete c;
-    }
+//    for (Constraint * c : constraints)  {
+//        delete c;
+//    }
 
     std::cout << "Freeing containers" << std::endl;
 
@@ -167,11 +167,11 @@ void Simulation::freeGPU() {
     std::cout << "Freeing graphics" << std::endl;
 
 #ifdef GRAPHICS
-    glDeleteBuffers(1, &vertices);
-    glDeleteBuffers(1, &colors);
-    glDeleteBuffers(1, &indices);
+//    glDeleteBuffers(1, &vertices);
+//    glDeleteBuffers(1, &colors);
+//    glDeleteBuffers(1, &indices);
     glDeleteProgram(programID);
-    glDeleteVertexArrays(1, &VertexArrayID);
+//    glDeleteVertexArrays(1, &VertexArrayID);
 
 //     Close OpenGL window and terminate GLFW
 #ifdef SDL2

@@ -42,7 +42,7 @@ class Mass;
 
 class Constraint { // constraint like plane or sphere which applies force to masses
 public:
-    virtual ~Constraint() {};
+    virtual ~Constraint() = default;
 
 #ifdef GRAPHICS
     bool _initialized;
