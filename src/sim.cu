@@ -144,6 +144,7 @@ Simulation::~Simulation() {
 
     FREED = true;
     ENDED = true; // just to be safe
+    std::cerr << "test1" << std::endl;
 
     std::cout << "Simulation destructor done." << std::endl;
 }
@@ -221,7 +222,7 @@ pyMass Simulation::createMass(const Vec & pos) {
     return createMass(m);
 }
 
-Spring * Simulation::createSpring(Spring * s) {
+pySpring Simulation::createSpring(Spring * s) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
         assert(false);
@@ -251,11 +252,12 @@ Spring * Simulation::createSpring(Spring * s) {
 #ifdef GRAPHICS
         resize_buffers = true;
 #endif
-        return s;
+        pySpring ps(s);
+        return ps;
     }
 }
 
-Spring * Simulation::createSpring() {
+pySpring Simulation::createSpring() {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
         assert(false);
@@ -265,13 +267,13 @@ Spring * Simulation::createSpring() {
     return createSpring(s);
 }
 
-Spring * Simulation::createSpring(Mass * m1, Mass * m2) {
+pySpring Simulation::createSpring(pyMass m1, pyMass m2) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
         assert(false);
     }
 
-    Spring * s = new Spring(m1, m2);
+    Spring * s = new Spring(m1.pointer, m2.pointer);
     return createSpring(s);
 }
 
@@ -1244,12 +1246,12 @@ void Simulation::createGLFWWindow() {
 void Simulation::stop() {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
-        assert(false);
+//        assert(false);
     }
 
     if (RUNNING) {
         std::cerr << "simulation is running." << std::endl;
-        assert(false);
+//        assert(false);
     }
 
     ENDED = true;

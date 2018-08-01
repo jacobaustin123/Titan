@@ -63,19 +63,19 @@ public:
     Spring * pointer;
 
     //Properties
-    double _k (){return pointer -> _k;} // spring constant (N/m)
-    double _rest () {return pointer -> _rest;} // spring rest length (meters)
+    double k (){return pointer -> _k;} // spring constant (N/m)
+    double rest () {return pointer -> _rest;} // spring rest length (meters)
 
     //Set
 
-    void pysetK(double k) { pointer -> _k = k; } //sets K
-    void pysetRestLength(double rest_length) {pointer -> _rest = rest_length; } //sets Rest length
-    void pydefaultLength() { pointer -> defaultLength();} //sets Rest Lenght
+    void setK(double k) { pointer -> _k = k; } //sets K
+    void setRestLength(double rest_length) {pointer -> _rest = rest_length; } //sets Rest length
+    void defaultLength() { pointer -> defaultLength();} //sets Rest Lenght
 
-    void pysetLeft(Mass * left) {pointer -> setLeft(left);}; // sets left mass (attaches spring to mass 1)
-    void pysetRight(Mass * right) {pointer -> setRight(right);};
+    void setLeft(pyMass left) {pointer -> setLeft(left.pointer);}; // sets left mass (attaches spring to mass 1)
+    void setRight(pyMass right) {pointer -> setRight(right.pointer);};
 
-    void pysetMasses(Mass * left, Mass * right) { pointer -> setLeft(left); pointer -> setRight(right); } //sets both right and left masses
+    void setMasses(pyMass left, pyMass right) { pointer -> setLeft(left.pointer); pointer -> setRight(right.pointer); } //sets both right and left masses
 };
 struct CUDA_SPRING {
     CUDA_SPRING() {};

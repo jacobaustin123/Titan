@@ -1,6 +1,8 @@
 #include <pybind11/pybind11.h>
+#include <pybind11/numpy.h>
 namespace py = pybind11;
 
+#include "vec.h"
 #include "sim.h"
 
 void bind_sim(py::module &m){
@@ -9,9 +11,16 @@ void bind_sim(py::module &m){
             //Creators/Destructors
             .def("createMass", (pyMass (Simulation::*)()) &Simulation::createMass, py::return_value_policy::reference)
             .def("createMass", (pyMass (Simulation::*)(const Vec & pos)) &Simulation::createMass, py::return_value_policy::reference)
-            .def("createSpring", (Spring * (Simulation::*)()) &Simulation::createSpring)
-            .def("createSpring", (Spring * (Simulation::*)(Mass * m1, Mass * m2)) &Simulation::createSpring)
+            .def("createSpring", (pySpring (Simulation::*)()) &Simulation::createSpring)
+            .def("createSpring", (pySpring (Simulation::*)(pyMass m1, pyMass m2)) &Simulation::createSpring)
             .def("createPlane", &Simulation::createPlane)
+//            .def("createPlane", [](py::array_t<double> array, double d){
+//                Vec array_vec;
+//                std::memcpy(&array_vec[0], array.data(), array.size() *sizeof(double));
+//                createPlane(array_vec, d);
+//
+//            })
+
             .def("createLattice", &Simulation::createLattice)
 
             .def("deleteMass", &Simulation::deleteMass)

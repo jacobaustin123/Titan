@@ -44,8 +44,8 @@ public:
     pyMass createMass();
     pyMass createMass(const Vec & pos);
 
-    Spring * createSpring();
-    Spring * createSpring(Mass * m1, Mass * m2);
+    pySpring createSpring();
+    pySpring createSpring(pyMass m1, pyMass m2);
 
     // Delete
     void deleteMass(Mass * m);
@@ -121,7 +121,7 @@ private:
     void printSprings();
 
     pyMass createMass(Mass * m); // utility
-    Spring * createSpring(Spring * s); // utility
+    pySpring createSpring(Spring * s); // utility
 
     double stop_time;
 

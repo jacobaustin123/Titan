@@ -109,12 +109,11 @@ public:
     void m(int m) {pointer -> m = m;} // set mass
     double dt() { return (pointer -> dt);} // update interval
     double T() { return (pointer -> T);} // local time
-    Vec pos() { return (pointer -> pos);} // position in m
+    double pos() { return (pointer -> pos[2]);} // position in m
     Vec vel() { return (pointer -> vel);} // velocity in m/s
     Vec acc() { return (pointer -> acc);} // acceleration in m/s^2
     Vec force() { return (pointer -> force);} // force in kg m / s^2
 
     void setm(double mass) { pointer -> m = mass;}  // mass in kg
-
 };
 #endif //LOCH_MASS_H

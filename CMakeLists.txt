@@ -15,7 +15,7 @@ set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include") # set SOURCE_DIR to src d
 
 include_directories(include) # include the include directory (can find headers there)
 
-set(LOCH_SOURCE_FILES src/graphics.cpp src/main.cpp src/mass.cu src/object.cu src/sim.cu src/spring.cu src/vec.cu)
+set(LOCH_SOURCE_FILES src/graphics.cpp src/main.cpp src/mass.cu src/object.cu src/sim.cu src/spring.cu src/vec.cu src/common/shader.cpp)
 set(LOCH_HEADER_FILES include/graphics.h include/mass.h include/object.h include/sim.h include/spring.h include/vec.h)
 set(LOCH_BIND_FILES bind/bind.cpp bind/bind_mass.cpp bind/bind_object.cpp  bind/bind_sim.cpp bind/bind_spring.cpp)
 
@@ -81,9 +81,17 @@ set_target_properties(cu_lib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(cu_lib PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 
 target_compile_definitions(cu_lib PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
+target_compile_definitions(cu_lib PRIVATE GRAPHICS) # defines the GRAPHICS preprocessor variable
+
 target_compile_features(cu_lib PUBLIC cxx_std_11)
 target_link_libraries(cu_lib PRIVATE cuda)
 target_link_libraries(cu_lib PRIVATE cudart)
+target_link_libraries(cu_lib PRIVATE glm)
+
+if ( WIN32 ) # use GLFW on Windows
+    target_link_libraries(cu_lib PRIVATE GLEW::GLEW)
+    target_link_libraries(cu_lib PRIVATE glfw)
+endif()
 
 #Create binding
 pybind11_add_module(bindloch ${LOCH_BIND_FILES} ${LOCH_HEADER_FILES})

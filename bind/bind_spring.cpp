@@ -4,14 +4,14 @@ namespace py = pybind11;
 #include "spring.h"
 
 void bind_spring(py::module &m){
-    py::class_<Spring>(m, "Spring")
+    py::class_<pySpring>(m, "Spring")
             .def(py::init<>())
-            .def("setK", &Spring::setK)
-            .def("setRestLength", &Spring::setRestLength)
-            .def("defaultLength", &Spring::defaultLength)
-            .def("setLeft", &Spring::setLeft)
-            .def("setRight", &Spring::setRight)
-            .def("setMasses", &Spring::setMasses);
+            .def("setK", &pySpring::setK)
+            .def("setRestLength", &pySpring::setRestLength)
+            .def("defaultLength", &pySpring::defaultLength)
+            .def("setLeft", &pySpring::setLeft)
+            .def("setRight", &pySpring::setRight)
+            .def("setMasses", &pySpring::setMasses);
 
 //            .def_readwrite("pointer", &pySpring::pointer)
 //            .def("setK", &pySpring::pysetK)
