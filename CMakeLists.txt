@@ -30,15 +30,6 @@ else()
     message(STATUS "CUDA NOT FOUND")
 endif()
 
-message(STATUS ${CUDA_LIBRARIES})
-
-find_package(assimp REQUIRED) # find and include OpenGL
-if (assimp_FOUND)
-    message(STATUS "ASSIMP FOUND")
-    target_include_directories(Loch PRIVATE ${assimp_INCLUDE_DIRS})
-    target_link_libraries(Loch PRIVATE ${assimp_LIBRARIES})
-endif()
-
 find_package(OPENGL REQUIRED) # find and include OpenGL
 if (OPENGL_FOUND)
     message(STATUS "OPENGL FOUND")
