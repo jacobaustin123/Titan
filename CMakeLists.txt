@@ -18,16 +18,10 @@ set(LOCH_SOURCE_FILES ${LOCH_SOURCE_DIR}/vec.cu ${LOCH_SOURCE_DIR}/sim.cu ${LOCH
 set(LOCH_HEADER_FILES ${LOCH_INCLUDE_DIR}/sim.h ${LOCH_INCLUDE_DIR}/mass.h ${LOCH_INCLUDE_DIR}/object.h
         ${LOCH_INCLUDE_DIR}/spring.h ${LOCH_INCLUDE_DIR}/vec.h ${LOCH_INCLUDE_DIR}/graphics.h ${LOCH_INCLUDE_DIR}/shader.h)
 
-if (LOCH_SHARED_BUILD)
-    set(BUILD_SHARED_LIBS ON)
-    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-    set(POSITION_INDEPENDENT_CODE ON)
-endif()
-
-add_library(Loch ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
+add_executable(Loch main.cpp ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
 
 set_target_properties(Loch PROPERTIES CUDA_SEPARABLE_COMPILATION ON) # needed for library compilation
-set_target_properties(Loch PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
+target_include_directories(Loch PRIVATE include/Loch)
 
 target_compile_definitions(Loch PUBLIC GRAPHICS)
 target_compile_definitions(Loch PUBLIC CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
@@ -70,42 +64,3 @@ if (glm_FOUND)
     target_include_directories(Loch PRIVATE ${glm_INCLUDE_DIRS})
     target_link_libraries(Loch PRIVATE ${glm_LIBRARIES} glm)
 endif()
-
-target_include_directories(Loch PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Loch>
-        $<INSTALL_INTERFACE:include>)
-
-set_target_properties(Loch PROPERTIES PUBLIC_HEADER "${LOCH_HEADER_FILES}")
-
-install(TARGETS Loch
-        EXPORT LochTargets
-        PUBLIC_HEADER DESTINATION include/Loch
-        LIBRARY DESTINATION bin
-        ARCHIVE DESTINATION lib
-        RUNTIME DESTINATION bin
-        )
-
-if (LOCH_SHARED_BUILD)
-    install(EXPORT LochTargets
-            FILE LochConfig.cmake
-            DESTINATION share/loch)
-else()
-    install(EXPORT LochTargets
-            FILE LochTargets.cmake
-            DESTINATION share/loch)
-
-    configure_file(cmake/LochConfig.cmake.in2
-            ${CMAKE_INSTALL_PREFIX}/share/loch/LochConfig.cmake @ONLY)
-endif()
-
-#install(DIRECTORY ${LOCH_INCLUDE_DIR} DESTINATION include/Loch)
-#install(TARGETS Loch DESTINATION lib)
-#
-#set(Loch_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/include/Loch)
-#set(Loch_LIBRARIES ${CMAKE_INSTALL_PREFIX}/lib/Loch)
-
-#configure_file(cmake/LochConfig.cmake.in2
-#        ${CMAKE_INSTALL_PREFIX}/share/Loch/LochConfig.cmake @ONLY)
-
-#add_subdirectory(tests/test1)
-#add_subdirectory(tests/test2)
