@@ -11,7 +11,7 @@ int main() {
 
     while (sim.time() < runtime) {
         sim.pause(sim.time() + 1.0);
-        sim.createCube(Vec(0, 0, 10), 3);
+        sim.createCube(Vec(0, 0, 10), 1);
         sim.resume();
     }
 

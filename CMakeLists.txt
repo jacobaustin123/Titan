@@ -1,12 +1,7 @@
 cmake_minimum_required(VERSION 3.11)
 project(Loch LANGUAGES CXX CUDA) # use CXX, CUDA by default (since CUDA is a language, don't need cuda_add_executable)
 
-#set(CMAKE_GENERATOR_TOOLSET version=14.13)
-
 set(CMAKE_CXX_STANDARD 14) # set C++ standard to C++11
-set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++14") # same thing, may be unnecessary
-set(CUDA_SEPARABLE_COMPILATION ON)
-set_property(GLOBAL PROPERTY CUDA_SEPARABLE_COMPILATION ON)
 
 set(LOCH_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
 set(LOCH_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include/Loch)
@@ -26,15 +21,22 @@ target_include_directories(Loch PRIVATE include/Loch)
 target_compile_definitions(Loch PUBLIC GRAPHICS)
 target_compile_definitions(Loch PUBLIC CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
 
-target_compile_features(Loch PUBLIC cxx_std_11) # same as above, may be unnecessary
-
 find_package(CUDA REQUIRED) # find and include CUDA
 if (CUDA_FOUND)
     message(STATUS "CUDA FOUND")
     target_include_directories(Loch PUBLIC ${CUDA_INCLUDE_DIRS})
-    target_link_libraries(Loch PRIVATE ${CUDA_LIBRARIES} cuda cudart)
+    target_link_libraries(Loch PRIVATE cuda) # cudart
 else()
     message(STATUS "CUDA NOT FOUND")
+endif()
+
+message(STATUS ${CUDA_LIBRARIES})
+
+find_package(assimp REQUIRED) # find and include OpenGL
+if (assimp_FOUND)
+    message(STATUS "ASSIMP FOUND")
+    target_include_directories(Loch PRIVATE ${assimp_INCLUDE_DIRS})
+    target_link_libraries(Loch PRIVATE ${assimp_LIBRARIES})
 endif()
 
 find_package(OPENGL REQUIRED) # find and include OpenGL
