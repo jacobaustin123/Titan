@@ -131,26 +131,40 @@ void Simulation::freeGPU() {
 Simulation::~Simulation() {
     std::cerr << "Simulation destructor called." << std::endl;
 
-    waitForEvent();
+    if (STARTED) {
+        waitForEvent();
 
-    ENDED = true; // TODO maybe race condition
+        ENDED = true; // TODO maybe race condition
 
-    while (!GPU_DONE) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    }
+        while (!GPU_DONE) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(10)); // TODO fix race condition
+        std::this_thread::sleep_for(std::chrono::milliseconds(10)); // TODO fix race condition
 
-    if (gpu_thread.joinable()) {
-        gpu_thread.join();
+        if (gpu_thread.joinable()) {
+            gpu_thread.join();
+        } else {
+            std::cout << "could not join GPU thread." << std::endl;
+            exit(1);
+        }
+
+        if (!FREED) {
+            freeGPU();
+            FREED = true;
+        }
     } else {
-        std::cout << "could not join GPU thread." << std::endl;
-        exit(1);
-    }
+        for (Mass * m : masses) {
+            delete m;
+        }
 
-    if (!FREED) {
-        freeGPU();
-        FREED = true;
+        for (Spring * s : springs) {
+            delete s;
+        }
+
+        for (Container * c : containers) {
+            delete c;
+        }
     }
 }
 
