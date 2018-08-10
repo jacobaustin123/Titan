@@ -10,7 +10,6 @@
 #include "object.h"
 #include "vec.h"
 
-
 #define MAX_BLOCKS 65535 // max number of CUDA blocks
 #define THREADS_PER_BLOCK 1024
 
@@ -71,6 +70,7 @@ public:
     Cube * createCube(const Vec & center, double side_length); // creates cube
     Lattice * createLattice(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
     Beam * createBeam(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
+    Container * importFromSTL(const std::string & path, double density = 10.0, int num_rays = 5); // density is vertices / volume
 
     // Bulk modifications, only update CPU
     void setSpringConstant(double k);

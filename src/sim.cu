@@ -3,6 +3,7 @@
 //
 
 #include "sim.h"
+#include "stlparser.h"
 
 #include <thrust/remove.h>
 #include <thrust/execution_policy.h>
@@ -855,15 +856,15 @@ CUDA_SPRING ** Simulation::springToArray() {
     }
 
     CUDA_SPRING ** d_ptrs = new CUDA_SPRING * [springs.size()]; // array of pointers
-    for (int i = 0; i < springs.size(); i++) { // potentially slow
+
+    for (int i = 0; i < springs.size(); i++) { // potentially slow, allocate memory for every spring
         gpuErrchk(cudaMalloc((void **) d_ptrs + i, sizeof(CUDA_SPRING *)));
     }
 
-    d_springs = thrust::device_vector<CUDA_SPRING *>(d_ptrs, d_ptrs + springs.size());
+    d_springs = thrust::device_vector<CUDA_SPRING *>(d_ptrs, d_ptrs + springs.size()); // copy those pointers to the GPU using thrust
 
 
-
-    CUDA_SPRING * h_spring = new CUDA_SPRING[springs.size()];
+    CUDA_SPRING * h_spring = new CUDA_SPRING[springs.size()]; // array for the springs themselves
 
     int count = 0;
     for (Spring * s : springs) {
@@ -1050,6 +1051,8 @@ __global__ void computeSpringForces(CUDA_SPRING ** d_spring, int num_springs) {
 
         Vec temp = (spring._right -> pos) - (spring._left -> pos);
         Vec force = spring._k * (spring._rest - temp.norm()) * (temp / temp.norm());
+
+//        force.print();
 
 #ifdef CONSTRAINTS
         if (spring._right -> constraints.fixed == false) {
@@ -1786,6 +1789,75 @@ Cube * Simulation::createCube(const Vec & center, double side_length) { // creat
     containers.push_back(cube);
 
     return cube;
+}
+
+Container * Simulation::importFromSTL(const std::string & path, double density, int num_rays) {
+    if (ENDED) {
+        std::cerr << "simulation has ended." << std::endl;
+        exit(1);
+    }
+
+    stl::stlFile file = stl::parseSTL(path);
+    stl::BBox b = file.getBoundingBox();
+
+    double dimmax = max(max(b.xdim, b.ydim), b.zdim);
+
+    double dimx, dimy, dimz;
+
+    dimx = 10 * b.xdim / dimmax;
+    dimy = 10 * b.ydim / dimmax;
+    dimz = 10 * b.zdim / dimmax;
+
+    std::cout << b.xdim << " " << b.ydim << " " << b.zdim << " " << dimmax << " " << pow(10 / dimmax, 3) << " " << density * pow(10 / dimmax, 3) * b.xdim * b.ydim * b.zdim << " " << (int) cbrt(density * pow(10 / dimmax, 3) * b.xdim * b.ydim * b.zdim) << std::endl;
+
+    int num_pts = (int) cbrt(density * pow(10 / dimmax, 3) * b.xdim * b.ydim * b.zdim);
+
+    std::cout << "density is: " << density << " and num_pts is " << num_pts << std::endl;
+
+    Lattice * l1 = new Lattice(Vec(0, 0, dimz), Vec(dimx - 0.001, dimy - 0.001, dimz - 0.001), num_pts, num_pts, num_pts);
+
+    for (Mass * m : l1 -> masses) {
+        if (!file.inside(stl::Vec3D(b.center[0] + (b.xdim / dimx) * m -> pos[0], b.center[1] + (b.ydim / dimy) * m -> pos[1], (b.zdim / dimz) * (m -> pos[2] - dimz) + b.center[2]), num_rays)) {
+            m -> valid = false;
+        }
+    }
+
+    for (auto i = l1 -> springs.begin(); i != l1 -> springs.end();) {
+        Spring * s = *i;
+
+        if (!s ->_left -> valid || ! s -> _right -> valid) {
+            delete s;
+            i = l1 -> springs.erase(i);
+        } else {
+            ++i;
+        }
+    }
+
+    for (auto i = l1 -> masses.begin(); i != l1 -> masses.end();) {
+        Mass * m = *i;
+
+        if (!m -> valid) {
+            delete m;
+            i = l1 -> masses.erase(i);
+        } else {
+            ++i;
+        }
+    }
+
+    d_masses.reserve(masses.size() + l1 -> masses.size());
+    d_springs.reserve(springs.size() + l1 -> springs.size());
+
+    for (Mass * m : l1 -> masses) {
+        createMass(m);
+    }
+
+    for (Spring * s : l1 -> springs) {
+        createSpring(s);
+    }
+
+    containers.push_back(l1);
+
+    return l1;
 }
 
 Lattice * Simulation::createLattice(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
