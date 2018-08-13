@@ -73,9 +73,9 @@ public:
     Container * importFromSTL(const std::string & path, double density = 10.0, int num_rays = 5); // density is vertices / volume
 
     // Bulk modifications, only update CPU
-    void setSpringConstant(double k);
-    void setMassValues(double m);
-    void setDeltaT(double dt);
+    void setAllSpringConstantValues(double k);
+    void setAllMassValues(double m);
+    void setAllDeltaTValues(double dt);
 
     void defaultRestLength();
 
@@ -110,6 +110,12 @@ public:
     std::vector<Mass *> masses;
     std::vector<Spring *> springs;
     std::vector<Container *> containers;
+
+    void setGlobalForce(const Vec & global);
+
+#ifdef GRAPHICS
+    void setViewport(Vec camera_position, Vec target_location, Vec up_vector);
+#endif
 
 private:
     void freeGPU();
@@ -164,6 +170,7 @@ private:
     void fromArray();
 
     std::thread gpu_thread;
+    Vec global; // global force
 
 #ifdef GRAPHICS
 
@@ -198,6 +205,10 @@ private:
 
     static int lineWidth;
     static int pointSize;
+
+    static Vec camera;
+    static Vec looks_at;
+    static Vec up;
 #endif
 };
 

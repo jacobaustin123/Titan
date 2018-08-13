@@ -216,11 +216,11 @@ enum CONSTRAINT_TYPE {
 };
 #endif
 
-
 class Container { // contains and manipulates groups of masses and springs
 public:
     virtual ~Container() {};
     void translate(const Vec & displ); // translate all masses by fixed amount
+    void rotate(const Vec & axis, double angle); // rotate all masses around a fixed axis by a specified angle with respect to the center of mass.
 
     void setMassValues(double m); // set masses for all Mass objects
     void setSpringConstants(double k); // set k for all Spring objects

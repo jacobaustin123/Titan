@@ -66,6 +66,13 @@ public:
         return *this;
     }
 
+    CUDA_CALLABLE_MEMBER Vec & operator-=(const Vec & v) {
+        data[0] -= v.data[0];
+        data[1] -= v.data[1];
+        data[2] -= v.data[2];
+        return *this;
+    }
+
     CUDA_DEVICE void atomicVecAdd(const Vec & v);
 
     CUDA_CALLABLE_MEMBER Vec operator-() const{
