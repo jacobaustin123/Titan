@@ -1346,7 +1346,7 @@ void Simulation::_run() { // repeatedly start next
     GPU_DONE = true;
 }
 
-void Simulation::setViewport(Vec camera_position, Vec target_location, Vec up_vector) {
+void Simulation::setViewport(const Vec & camera_position, const Vec & target_location, const Vec & up_vector) {
     if (RUNNING) {
         throw std::runtime_error("The simulation is running. Cannot modify viewport during simulation run.");
     }
@@ -1354,6 +1354,18 @@ void Simulation::setViewport(Vec camera_position, Vec target_location, Vec up_ve
     this -> camera = camera_position;
     this -> looks_at = target_location;
     this -> up = up_vector;
+
+    if (STARTED) {
+        this -> MVP = getProjection(camera, looks_at, up); // compute perspective projection matrix
+    }
+}
+
+void Simulation::moveViewport(const Vec & displacement) {
+    if (RUNNING) {
+        throw std::runtime_error("The simulation is running. Cannot modify viewport during simulation run.");
+    }
+
+    this -> camera += displacement;
 
     if (STARTED) {
         this -> MVP = getProjection(camera, looks_at, up); // compute perspective projection matrix

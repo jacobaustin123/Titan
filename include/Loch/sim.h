@@ -114,7 +114,8 @@ public:
     void setGlobalForce(const Vec & global);
 
 #ifdef GRAPHICS
-    void setViewport(Vec camera_position, Vec target_location, Vec up_vector);
+    void setViewport(const Vec & camera_position, const Vec & target_location, const Vec & up_vector);
+    void moveViewport(const Vec & displacement);
 #endif
 
 private:
