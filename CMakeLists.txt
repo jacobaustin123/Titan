@@ -16,10 +16,18 @@ set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include") # set SOURCE_DIR to src d
 
 include_directories(include) # include the include directory (can find headers there)
 
+#SET CPP PLOCH PROJECT
 set(LOCH_SOURCE_FILES src/graphics.cpp src/main.cpp src/mass.cu src/object.cu src/sim.cu src/spring.cu src/vec.cu src/common/shader.cpp)
-set(LOCH_HEADER_FILES bind/pymass.h bind/pyspring.h include/graphics.h include/mass.h include/object.h include/sim.h include/spring.h include/vec.h)
-set(LOCH_BIND_FILES bind/bind.cpp bind/bind_mass.cpp bind/bind_object.cpp  bind/bind_sim.cpp bind/bind_spring.cpp)
-
+set(LOCH_HEADER_FILES include/graphics.h include/mass.h include/object.h include/sim.h include/spring.h include/vec.h)
+set(LOCH_FILES ${LOCH_HEADER_FILES} ${LOCH_SOURCE_FILES})
+set(LOCH_INCLUDE_DIR include)
+#SET PYTHON BINDING DIRECTORIES
+set(LOCH_BIND_SOURCE_FILES bind/src/bind.cpp bind/src/bind_mass.cpp bind/src/bind_object.cpp bind/src/bind_sim.cpp
+        bind/src/bind_spring.cpp bind/src/pyspring.cpp bind/src/pymass.cpp)
+set(LOCH_BIND_HEADER_FILES bind/include/pyspring.h bind/include/pymass.h)
+set(LOCH_BIND_FILES ${LOCH_BIND_HEADER_FILES} ${LOCH_BIND_SOURCE_FILES})
+set(LOCH_BIND_INCLUDE_DIR bind/include)
+#IMPORT PACKAGES
 find_package(CUDA REQUIRED) # find and include CUDA
 if (CUDA_FOUND)
     message(STATUS "CUDA FOUND")
@@ -75,9 +83,8 @@ else()
 endif()
 
 #Create Library with .cu files
-add_library(cu_lib ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
-
-target_include_directories(cu_lib PRIVATE ${INCLUDE_DIR} ${CUDA_INCLUDE_DIRS})
+add_library(cu_lib ${LOCH_FILES} )
+target_include_directories(cu_lib PRIVATE ${LOCH_INCLUDE_DIR} ${CUDA_INCLUDE_DIRS})
 set_target_properties(cu_lib PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 set_target_properties(cu_lib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(cu_lib PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
@@ -95,36 +102,15 @@ if ( WIN32 ) # use GLFW on Windows
     target_link_libraries(cu_lib PRIVATE glfw)
 endif()
 
-#Create binding
-pybind11_add_module(bindloch ${LOCH_BIND_FILES} ${LOCH_HEADER_FILES})
 
-#Add linking dependedncies to the binding library
-target_include_directories(bindloch PRIVATE include)
+#PYBIND11
+#CREATE PYTHON BINDINGS
+pybind11_add_module(bindloch ${LOCH_BIND_SOURCE_FILES} ${LOCH_HEADER_FILES})
+
+#Add linking dependencies to the binding library
+target_include_directories(bindloch PRIVATE ${LOCH_BIND_INCLUDE_DIR}
+        ${LOCH_INCLUDE_DIR})
 add_dependencies(bindloch cu_lib)
 target_link_libraries(bindloch PRIVATE cu_lib)
 
 
-
-#add_executable(nographics src/main.cpp ${SOURCE_FILES} ${HEADERS}) # create nographics target
-#target_compile_features(nographics PUBLIC cxx_std_11)
-#set_target_properties(nographics PROPERTIES CUDA_SEPARABLE_COMPILATION ON) # allows declarations and implementations to be separated
-#target_link_libraries(nographics PRIVATE cuda)
-#
-#add_executable(graphics src/main.cpp ${SOURCE_FILES} ${HEADERS}) # create graphics target
-#target_compile_definitions(graphics PRIVATE GRAPHICS) # defines the GRAPHICS preprocessor variable
-#
-#target_compile_features(graphics PUBLIC cxx_std_11) # same as above
-#set_target_properties(graphics PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
-#target_link_libraries(graphics PRIVATE cuda)
-#
-#target_link_libraries(graphics PRIVATE glm)
-#
-#if ( WIN32 ) # use GLFW on Windows
-#    target_link_libraries(graphics PRIVATE GLEW::GLEW)
-#    target_link_libraries(graphics PRIVATE glfw)
-#else() # use SDL2 on Mac
-#    target_link_libraries(graphics PRIVATE GLEW)
-#    target_link_libraries(graphics PRIVATE gl)
-#    target_link_libraries(graphics PRIVATE sdl2)
-#    target_compile_definitions(graphics PRIVATE SDL2)
-#endif()

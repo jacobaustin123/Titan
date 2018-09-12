@@ -1,7 +1,9 @@
 #include <pybind11/pybind11.h>
+#include <pybind11/iostream.h>
+
 namespace py = pybind11;
 
-#include "spring.h"
+#include "../include/pyspring.h"
 
 void bind_spring(py::module &m){
     py::class_<pySpring>(m, "Spring")

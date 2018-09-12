@@ -6,6 +6,9 @@ namespace py = pybind11;
 
 #include "vec.h"
 #include "sim.h"
+#include "../include/pymass.h"
+#include "../include/pyspring.h"
+
 
 void bind_sim(py::module &m){
     py::class_<Simulation>(m, "Sim")
