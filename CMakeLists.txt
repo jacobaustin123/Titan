@@ -4,6 +4,7 @@ project(Loch LANGUAGES CXX CUDA) # use CXX, CUDA by default (since CUDA is a lan
 
 set(BUILD_SHARED_LIBS OFF)
 set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(CMAKE_CXX_STANDARD 14) # set C++ standard to C++11
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++14") # same thing, may be unnecessary
@@ -16,12 +17,13 @@ set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include") # set SOURCE_DIR to src d
 include_directories(include) # include the include directory (can find headers there)
 
 set(LOCH_SOURCE_FILES src/graphics.cpp src/main.cpp src/mass.cu src/object.cu src/sim.cu src/spring.cu src/vec.cu src/common/shader.cpp)
-set(LOCH_HEADER_FILES include/graphics.h include/mass.h include/object.h include/sim.h include/spring.h include/vec.h)
+set(LOCH_HEADER_FILES bind/pymass.h bind/pyspring.h include/graphics.h include/mass.h include/object.h include/sim.h include/spring.h include/vec.h)
 set(LOCH_BIND_FILES bind/bind.cpp bind/bind_mass.cpp bind/bind_object.cpp  bind/bind_sim.cpp bind/bind_spring.cpp)
 
 find_package(CUDA REQUIRED) # find and include CUDA
 if (CUDA_FOUND)
     message(STATUS "CUDA FOUND")
+    list(APPEND CUDA_NVCC_FLAGS "-DVERBOSE")
     include_directories(${CUDA_INCLUDE_DIRS})
     link_libraries(${CUDA_LIBRARIES})
 else()
@@ -72,16 +74,16 @@ else()
     message(STATUS "pybind11 NOT FOUND")
 endif()
 
-
 #Create Library with .cu files
 add_library(cu_lib ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
+
 target_include_directories(cu_lib PRIVATE ${INCLUDE_DIR} ${CUDA_INCLUDE_DIRS})
 set_target_properties(cu_lib PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 set_target_properties(cu_lib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(cu_lib PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 
 target_compile_definitions(cu_lib PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
-target_compile_definitions(cu_lib PRIVATE GRAPHICS) # defines the GRAPHICS preprocessor variable
+#target_compile_definitions(cu_lib PRIVATE GRAPHICS) # defines the GRAPHICS preprocessor variable
 
 target_compile_features(cu_lib PUBLIC cxx_std_11)
 target_link_libraries(cu_lib PRIVATE cuda)

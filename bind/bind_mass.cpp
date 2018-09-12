@@ -3,7 +3,7 @@
 
 namespace py = pybind11;
 
-#include "mass.h"
+#include "pymass.h"
 
 void bind_mass(py::module &m){
     py::class_<pyMass>(m, "Mass")
@@ -15,9 +15,7 @@ void bind_mass(py::module &m){
 //            .def("m", &pyMass::m)
 
             .def("m", (double (pyMass::*)()) &pyMass::m, py::return_value_policy::reference)
-            .def("m", (void (pyMass::*)(int m)) &pyMass::m, py::return_value_policy::reference)
-
-            .def("setm", &pyMass::setm)
+            .def("m", (void (pyMass::*)(double m)) &pyMass::m, py::return_value_policy::reference)
             .def("pos", &pyMass::pos)
             .def("vel", &pyMass::vel)
             .def("acc", &pyMass::acc)

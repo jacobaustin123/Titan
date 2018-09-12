@@ -7,6 +7,7 @@
 #include <thrust/remove.h>
 #include <thrust/execution_policy.h>
 
+
 __device__ const double G = 9.81;
 
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
@@ -209,8 +210,10 @@ pyMass Simulation::createMass() {
     }
 
     Mass * m = new Mass();
+    std::cout << "Mass created" << std::endl;
     return createMass(m);
 }
+
 
 pyMass Simulation::createMass(const Vec & pos) {
     if (ENDED) {
@@ -1790,6 +1793,23 @@ void Simulation::createPlane(const Vec & abc, double d ) { // creates half-space
 
     update_constraints = true;
 }
+
+//void Simulation::createPlane(py::array_t<double> array, double d) { // creates half-space ax + by + cz < d
+//    if (ENDED) {
+//        std::cerr << "simulation has ended." << std::endl;
+//        assert(false);
+//    }
+//
+//    Vec array_vec;
+//
+//    std::memcpy(& array_vec[0],array.data(),array.size()*sizeof(double));
+//
+//    ContactPlane * new_plane = new ContactPlane(array_vec, d);
+//
+//    constraints.push_back(new_plane);
+//    d_planes.push_back(CudaContactPlane(*new_plane));
+//    update_constraints = true;
+//}
 
 void Simulation::createBall(const Vec & center, double r ) { // creates ball with radius r at position center
     if (ENDED) {
