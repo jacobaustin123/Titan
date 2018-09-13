@@ -17,12 +17,12 @@ set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include") # set SOURCE_DIR to src d
 include_directories(include) # include the include directory (can find headers there)
 
 #SET CPP PLOCH PROJECT
-set(LOCH_SOURCE_FILES src/graphics.cpp src/main.cpp src/mass.cu src/object.cu src/sim.cu src/spring.cu src/vec.cu src/common/shader.cpp)
-set(LOCH_HEADER_FILES include/graphics.h include/mass.h include/object.h include/sim.h include/spring.h include/vec.h)
+set(LOCH_SOURCE_FILES src/object.cu src/graphics.cpp src/mass.cu src/sim.cu src/spring.cu src/vec.cu src/common/shader.cpp)
+set(LOCH_HEADER_FILES include/object.h include/graphics.h include/mass.h include/sim.h include/spring.h include/vec.h)
 set(LOCH_FILES ${LOCH_HEADER_FILES} ${LOCH_SOURCE_FILES})
 set(LOCH_INCLUDE_DIR include)
 #SET PYTHON BINDING DIRECTORIES
-set(LOCH_BIND_SOURCE_FILES bind/src/bind.cpp bind/src/bind_mass.cpp bind/src/bind_object.cpp bind/src/bind_sim.cpp
+set(LOCH_BIND_SOURCE_FILES bind/src/bind.cpp bind/src/bind_mass.cpp  bind/src/bind_sim.cpp
         bind/src/bind_spring.cpp bind/src/pyspring.cpp bind/src/pymass.cpp)
 set(LOCH_BIND_HEADER_FILES bind/include/pyspring.h bind/include/pymass.h)
 set(LOCH_BIND_FILES ${LOCH_BIND_HEADER_FILES} ${LOCH_BIND_SOURCE_FILES})
@@ -82,20 +82,29 @@ else()
     message(STATUS "pybind11 NOT FOUND")
 endif()
 
+#FIND PYTHON: ONLY NEEDED FOR DEPENDENT BINDINGS APPROACH(SRC CPP CODE IS MODIFIED TO OUTPUT PYTHON OBJECTS)
+#DECISION WAS MADE TO MAKE THE CPP MODULE AND PYTHON BINDINGS COMPLETELY INDEPENDENT FROM EACH OTHER
+
+#find_package(PythonLibs REQUIRED)
+#if (PythonLibs_FOUND)
+#    message(STATUS "Python FOUND")
+#else()
+#    message(STATUS "Python NOT FOUND")
+#endif()
+
+
 #Create Library with .cu files
-add_library(cu_lib ${LOCH_FILES} )
-target_include_directories(cu_lib PRIVATE ${LOCH_INCLUDE_DIR} ${CUDA_INCLUDE_DIRS})
+add_library(cu_lib ${LOCH_FILES})
+target_include_directories(cu_lib PRIVATE ${LOCH_INCLUDE_DIR}} ${CUDA_INCLUDE_DIRS} )
 set_target_properties(cu_lib PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 set_target_properties(cu_lib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(cu_lib PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 
-target_compile_definitions(cu_lib PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
+#target_compile_definitions(cu_lib PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
 #target_compile_definitions(cu_lib PRIVATE GRAPHICS) # defines the GRAPHICS preprocessor variable
 
 target_compile_features(cu_lib PUBLIC cxx_std_11)
-target_link_libraries(cu_lib PRIVATE cuda)
-target_link_libraries(cu_lib PRIVATE cudart)
-target_link_libraries(cu_lib PRIVATE glm)
+target_link_libraries(cu_lib PRIVATE cuda cudart glm)
 
 if ( WIN32 ) # use GLFW on Windows
     target_link_libraries(cu_lib PRIVATE GLEW::GLEW)
@@ -105,7 +114,7 @@ endif()
 
 #PYBIND11
 #CREATE PYTHON BINDINGS
-pybind11_add_module(bindloch ${LOCH_BIND_SOURCE_FILES} ${LOCH_HEADER_FILES})
+pybind11_add_module(bindloch ${LOCH_BIND_FILES} ${LOCH_HEADER_FILES})
 
 #Add linking dependencies to the binding library
 target_include_directories(bindloch PRIVATE ${LOCH_BIND_INCLUDE_DIR}

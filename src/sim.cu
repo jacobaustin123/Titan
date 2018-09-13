@@ -150,7 +150,7 @@ Simulation::~Simulation() {
     std::cout << "Simulation destructor done." << std::endl;
 }
 
-pyMass Simulation::createMass(Mass * m) {
+Mass * Simulation::createMass(Mass * m) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
         assert(false);
@@ -179,9 +179,8 @@ pyMass Simulation::createMass(Mass * m) {
 #ifdef GRAPHICS
         resize_buffers = true;
 #endif
-        pyMass mp(m);
 
-        return mp;
+        return m;
     }
 }
 
@@ -203,7 +202,7 @@ Container * Simulation::getContainerByIndex(int i) {
     return objs[i];
 }
 
-pyMass Simulation::createMass() {
+Mass * Simulation::createMass() {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
         assert(false);
@@ -215,7 +214,7 @@ pyMass Simulation::createMass() {
 }
 
 
-pyMass Simulation::createMass(const Vec & pos) {
+Mass * Simulation::createMass(const Vec & pos) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
         assert(false);
@@ -225,7 +224,7 @@ pyMass Simulation::createMass(const Vec & pos) {
     return createMass(m);
 }
 
-pySpring Simulation::createSpring(Spring * s) {
+Spring * Simulation::createSpring(Spring * s) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
         assert(false);
@@ -255,12 +254,11 @@ pySpring Simulation::createSpring(Spring * s) {
 #ifdef GRAPHICS
         resize_buffers = true;
 #endif
-        pySpring ps(s);
-        return ps;
+        return s;
     }
 }
 
-pySpring Simulation::createSpring() {
+Spring * Simulation::createSpring() {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
         assert(false);
@@ -270,13 +268,13 @@ pySpring Simulation::createSpring() {
     return createSpring(s);
 }
 
-pySpring Simulation::createSpring(pyMass m1, pyMass m2) {
+Spring * Simulation::createSpring(Mass * m1, Mass * m2) {
     if (ENDED) {
         std::cerr << "simulation has ended." << std::endl;
         assert(false);
     }
 
-    Spring * s = new Spring(m1.pointer, m2.pointer);
+    Spring * s = new Spring(m1, m2);
     return createSpring(s);
 }
 

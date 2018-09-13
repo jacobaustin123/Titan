@@ -13,7 +13,6 @@
 
 namespace py = pybind11;
 
-
 class pyMass { // user mass class used to store real mass class properties in python and avoid ownership issues
 public:
     //constructor
@@ -22,11 +21,9 @@ public:
 
     //Pointer to real C++ mass object
     Mass * pointer;
-
     //Properties
     double m() { return (pointer -> m);}  // mass in kg
-    void m(double m); // set mass
-    //    void m(double m) {pointer -> m = m;} // set mass
+    void m(double m) {pointer -> m = m;} // set mass
     double dt() { return (pointer -> dt);} // update interval
     double T() { return (pointer -> T);} // local time
     py::array_t<double> pos(); // position in m

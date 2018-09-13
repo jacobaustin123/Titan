@@ -138,7 +138,6 @@ public:
         return data[0] + data[1] + data[2];
     } // sums all components of the vector
 
-private:
     double data[3] = { 0 }; // initialize data to 0
 };
 

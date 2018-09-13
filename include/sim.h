@@ -36,16 +36,15 @@
 #include <cuda.h>
 #include <cuda_device_runtime_api.h>
 #include <thread>
-#include "pymass.h"
 
 class Simulation {
 public:
     // Create
-    pyMass createMass();
-    pyMass createMass(const Vec & pos);
+    Mass * createMass();
+    Mass * createMass(const Vec & pos);
 
-    pySpring createSpring();
-    pySpring createSpring(pyMass m1, pyMass m2);
+    Spring * createSpring();
+    Spring * createSpring(Mass * m1, Mass * m2);
 
     // Delete
     void deleteMass(Mass * m);
@@ -120,8 +119,8 @@ private:
     //Prints
     void printSprings();
 
-    pyMass createMass(Mass * m); // utility
-    pySpring createSpring(Spring * s); // utility
+    Mass * createMass(Mass * m); // utility
+    Spring * createSpring(Spring * s); // utility
 
     double stop_time;
 
