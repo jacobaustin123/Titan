@@ -22,9 +22,9 @@ set(LOCH_HEADER_FILES include/object.h include/graphics.h include/mass.h include
 set(LOCH_FILES ${LOCH_HEADER_FILES} ${LOCH_SOURCE_FILES})
 set(LOCH_INCLUDE_DIR include)
 #SET PYTHON BINDING DIRECTORIES
-set(LOCH_BIND_SOURCE_FILES bind/src/bind.cpp bind/src/bind_mass.cpp  bind/src/bind_sim.cpp
+set(LOCH_BIND_SOURCE_FILES bind/src/pysimulation.cpp bind/src/bind.cpp bind/src/bind_mass.cpp  bind/src/bind_sim.cpp
         bind/src/bind_spring.cpp bind/src/pyspring.cpp bind/src/pymass.cpp)
-set(LOCH_BIND_HEADER_FILES bind/include/pyspring.h bind/include/pymass.h)
+set(LOCH_BIND_HEADER_FILES bind/include/pysimulation.h bind/include/pyspring.h bind/include/pymass.h)
 set(LOCH_BIND_FILES ${LOCH_BIND_HEADER_FILES} ${LOCH_BIND_SOURCE_FILES})
 set(LOCH_BIND_INCLUDE_DIR bind/include)
 #IMPORT PACKAGES

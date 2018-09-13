@@ -16,26 +16,22 @@ void bind_sim(py::module &m){
     py::class_<Simulation>(m, "Sim")
             .def(py::init<>())
             //Creators/Destructors
-//            .def("createMass", (pyMass (Simulation::*)()) &Simulation::createMass,
-//                 py::call_guard<py::scoped_ostream_redirect,
-//                         py::scoped_estream_redirect>(), py::return_value_policy::reference)
-        .def("createMass", [](Func&& f = (Mass * (Simulation::*)()) &Simulation::createMass){
-                pyMass pm(f);
-                return pm;
-            })
+            .def("createMass", (pyMass (Simulation::*)()) &Simulation::createMass,
+                 py::call_guard<py::scoped_ostream_redirect,
+                         py::scoped_estream_redirect>(), py::return_value_policy::reference)
 
-//
-//            .def("createMass", (pyMass (Simulation::*)(const Vec & pos)) &Simulation::createMass,
-//                 py::call_guard<py::scoped_ostream_redirect,
-//                         py::scoped_estream_redirect>(), py::return_value_policy::reference)
-//            .def("createSpring", (pySpring (Simulation::*)()) &Simulation::createSpring)
-//            .def("createSpring", (pySpring (Simulation::*)(pyMass m1, pyMass m2)) &Simulation::createSpring)
-//            .def("createPlane", &Simulation::createPlane)
-//            .def("createPlane", [](py::array_t<double> array, double d, void (Simulation::* createPlaneFunc) (const Vec &, double) = &Simulation::createPlane){
-//                Vec array_vec;
-//                std::memcpy(&array_vec[0], array.data(), array.size() *sizeof(double));
-//                createPlaneFunc(array_vec, d);
-//
+
+            .def("createMass", (pyMass (Simulation::*)(const Vec & pos)) &Simulation::createMass,
+                 py::call_guard<py::scoped_ostream_redirect,
+                         py::scoped_estream_redirect>(), py::return_value_policy::reference)
+            .def("createSpring", (pySpring (Simulation::*)()) &Simulation::createSpring)
+            .def("createSpring", (pySpring (Simulation::*)(pyMass m1, pyMass m2)) &Simulation::createSpring)
+            .def("createPlane", &Simulation::createPlane)
+            .def("createPlane", [](py::array_t<double> array, double d, void (Simulation::* createPlaneFunc) (const Vec &, double) = &Simulation::createPlane){
+                Vec array_vec;
+                std::memcpy(&array_vec[0], array.data(), array.size() *sizeof(double));
+                createPlaneFunc(array_vec, d);
+
 //            }) NOT WORKING BECAUSE IT IS NOT POSSIBLE TO CALL A FUNCTION POINTER TO A METHOD WOTHOUR KNOWING THE
 //            OBJECT IT IS APPLIED TO IMPLICITLY
 
