@@ -9,65 +9,67 @@ namespace py = pybind11;
 #include "mass.h"
 #include "spring.h"
 #include "pymass.h"
+#include "pysimulation.h"
 
 
 void bind_sim(py::module &m){
 
-    py::class_<Simulation>(m, "Sim")
-            .def(py::init<>())
+    py::class_<pySimulation>(m, "Sim")
+            .def(py::init<>(),py::return_value_policy::reference)
             //Creators/Destructors
-            .def("createMass", (pyMass (Simulation::*)()) &Simulation::createMass,
+            .def("createMass", (pyMass (pySimulation::*)()) &pySimulation::createMass,
                  py::call_guard<py::scoped_ostream_redirect,
                          py::scoped_estream_redirect>(), py::return_value_policy::reference)
 
 
-            .def("createMass", (pyMass (Simulation::*)(const Vec & pos)) &Simulation::createMass,
-                 py::call_guard<py::scoped_ostream_redirect,
-                         py::scoped_estream_redirect>(), py::return_value_policy::reference)
-            .def("createSpring", (pySpring (Simulation::*)()) &Simulation::createSpring)
-            .def("createSpring", (pySpring (Simulation::*)(pyMass m1, pyMass m2)) &Simulation::createSpring)
-            .def("createPlane", &Simulation::createPlane)
-            .def("createPlane", [](py::array_t<double> array, double d, void (Simulation::* createPlaneFunc) (const Vec &, double) = &Simulation::createPlane){
-                Vec array_vec;
-                std::memcpy(&array_vec[0], array.data(), array.size() *sizeof(double));
-                createPlaneFunc(array_vec, d);
-
-//            }) NOT WORKING BECAUSE IT IS NOT POSSIBLE TO CALL A FUNCTION POINTER TO A METHOD WOTHOUR KNOWING THE
+//            .def("createMass", (pyMass (pySimulation::*)(const Vec & pos)) &pySimulation::createMass,
+//                 py::call_guard<py::scoped_ostream_redirect,
+//                         py::scoped_estream_redirect>(), py::return_value_policy::reference)
+            .def("createSpring", (pySpring (pySimulation::*)()) &pySimulation::createSpring)
+            .def("createSpring", (pySpring (pySimulation::*)(pyMass m1, pyMass m2)) &pySimulation::createSpring)
+//            .def("createPlane", &pySimulation::createPlane)
+//            .def("createPlane", [](py::array_t<double> array, double d, void (Simulation::* createPlaneFunc) (const Vec &, double) = &Simulation::createPlane){
+//                Vec array_vec;
+//                std::memcpy(&array_vec[0], array.data(), array.size() *sizeof(double));
+//                createPlaneFunc(array_vec, d);
+//
+//            })
+// NOT WORKING BECAUSE IT IS NOT POSSIBLE TO CALL A FUNCTION POINTER TO A METHOD WOTHOUR KNOWING THE
 //            OBJECT IT IS APPLIED TO IMPLICITLY
 
-//            .def("createLattice", &Simulation::createLattice)
+//            .def("createLattice", &pySimulation::createLattice)
 
-            .def("deleteMass", &Simulation::deleteMass)
-            .def("deleteSpring", &Simulation::deleteSpring)
-//            .def("deleteContainer", &Simulation::deleteContainer)
-//            .def("clearConstraints", &Simulation::clearConstraints)
+//            .def("deleteMass", &pySimulation::deleteMass)
+//            .def("deleteSpring", &pySimulation::deleteSpring)
+//            .def("deleteContainer", &pySimulation::deleteContainer)
+//            .def("clearConstraints", &pySimulation::clearConstraints)
 //                    //Setters
-            .def("set", (void (Simulation::*)(Mass *m)) &Simulation::set)
-            .def("set", (void (Simulation::*)(Spring *s)) &Simulation::set)
-//            .def("set", (void (Simulation::*)(Container *c)) &Simulation::set)
-            .def("setAll", &Simulation::setAll)
+//            .def("set", (void (pySimulation::*)(Mass *m)) &pySimulation::set)
+//            .def("set", (void (pySimulation::*)(Spring *s)) &pySimulation::set)
+//            .def("set", (void (pySimulation::*)(Container *c)) &pySimulation::set)
+            .def("setAll", &pySimulation::setAll)
 //
 //            //Getters
-            .def("get", (void (Simulation::*)(Mass *m)) &Simulation::get)
-            .def("get", (void (Simulation::*)(Spring *s)) &Simulation::get)
-            .def("get", (void (Simulation::*)(Container *c)) &Simulation::get)
+//            .def("get", (void (pySimulation::*)(Mass *m)) &pySimulation::get)
+//            .def("get", (void (pySimulation::*)(Spring *s)) &pySimulation::get)
+//            .def("get", (void (pySimulation::*)(Container *c)) &pySimulation::get)
 
                     //Bulk
-            .def("setSpringConstant", &Simulation::setSpringConstant)
-            .def("setMass", &Simulation::setMassValues)
-            .def("setMassDeltaT", &Simulation::setDeltaT)
-            .def("setAll", &Simulation::setAll)
-            .def("getAll", &Simulation::getAll)
-            .def("defaultRestLength", &Simulation::defaultRestLength)
+            .def("setSpringConstant", &pySimulation::setSpringConstant)
+            .def("setMass", &pySimulation::setMassValues)
+            .def("setMassDeltaT", &pySimulation::setDeltaT)
+            .def("setAll", &pySimulation::setAll)
+            .def("getAll", &pySimulation::getAll)
+            .def("defaultRestLength", &pySimulation::defaultRestLength)
 
                     //Control
 
-            .def("start", &Simulation::start)
-            .def("stop", (void (Simulation::*)()) &Simulation::stop)
-            .def("stop", (void (Simulation::*)(double time)) &Simulation::stop)
-            .def("pause", &Simulation::pause)
-            .def("resume", &Simulation::resume)
-            .def("wait", &Simulation::wait)
-            .def("time", &Simulation::time)
-            .def("running", &Simulation::running);
+            .def("start", &pySimulation::start)
+            .def("stop", (void (pySimulation::*)()) &pySimulation::stop)
+            .def("stop", (void (pySimulation::*)(double time)) &pySimulation::stop)
+            .def("pause", &pySimulation::pause)
+            .def("resume", &pySimulation::resume)
+            .def("wait", &pySimulation::wait)
+            .def("time", &pySimulation::time)
+            .def("running", &pySimulation::running);
 }

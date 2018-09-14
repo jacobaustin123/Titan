@@ -27,9 +27,9 @@ public:
     double dt() { return (pointer -> dt);} // update interval
     double T() { return (pointer -> T);} // local time
     py::array_t<double> pos(); // position in m
-    Vec vel() { return (pointer -> vel);} // velocity in m/s
-    Vec acc() { return (pointer -> acc);} // acceleration in m/s^2
-    Vec force() { return (pointer -> force);} // force in kg m / s^2
+    py::array_t<double> vel();
+    py::array_t<double> acc();
+    py::array_t<double> force();
 
 };
 

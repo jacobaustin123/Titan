@@ -1317,12 +1317,12 @@ void Simulation::start(double time) {
 
     updateCudaParameters();
 
-    d_constraints.d_balls = thrust::raw_pointer_cast(&d_balls[0]);
-    d_constraints.d_planes = thrust::raw_pointer_cast(&d_planes[0]);
-    d_constraints.num_balls = d_balls.size();
-    d_constraints.num_planes = d_planes.size();
+//    d_constraints.d_balls = thrust::raw_pointer_cast(&d_balls[0]);
+//    d_constraints.d_planes = thrust::raw_pointer_cast(&d_planes[0]);
+//    d_constraints.num_balls = d_balls.size();
+//    d_constraints.num_planes = d_planes.size();
 
-    update_constraints = false;
+//    update_constraints = false;
 
 //    cudaDeviceSetLimit(cudaLimitMallocHeapSize, 5 * (masses.size() * sizeof(CUDA_MASS) + springs.size() * sizeof(CUDA_SPRING)));
     toArray();

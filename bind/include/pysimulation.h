@@ -13,28 +13,29 @@ class pySimulation{
 public:
     //constructor
     pySimulation() = default;
+//    ~pySimulation();
 
     Simulation sim;
 
     //Create
     pyMass createMass(){pyMass pm(sim.createMass());  return pm;}
-    pyMass createMass();
+//    pyMass createMass(py::array_t<double>);
 
     pySpring createSpring(){ pySpring ps(sim.createSpring());  return ps;}
-    pySpring createSpring();
+//    pySpring createSpring();
 
     // Delete
-    void deleteMass(pyMass pm);
-    void deleteSpring(pySpring ps);
-    void deleteContainer(Container * c);
-
-    void get(pyMass pm);
-    void get(pySpring ps);
-    void get(Container *c);
-
-    void set(pyMass pm);
-    void set(pySpring ps);
-    void set(Container * c);
+//    void deleteMass(pyMass pm);
+//    void deleteSpring(pySpring ps);
+//    void deleteContainer(Container * c);
+//
+//    void get(pyMass pm);
+//    void get(pySpring ps);
+//    void get(Container *c);
+//
+//    void set(pyMass pm);
+//    void set(pySpring ps);
+//    void set(Container * c);
 
     void getAll(){ sim.getAll();};
     void setAll(){ sim.setAll();};
@@ -64,18 +65,18 @@ public:
     void stop(double time){sim.stop(time);}
 
     void pause(double t){sim.pause(t);}
-    void resume(){sim.resume;}
+    void resume(){sim.resume();}
 
-    void wait(double t){sim.wait(t)};
+    void wait(double t){sim.wait(t);}
 
-    double time() { return sim.T;}
-    double running() { return sim.RUNNING;}
+    double time() { return sim.time();}
+    double running() { return sim.running();}
 
     void printPositions(){sim.printPositions();}
-    void printForces(){sim.printForces;}
+    void printForces(){sim.printForces();}
 
-    pyMass getMassByIndex(int i);
-    pySpring getSpringByIndex(int i);
+//    pyMass getMassByIndex(int i);
+//    pySpring getSpringByIndex(int i);
 //    Container * getContainerByIndex(int i);
 };
 #endif //LOCH_PYSIMULATION_H
