@@ -1112,8 +1112,9 @@ __global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, CUDA_GLOBAL_CONSTRAINTS
             mass.constraints.direction[j].applyForce(&mass);
         }
 
-        if (mass.vel.norm() != 0.0) {
-            mass.force += - mass.constraints.drag_coefficient * pow(mass.vel.norm(), 2) * mass.vel / mass.vel.norm(); // drag
+        if (mass.vel.norm() != 0.0) { // NOTE TODO this is really janky. On certain platforms, the following code causes excessive memory usage on the GPU.
+            double norm = mass.vel.norm();
+            mass.force += - mass.constraints.drag_coefficient * pow(norm, 2) * mass.vel / norm; // drag
         }
 #endif
 
@@ -1508,13 +1509,17 @@ void Simulation::execute() {
 
 #ifdef GRAPHICS
         computeSpringForces<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(d_spring, springs.size()); // compute mass forces after syncing
+        gpuErrchk( cudaPeekAtLastError() );
         massForcesAndUpdate<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, d_constraints, masses.size());
+        gpuErrchk( cudaPeekAtLastError() );
         T += dt;
 #else
 
         for (int i = 0; i < NUM_QUEUED_KERNELS; i++) {
             computeSpringForces<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(d_spring, springs.size()); // compute mass forces after syncing
+            gpuErrchk( cudaPeekAtLastError() );
             massForcesAndUpdate<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, d_constraints, masses.size());
+            gpuErrchk( cudaPeekAtLastError() );
             T += dt;
         }
 #endif
