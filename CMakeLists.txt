@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.11)
-project(Loch LANGUAGES CXX CUDA) # use CXX, CUDA by default (since CUDA is a language, don't need cuda_add_executable)
+project(Loch LANGUAGES C CXX CUDA) # use CXX, CUDA by default (since CUDA is a language, don't need cuda_add_executable)
 
 #set(CMAKE_GENERATOR_TOOLSET version=14.13)
 
@@ -24,6 +24,9 @@ if (LOCH_SHARED_BUILD)
     set(POSITION_INDEPENDENT_CODE ON)
 endif()
 
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+set(POSITION_INDEPENDENT_CODE ON)
+
 add_library(Loch ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
 
 set_target_properties(Loch PROPERTIES CUDA_SEPARABLE_COMPILATION ON) # needed for library compilation
@@ -31,6 +34,7 @@ set_target_properties(Loch PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 
 target_compile_definitions(Loch PUBLIC GRAPHICS)
 target_compile_definitions(Loch PUBLIC CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
+target_compile_definitions(Loch PUBLIC _MWAITXINTRIN_H_INCLUDED)
 
 target_compile_features(Loch PUBLIC cxx_std_11) # same as above, may be unnecessary
 
@@ -43,11 +47,11 @@ else()
     message(STATUS "CUDA NOT FOUND")
 endif()
 
-find_package(OPENGL REQUIRED) # find and include OpenGL
-if (OPENGL_FOUND)
+find_package(OpenGL REQUIRED) # find and include OpenGL
+if (OpenGL_FOUND)
     message(STATUS "OPENGL FOUND")
-    target_include_directories(Loch PRIVATE ${OPENGL_INCLUDE_DIRS})
-    target_link_libraries(Loch PRIVATE ${OPENGL_LIBRARIES})
+    target_include_directories(Loch PRIVATE ${OpenGL_INCLUDE_DIRS})
+    target_link_libraries(Loch PRIVATE ${OpenGL_LIBRARIES} GL)
 endif()
 
 find_package(glfw3 CONFIG REQUIRED)
@@ -97,15 +101,3 @@ else()
     configure_file(cmake/LochConfig.cmake.in2
             ${CMAKE_INSTALL_PREFIX}/share/loch/LochConfig.cmake @ONLY)
 endif()
-
-#install(DIRECTORY ${LOCH_INCLUDE_DIR} DESTINATION include/Loch)
-#install(TARGETS Loch DESTINATION lib)
-#
-#set(Loch_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/include/Loch)
-#set(Loch_LIBRARIES ${CMAKE_INSTALL_PREFIX}/lib/Loch)
-
-#configure_file(cmake/LochConfig.cmake.in2
-#        ${CMAKE_INSTALL_PREFIX}/share/Loch/LochConfig.cmake @ONLY)
-
-#add_subdirectory(tests/test1)
-#add_subdirectory(tests/test2)

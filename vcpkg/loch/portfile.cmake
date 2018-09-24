@@ -55,7 +55,7 @@ endif()
 set(CMAKE_CUDA_COMPILER:FILEPATH ${NVCC})
 
 if(VCPKG_LIBRARY_LINKAGE STREQUAL "static")
-    message(FATAL_ERROR "The Loch library does not currently support static compilation. Please use the x64-windows or x64-osx triplets")
+#    message(FATAL_ERROR "The Loch library does not currently support static compilation. Please use the x64-windows or x64-osx triplets")
 
     vcpkg_configure_cmake( # may be added later
             SOURCE_PATH ${SOURCE_PATH}

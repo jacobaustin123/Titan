@@ -3,5 +3,6 @@ find_dependency(glfw3)
 find_dependency(GLEW)
 find_dependency(glm)
 find_dependency(CUDA)
+find_dependency(OpenGL)
 
 include("${CMAKE_CURRENT_LIST_DIR}/LochTargets.cmake")
