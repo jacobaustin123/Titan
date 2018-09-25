@@ -50,7 +50,7 @@ if (OpenGL_FOUND)
     target_include_directories(Loch PRIVATE ${OpenGL_INCLUDE_DIRS})
 
     if (WIN32)
-        target_link_libraries(Loch PRIVATE ${OpenGL_LIBRARIES} gl)
+        target_link_libraries(Loch PRIVATE ${OpenGL_LIBRARIES})
     else()
         target_link_libraries(Loch PRIVATE ${OpenGL_LIBRARIES} GL)
     endif()
