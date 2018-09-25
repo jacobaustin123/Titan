@@ -44,15 +44,19 @@ else()
     message(STATUS "CUDA NOT FOUND")
 endif()
 
-find_package(OpenGL REQUIRED) # find and include OpenGL
-if (OpenGL_FOUND)
-    message(STATUS "OPENGL FOUND")
-    target_include_directories(Loch PRIVATE ${OpenGL_INCLUDE_DIRS})
-
-    if (WIN32)
-        target_link_libraries(Loch PRIVATE ${OpenGL_LIBRARIES})
-    else()
+if (UNIX)
+    find_package(OpenGL REQUIRED) # find and include OpenGL
+    if (OpenGL_FOUND)
+        message(STATUS "OPENGL FOUND")
+        target_include_directories(Loch PRIVATE ${OpenGL_INCLUDE_DIRS})
         target_link_libraries(Loch PRIVATE ${OpenGL_LIBRARIES} GL)
+    endif()
+else()
+    find_package(OPENGL REQUIRED) # find and include OpenGL
+    if (OPENGL_FOUND)
+        message(STATUS "OPENGL FOUND")
+        target_include_directories(Loch PRIVATE ${OPENGL_INCLUDE_DIRS})
+        target_link_libraries(Loch PRIVATE ${OPENGL_LIBRARIES})
     endif()
 endif()
 
