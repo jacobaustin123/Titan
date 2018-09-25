@@ -33,6 +33,7 @@ target_compile_definitions(Loch PUBLIC CONSTRAINTS) # defines the CONSTRAINTS pr
 
 if (NOT LOCH_SHARED_BUILD)
     target_compile_definitions(Loch PUBLIC _MWAITXINTRIN_H_INCLUDED)
+    target_compile_features(Loch PUBLIC cxx_std_11) # same as above, may be unnecessary
 endif()
 
 find_package(CUDA REQUIRED) # find and include CUDA
