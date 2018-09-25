@@ -30,7 +30,10 @@ set_target_properties(Loch PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 
 target_compile_definitions(Loch PUBLIC GRAPHICS)
 target_compile_definitions(Loch PUBLIC CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
-target_compile_definitions(Loch PUBLIC _MWAITXINTRIN_H_INCLUDED)
+
+if (NOT LOCH_SHARED_BUILD)
+    target_compile_definitions(Loch PUBLIC _MWAITXINTRIN_H_INCLUDED)
+endif()
 
 find_package(CUDA REQUIRED) # find and include CUDA
 if (CUDA_FOUND)
@@ -45,7 +48,12 @@ find_package(OpenGL REQUIRED) # find and include OpenGL
 if (OpenGL_FOUND)
     message(STATUS "OPENGL FOUND")
     target_include_directories(Loch PRIVATE ${OpenGL_INCLUDE_DIRS})
-    target_link_libraries(Loch PRIVATE ${OpenGL_LIBRARIES} GL)
+
+    if (WIN32)
+        target_link_libraries(Loch PRIVATE ${OpenGL_LIBRARIES} gl)
+    else()
+        target_link_libraries(Loch PRIVATE ${OpenGL_LIBRARIES} GL)
+    endif()
 endif()
 
 find_package(glfw3 CONFIG REQUIRED)
