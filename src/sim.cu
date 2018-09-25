@@ -3,6 +3,7 @@
 //
 
 #include "sim.h"
+#include "stlparser.h"
 
 #include <thrust/remove.h>
 #include <thrust/execution_policy.h>
@@ -15,6 +16,7 @@
 #include <cuda.h>
 #include <cuda_device_runtime_api.h>
 #include <cuda_gl_interop.h>
+#include <exception>
 
 #ifdef GRAPHICS
 #ifndef SDL2
@@ -26,13 +28,8 @@ __global__ void createSpringPointers(CUDA_SPRING ** ptrs, CUDA_SPRING * data, in
 __global__ void createMassPointers(CUDA_MASS ** ptrs, CUDA_MASS * data, int size);
 
 __global__ void computeSpringForces(CUDA_SPRING * device_springs, int num_springs);
-//__global__ void computeMassForces(CUDA_MASS * device_masses, int num_masses);
-__global__ void massForcesAndUpdate(CUDA_SPRING * device_springs, Constraint ** d_constraints, int num_springs, int num_constraints);
-//__global__ void update(CUDA_MASS * d_mass, int num_masses);
+__global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, Vec global, CUDA_GLOBAL_CONSTRAINTS c, int num_masses);
 
-
-
-__device__ const double G = 9.81;
 
 bool Simulation::RUNNING;
 bool Simulation::STARTED;
@@ -54,6 +51,9 @@ bool Simulation::update_colors;
 int Simulation::lineWidth;
 int Simulation::pointSize;
 bool Simulation::resize_buffers;
+Vec Simulation::camera;
+Vec Simulation::looks_at;
+Vec Simulation::up;
 #endif
 
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
@@ -75,6 +75,7 @@ Simulation::Simulation() {
     GPU_DONE = false;
 
     update_constraints = true;
+    global = Vec(0, 0, -9.81);
 
 #ifdef GRAPHICS
     resize_buffers = true;
@@ -83,6 +84,10 @@ Simulation::Simulation() {
 
     lineWidth = 1;
     pointSize = 3;
+
+    camera = Vec(15, 15, 7);
+    looks_at = Vec(0, 0, 2);
+    up = Vec(0, 0, 1);
 #endif
 }
 
@@ -170,8 +175,7 @@ Simulation::~Simulation() {
 
 Mass * Simulation::createMass(Mass * m) {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Cannot modify simulation after the end of the simulation.");
     }
 
     m -> ref_count++;
@@ -181,8 +185,7 @@ Mass * Simulation::createMass(Mass * m) {
         return m;
     } else {
         if (RUNNING) {
-            std::cerr << "simulation is running. stop the simulation make changes" << std::endl;
-            exit(1);
+            throw std::runtime_error("The simulation is running. Stop the simulation to make changes.");
         }
 
         masses.push_back(m);
@@ -222,8 +225,7 @@ Container * Simulation::getContainerByIndex(int i) {
 
 Mass * Simulation::createMass() {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Cannot modify simulation after the end of the simulation.");
     }
 
     Mass * m = new Mass();
@@ -232,8 +234,7 @@ Mass * Simulation::createMass() {
 
 Mass * Simulation::createMass(const Vec & pos) {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Cannot modify simulation after the end of the simulation.");
     }
 
     Mass * m = new Mass(pos);
@@ -242,8 +243,7 @@ Mass * Simulation::createMass(const Vec & pos) {
 
 Spring * Simulation::createSpring(Spring * s) {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Cannot modify simulation after the end of the simulation.");
     }
 
     if (s -> _right) { s -> _right -> ref_count++; }
@@ -276,8 +276,7 @@ Spring * Simulation::createSpring(Spring * s) {
 
 Spring * Simulation::createSpring() {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Cannot modify simulation after the end of the simulation.");
     }
 
     Spring * s = new Spring();
@@ -286,8 +285,7 @@ Spring * Simulation::createSpring() {
 
 Spring * Simulation::createSpring(Mass * m1, Mass * m2) {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Cannot modify simulation after the end of the simulation.");
     }
 
     Spring * s = new Spring(m1, m2);
@@ -306,8 +304,7 @@ __global__ void invalidate(CUDA_MASS ** ptrs, CUDA_MASS * m, int size) {
 
 void Simulation::deleteMass(Mass * m) {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Cannot modify simulation after the end of the simulation.");
     }
 
     if (!STARTED) {
@@ -338,8 +335,7 @@ void Simulation::deleteMass(Mass * m) {
 
 void Simulation::deleteSpring(Spring * s) {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Cannot modify simulation after the end of the simulation.");
     }
 
     if (!STARTED) {
@@ -441,13 +437,11 @@ struct host_spring_in_list {
 
 void Simulation::deleteContainer(Container * c) {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Cannot modify simulation after the end of the simulation.");
     }
 
     if (RUNNING) {
-        std::cerr << "simulation is running." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation is running. Stop the simulation to make changes.");
     }
 
     if (!STARTED) {
@@ -466,8 +460,6 @@ void Simulation::deleteContainer(Container * c) {
     }
 
     {
-        std::cout << "deleting masses" << std::endl;
-
         CUDA_MASS ** d_ptrs = new CUDA_MASS * [c -> masses.size()];
 
         for (int i = 0; i < c -> masses.size(); i++) {
@@ -490,8 +482,6 @@ void Simulation::deleteContainer(Container * c) {
     }
 
     {
-        std::cout << "deleting springs" << std::endl;
-
         CUDA_SPRING ** d_ptrs = new CUDA_SPRING * [c -> springs.size()];
 
         for (int i = 0; i < c -> springs.size(); i++) {
@@ -511,14 +501,10 @@ void Simulation::deleteContainer(Container * c) {
         gpuErrchk(cudaMemcpy(temp, d_ptrs, c -> springs.size() * sizeof(CUDA_SPRING *), cudaMemcpyHostToDevice));
         delete [] d_ptrs;
 
-        std::cout << "remove called" << std::endl;
-
         thrust::remove_if(thrust::device, d_springs.begin(), d_springs.begin() + springs.size() + c -> springs.size(), spring_in_list(temp, c -> springs.size()));
         d_springs.resize(springs.size());
 
         gpuErrchk(cudaFree(temp));
-
-        std::cout << "done" << std::endl;
     }
 
 #ifdef GRAPHICS // TODO make a decision about this
@@ -554,13 +540,12 @@ void Simulation::deleteContainer(Container * c) {
 
 void Simulation::get(Mass * m) {
     if (!STARTED) {
-        std::cerr << "Simulation has not started." << std::endl;
+        std::cerr << "The simulation has not started. Get and set commands cannot be called before sim.start()" << std::endl;
         return;
     }
 
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Cannot modify simulation after the end of the simulation.");
     }
 
     CUDA_MASS temp;
@@ -570,13 +555,12 @@ void Simulation::get(Mass * m) {
 
 void Simulation::set(Mass * m) {
     if (!STARTED) {
-        std::cerr << "Simulation has not started." << std::endl;
+        std::cerr << "The simulation has not started. Get and set commands cannot be called before sim.start()" << std::endl;
         return;
     }
 
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Cannot modify simulation after the end of the simulation.");
     }
 
     CUDA_MASS temp = CUDA_MASS(*m);
@@ -585,13 +569,12 @@ void Simulation::set(Mass * m) {
 
 void Simulation::get(Spring * s) {
     if (!STARTED) {
-        std::cerr << "Simulation has not started." << std::endl;
+        std::cerr << "The simulation has not started. Get and set commands cannot be called before sim.start()" << std::endl;
         return;
     }
 
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Cannot modify simulation after the end of the simulation.");
     }
 
     CUDA_SPRING temp;
@@ -601,7 +584,7 @@ void Simulation::get(Spring * s) {
 
 void Simulation::set(Spring * s) {
     if (!STARTED) {
-        std::cerr << "Simulation has not started." << std::endl;
+        std::cerr << "The simulation has not started. Get and set commands cannot be called before sim.start()" << std::endl;
         return;
     }
 
@@ -611,25 +594,28 @@ void Simulation::set(Spring * s) {
 
 void Simulation::getAll() {
     if (!STARTED) {
-        std::cerr << "Simulation has not started." << std::endl;
+        std::cerr << "The simulation has not started. Get and set commands cannot be called before sim.start()" << std::endl;
         return;
     }
 
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Cannot modify simulation after the end of the simulation.");
     }
 
     massFromArray(); // TODO make a note of this
 }
 
 void Simulation::set(Container * c) {
-    {
-        if (ENDED) {
-            std::cerr << "simulation has ended." << std::endl;
-            exit(1);
-        }
+    if (ENDED) {
+        throw std::runtime_error("The simulation has ended. Cannot modify simulation after the end of the simulation.");
+    }
 
+    if (!STARTED) {
+        std::cerr << "The simulation has not started. Get and set commands cannot be called before sim.start()" << std::endl;
+        return;
+    }
+
+    {
         CUDA_MASS * h_data = new CUDA_MASS[c -> masses.size()]; // copy masses into single array for copying to the GPU, set GPU pointers
         CUDA_MASS ** d_ptrs = new CUDA_MASS * [c -> masses.size()];
 
@@ -685,8 +671,7 @@ void Simulation::set(Container * c) {
 
 void Simulation::setAll() {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Cannot modify simulation after the end of the simulation.");
     }
 
     {
@@ -733,10 +718,9 @@ void Simulation::setAll() {
 
 
 
-void Simulation::setSpringConstant(double k) {
+void Simulation::setAllSpringConstantValues(double k) {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Cannot modify simulation after the end of the simulation.");
     }
 
     for (Spring * s : springs) {
@@ -746,8 +730,7 @@ void Simulation::setSpringConstant(double k) {
 
 void Simulation::defaultRestLength() {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Cannot modify simulation after the end of the simulation.");
     }
 
     for (Spring * s : springs) {
@@ -755,23 +738,21 @@ void Simulation::defaultRestLength() {
     }
 }
 
-void Simulation::setMassValues(double m) {
+void Simulation::setAllMassValues(double m) {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Cannot modify simulation after the end of the simulation.");
     }
 
     for (Mass * mass : masses) {
         mass -> m += m;
     }
 }
-void Simulation::setDeltaT(double delta_t) {
+void Simulation::setAllDeltaTValues(double delta_t) {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Cannot modify simulation after the end of the simulation.");
     }
 
-    this -> dt = delta_t;
+    this -> dt = delta_t; // TODO make this work
 
     for (Mass * m : masses) {
         m -> dt = delta_t;
@@ -780,8 +761,7 @@ void Simulation::setDeltaT(double delta_t) {
 
 void Simulation::setBreakpoint(double time) {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Cannot set breakpoints after the end of the simulation run.");
     }
 
     bpts.insert(time); // TODO mutex breakpoints
@@ -849,21 +829,16 @@ __global__ void createSpringPointers(CUDA_SPRING ** ptrs, CUDA_SPRING * data, in
 }
 
 CUDA_SPRING ** Simulation::springToArray() {
-    if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
-    }
-
     CUDA_SPRING ** d_ptrs = new CUDA_SPRING * [springs.size()]; // array of pointers
-    for (int i = 0; i < springs.size(); i++) { // potentially slow
+
+    for (int i = 0; i < springs.size(); i++) { // potentially slow, allocate memory for every spring
         gpuErrchk(cudaMalloc((void **) d_ptrs + i, sizeof(CUDA_SPRING *)));
     }
 
-    d_springs = thrust::device_vector<CUDA_SPRING *>(d_ptrs, d_ptrs + springs.size());
+    d_springs = thrust::device_vector<CUDA_SPRING *>(d_ptrs, d_ptrs + springs.size()); // copy those pointers to the GPU using thrust
 
 
-
-    CUDA_SPRING * h_spring = new CUDA_SPRING[springs.size()];
+    CUDA_SPRING * h_spring = new CUDA_SPRING[springs.size()]; // array for the springs themselves
 
     int count = 0;
     for (Spring * s : springs) {
@@ -898,11 +873,6 @@ CUDA_SPRING ** Simulation::springToArray() {
 //}
 
 void Simulation::toArray() {
-    if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
-    }
-
     CUDA_MASS ** d_mass = massToArray(); // must come first
     CUDA_SPRING ** d_spring = springToArray();
 }
@@ -917,8 +887,10 @@ __global__ void fromMassPointers(CUDA_MASS ** d_mass, CUDA_MASS * data, int size
 
 void Simulation::get(Container *c) {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Cannot get updates from the GPU after the end of the simulation.");
+    } else if (!STARTED) {
+        std::cerr << "sim.get() does nothing if called before the simulation has started." << std::endl;
+        return;
     }
 
     CUDA_MASS ** temp;
@@ -957,11 +929,6 @@ void Simulation::get(Container *c) {
 }
 
 void Simulation::massFromArray() {
-    if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
-    }
-
     CUDA_MASS * temp;
     gpuErrchk(cudaMalloc((void **) &temp, sizeof(CUDA_MASS) * masses.size()));
 
@@ -994,11 +961,6 @@ void Simulation::constraintsFromArray() {
 }
 
 void Simulation::fromArray() {
-    if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
-    }
-
     massFromArray();
     springFromArray();
     constraintsFromArray();
@@ -1031,14 +993,6 @@ __global__ void printSpring(CUDA_SPRING ** d_springs, int num_springs) {
     }
 }
 
-//__global__ void printSpringForce(CUDA_SPRING * d_springs, int num_springs) {
-//    int i = blockDim.x * blockIdx.x + threadIdx.x;
-//
-//    if (i < num_springs) {
-//        printf("%d: left: (%5f, %5f, %5f), right:  (%5f, %5f, %5f)\n\n ", i, d_springs[i]._left -> force[0], d_springs[i]._left -> force[1], d_springs[i]._left -> force[2], d_springs[i]._right -> force[0], d_springs[i]._right -> force[1], d_springs[i]._right -> force[2]);
-//    }
-//}
-
 __global__ void computeSpringForces(CUDA_SPRING ** d_spring, int num_springs) {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
 
@@ -1050,6 +1004,8 @@ __global__ void computeSpringForces(CUDA_SPRING ** d_spring, int num_springs) {
 
         Vec temp = (spring._right -> pos) - (spring._left -> pos);
         Vec force = spring._k * (spring._rest - temp.norm()) * (temp / temp.norm());
+
+//        force.print();
 
 #ifdef CONSTRAINTS
         if (spring._right -> constraints.fixed == false) {
@@ -1074,7 +1030,7 @@ bool Simulation::running() {
     return this -> RUNNING;
 }
 
-__global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, CUDA_GLOBAL_CONSTRAINTS c, int num_masses) {
+__global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, Vec global, CUDA_GLOBAL_CONSTRAINTS c, int num_masses) {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
 
     if (i < num_masses) {
@@ -1085,7 +1041,7 @@ __global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, CUDA_GLOBAL_CONSTRAINTS
             return;
 #endif
 
-        mass.force += Vec(0, 0, - G * mass.m); // gravity
+        mass.force += global;
 
         for (int j = 0; j < c.num_planes; j++) { // global constraints
             c.d_planes[j].applyForce(&mass);
@@ -1306,13 +1262,11 @@ void Simulation::stop(double t) {
 
 void Simulation::start() {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Cannot call sim.start() after the end of the simulation.");
     }
 
     if (masses.size() == 0) {
-        std::cerr << "No masses have been added. Please add masses before starting the simulation." << std::endl;
-        exit(1);
+        throw std::runtime_error("No masses have been added. Please add masses before starting the simulation.");
     }
 
     std::cout << "Starting simulation with " << masses.size() << " masses and " << springs.size() << " springs." << std::endl;
@@ -1356,11 +1310,6 @@ void Simulation::start() {
 }
 
 void Simulation::_run() { // repeatedly start next
-    if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
-    }
-
 #ifdef GRAPHICS
 
 #ifndef SDL2 // GLFW window needs to be created here for Windows
@@ -1381,7 +1330,7 @@ void Simulation::_run() { // repeatedly start next
     this -> programID = LoadShaders(); // ("shaders/StandardShading.vertexshader", "shaders/StandardShading.fragmentshader"); //
     // Get a handle for our "MVP" uniform
 
-    this -> MVP = getProjection(Vec(15, 15, 7), Vec(0, 0, 2), Vec(0, 0, 1)); // compute perspective projection matrix
+    this -> MVP = getProjection(camera, looks_at, up); // compute perspective projection matrix
 
     this -> MatrixID = glGetUniformLocation(programID, "MVP"); // doesn't seem to be necessary
 
@@ -1398,12 +1347,33 @@ void Simulation::_run() { // repeatedly start next
     GPU_DONE = true;
 }
 
-void Simulation::updateCudaParameters() {
-    if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+void Simulation::setViewport(const Vec & camera_position, const Vec & target_location, const Vec & up_vector) {
+    if (RUNNING) {
+        throw std::runtime_error("The simulation is running. Cannot modify viewport during simulation run.");
     }
 
+    this -> camera = camera_position;
+    this -> looks_at = target_location;
+    this -> up = up_vector;
+
+    if (STARTED) {
+        this -> MVP = getProjection(camera, looks_at, up); // compute perspective projection matrix
+    }
+}
+
+void Simulation::moveViewport(const Vec & displacement) {
+    if (RUNNING) {
+        throw std::runtime_error("The simulation is running. Cannot modify viewport during simulation run.");
+    }
+
+    this -> camera += displacement;
+
+    if (STARTED) {
+        this -> MVP = getProjection(camera, looks_at, up); // compute perspective projection matrix
+    }
+}
+
+void Simulation::updateCudaParameters() {
     massBlocksPerGrid = (masses.size() + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK;
     springBlocksPerGrid = (springs.size() + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK;
 
@@ -1421,18 +1391,15 @@ void Simulation::updateCudaParameters() {
 
 void Simulation::resume() {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Cannot resume the simulation.");
     }
 
     if (!STARTED) {
-        std::cerr << "simulation has not started." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has not started. You cannot resume a simulation before calling sim.start().");
     }
 
     if (masses.size() == 0) {
-        std::cerr << "No masses have been added. Please add masses before starting the simulation." << std::endl;
-        exit(1);
+        throw std::runtime_error("No masses have been added. Please add masses before starting the simulation.");
     }
 
     updateCudaParameters();
@@ -1510,7 +1477,7 @@ void Simulation::execute() {
 #ifdef GRAPHICS
         computeSpringForces<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(d_spring, springs.size()); // compute mass forces after syncing
         gpuErrchk( cudaPeekAtLastError() );
-        massForcesAndUpdate<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, d_constraints, masses.size());
+        massForcesAndUpdate<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, global, d_constraints, masses.size());
         gpuErrchk( cudaPeekAtLastError() );
         T += dt;
 #else
@@ -1518,7 +1485,7 @@ void Simulation::execute() {
         for (int i = 0; i < NUM_QUEUED_KERNELS; i++) {
             computeSpringForces<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(d_spring, springs.size()); // compute mass forces after syncing
             gpuErrchk( cudaPeekAtLastError() );
-            massForcesAndUpdate<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, d_constraints, masses.size());
+            massForcesAndUpdate<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, global, d_constraints, masses.size());
             gpuErrchk( cudaPeekAtLastError() );
             T += dt;
         }
@@ -1539,9 +1506,9 @@ void Simulation::execute() {
 
 #ifndef SDL2
             if (glfwGetKey(window, GLFW_KEY_ESCAPE ) == GLFW_PRESS || glfwWindowShouldClose(window) != 0) {
-                RUNNING = 0;
-                ENDED = 1;
-                break;
+//                RUNNING = 0;
+//                ENDED = 1;
+                exit(1); // TODO maybe deal with memory leak here.
             }
 #endif
         }
@@ -1552,8 +1519,7 @@ void Simulation::execute() {
 
 void Simulation::pause(double t) {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Control functions cannot be called.");
     }
 
     setBreakpoint(t);
@@ -1562,8 +1528,7 @@ void Simulation::pause(double t) {
 
 void Simulation::wait(double t) {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Control functions cannot be called.");
     }
 
 
@@ -1575,8 +1540,7 @@ void Simulation::wait(double t) {
 
 void Simulation::waitUntil(double t) {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Control functions cannot be called.");
     }
 
 
@@ -1587,8 +1551,7 @@ void Simulation::waitUntil(double t) {
 
 void Simulation::waitForEvent() {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Control functions cannot be called.");
     }
 
     while (RUNNING) {
@@ -1771,8 +1734,7 @@ Container * Simulation::createContainer() {
 
 Cube * Simulation::createCube(const Vec & center, double side_length) { // creates half-space ax + by + cz < d
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. Cannot create new objects");
     }
 
     Cube * cube = new Cube(center, side_length);
@@ -1793,10 +1755,77 @@ Cube * Simulation::createCube(const Vec & center, double side_length) { // creat
     return cube;
 }
 
+Container * Simulation::importFromSTL(const std::string & path, double density, int num_rays) {
+    if (ENDED) {
+        throw std::runtime_error("The simulation has ended. Cannot import new STL objects");
+    }
+
+    stl::stlFile file = stl::parseSTL(path);
+    stl::BBox b = file.getBoundingBox();
+
+    double dimmax = max(max(b.xdim, b.ydim), b.zdim);
+
+    double dimx, dimy, dimz;
+
+    dimx = 10 * b.xdim / dimmax;
+    dimy = 10 * b.ydim / dimmax;
+    dimz = 10 * b.zdim / dimmax;
+
+    std::cout << b.xdim << " " << b.ydim << " " << b.zdim << " " << dimmax << " " << pow(10 / dimmax, 3) << " " << density * pow(10 / dimmax, 3) * b.xdim * b.ydim * b.zdim << " " << (int) cbrt(density * pow(10 / dimmax, 3) * b.xdim * b.ydim * b.zdim) << std::endl;
+
+    int num_pts = (int) cbrt(density * pow(10 / dimmax, 3) * b.xdim * b.ydim * b.zdim);
+
+    std::cout << "density is: " << density << " and num_pts is " << num_pts << std::endl;
+
+    Lattice * l1 = new Lattice(Vec(0, 0, dimz), Vec(dimx - 0.001, dimy - 0.001, dimz - 0.001), num_pts, num_pts, num_pts);
+
+    for (Mass * m : l1 -> masses) {
+        if (!file.inside(stl::Vec3D(b.center[0] + (b.xdim / dimx) * m -> pos[0], b.center[1] + (b.ydim / dimy) * m -> pos[1], (b.zdim / dimz) * (m -> pos[2] - dimz) + b.center[2]), num_rays)) {
+            m -> valid = false;
+        }
+    }
+
+    for (auto i = l1 -> springs.begin(); i != l1 -> springs.end();) {
+        Spring * s = *i;
+
+        if (!s ->_left -> valid || ! s -> _right -> valid) {
+            delete s;
+            i = l1 -> springs.erase(i);
+        } else {
+            ++i;
+        }
+    }
+
+    for (auto i = l1 -> masses.begin(); i != l1 -> masses.end();) {
+        Mass * m = *i;
+
+        if (!m -> valid) {
+            delete m;
+            i = l1 -> masses.erase(i);
+        } else {
+            ++i;
+        }
+    }
+
+    d_masses.reserve(masses.size() + l1 -> masses.size());
+    d_springs.reserve(springs.size() + l1 -> springs.size());
+
+    for (Mass * m : l1 -> masses) {
+        createMass(m);
+    }
+
+    for (Spring * s : l1 -> springs) {
+        createSpring(s);
+    }
+
+    containers.push_back(l1);
+
+    return l1;
+}
+
 Lattice * Simulation::createLattice(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. New objects cannot be created.");
     }
 
     Lattice * l = new Lattice(center, dims, nx, ny, nz);
@@ -1819,8 +1848,7 @@ Lattice * Simulation::createLattice(const Vec & center, const Vec & dims, int nx
 
 Beam * Simulation::createBeam(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. New objects cannot be created.");
     }
 
     Beam * l = new Beam(center, dims, nx, ny, nz);
@@ -1843,8 +1871,7 @@ Beam * Simulation::createBeam(const Vec & center, const Vec & dims, int nx, int 
 
 void Simulation::createPlane(const Vec & abc, double d ) { // creates half-space ax + by + cz < d
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. New objects cannot be created.");
     }
 
     ContactPlane * new_plane = new ContactPlane(abc, d);
@@ -1856,8 +1883,7 @@ void Simulation::createPlane(const Vec & abc, double d ) { // creates half-space
 
 void Simulation::createBall(const Vec & center, double r ) { // creates ball with radius r at position center
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. New constraints cannot be added.");
     }
 
     Ball * new_ball = new Ball(center, r);
@@ -1874,10 +1900,8 @@ void Simulation::clearConstraints() { // clears global constraints only
 
 void Simulation::printPositions() {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. You cannot view parameters of the simulation after it has been stopped.");
     }
-
 
     if (RUNNING) {
         std::cout << "\nDEVICE MASSES: " << std::endl;
@@ -1898,10 +1922,8 @@ void Simulation::printPositions() {
 
 void Simulation::printForces() {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. You cannot view parameters of the simulation after it has been stopped.");
     }
-
 
     if (RUNNING) {
         std::cout << "\nDEVICE FORCES: " << std::endl;
@@ -1920,8 +1942,7 @@ void Simulation::printForces() {
 
 void Simulation::printSprings() {
     if (ENDED) {
-        std::cerr << "simulation has ended." << std::endl;
-        exit(1);
+        throw std::runtime_error("The simulation has ended. You cannot view parameters of the simulation after it has been stopped.");
     }
 
     if (RUNNING) {
@@ -1934,5 +1955,13 @@ void Simulation::printSprings() {
     }
 
     std::cout << std::endl;
+}
+
+void Simulation::setGlobalForce(const Vec & global) {
+    if (RUNNING) {
+        throw std::runtime_error("The simulation is running. The global force parameter cannot be changed during runtime");
+    }
+
+    this -> global = global;
 }
 

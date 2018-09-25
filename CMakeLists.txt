@@ -1,12 +1,7 @@
 cmake_minimum_required(VERSION 3.11)
 project(Loch LANGUAGES C CXX CUDA) # use CXX, CUDA by default (since CUDA is a language, don't need cuda_add_executable)
 
-#set(CMAKE_GENERATOR_TOOLSET version=14.13)
-
 set(CMAKE_CXX_STANDARD 14) # set C++ standard to C++11
-set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++14") # same thing, may be unnecessary
-set(CUDA_SEPARABLE_COMPILATION ON)
-set_property(GLOBAL PROPERTY CUDA_SEPARABLE_COMPILATION ON)
 
 set(LOCH_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/src)
 set(LOCH_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include/Loch)
@@ -16,7 +11,8 @@ set(LOCH_SOURCE_FILES ${LOCH_SOURCE_DIR}/vec.cu ${LOCH_SOURCE_DIR}/sim.cu ${LOCH
         ${LOCH_SOURCE_DIR}/object.cu ${LOCH_SOURCE_DIR}/graphics.cpp)
 
 set(LOCH_HEADER_FILES ${LOCH_INCLUDE_DIR}/sim.h ${LOCH_INCLUDE_DIR}/mass.h ${LOCH_INCLUDE_DIR}/object.h
-        ${LOCH_INCLUDE_DIR}/spring.h ${LOCH_INCLUDE_DIR}/vec.h ${LOCH_INCLUDE_DIR}/graphics.h ${LOCH_INCLUDE_DIR}/shader.h)
+        ${LOCH_INCLUDE_DIR}/spring.h ${LOCH_INCLUDE_DIR}/vec.h ${LOCH_INCLUDE_DIR}/graphics.h ${LOCH_INCLUDE_DIR}/shader.h
+        ${LOCH_INCLUDE_DIR}/stlparser.h)
 
 if (LOCH_SHARED_BUILD)
     set(BUILD_SHARED_LIBS ON)
@@ -36,13 +32,11 @@ target_compile_definitions(Loch PUBLIC GRAPHICS)
 target_compile_definitions(Loch PUBLIC CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
 target_compile_definitions(Loch PUBLIC _MWAITXINTRIN_H_INCLUDED)
 
-target_compile_features(Loch PUBLIC cxx_std_11) # same as above, may be unnecessary
-
 find_package(CUDA REQUIRED) # find and include CUDA
 if (CUDA_FOUND)
     message(STATUS "CUDA FOUND")
     target_include_directories(Loch PUBLIC ${CUDA_INCLUDE_DIRS})
-    target_link_libraries(Loch PRIVATE ${CUDA_LIBRARIES} cuda cudart)
+    target_link_libraries(Loch PRIVATE cuda) # cudart
 else()
     message(STATUS "CUDA NOT FOUND")
 endif()
