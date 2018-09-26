@@ -844,14 +844,13 @@ CUDA_SPRING ** Simulation::springToArray() {
 
     d_springs = thrust::device_vector<CUDA_SPRING *>(d_ptrs, d_ptrs + springs.size());
 
-
-
     CUDA_SPRING * h_spring = new CUDA_SPRING[springs.size()];
-
+//still works
     int count = 0;
     for (Spring * s : springs) {
         s -> arrayptr = d_ptrs[count];
-        h_spring[count] = CUDA_SPRING(*s, s -> _left -> arrayptr, s -> _right -> arrayptr);
+
+        h_spring[count] = CUDA_SPRING(*s, s -> _left -> arrayptr, s -> _right -> arrayptr); //this line kills the kernel: FIX
         count++;
     }
 
@@ -888,6 +887,7 @@ void Simulation::toArray() {
 
     CUDA_MASS ** d_mass = massToArray(); // must come first
     CUDA_SPRING ** d_spring = springToArray();
+
 }
 
 __global__ void fromMassPointers(CUDA_MASS ** d_mass, CUDA_MASS * data, int size) {
@@ -1325,12 +1325,15 @@ void Simulation::start(double time) {
 //    update_constraints = false;
 
 //    cudaDeviceSetLimit(cudaLimitMallocHeapSize, 5 * (masses.size() * sizeof(CUDA_MASS) + springs.size() * sizeof(CUDA_SPRING)));
+
+
     toArray();
 
     d_mass = thrust::raw_pointer_cast(d_masses.data());
     d_spring = thrust::raw_pointer_cast(d_springs.data());
 
     gpu_thread = std::thread(&Simulation::_run, this);
+
 }
 
 void Simulation::_run() { // repeatedly start next

@@ -59,7 +59,7 @@ struct CUDA_SPRING {
     CUDA_SPRING() {};
     CUDA_SPRING(const Spring & s);
 
-    CUDA_SPRING(const Spring & s, CUDA_MASS * left, CUDA_MASS * right);
+    CUDA_SPRING( const Spring & s, CUDA_MASS * left, CUDA_MASS * right);
 
     CUDA_MASS * _left; // pointer to left mass object
     CUDA_MASS * _right; // pointer to right mass object

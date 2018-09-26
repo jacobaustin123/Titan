@@ -19,10 +19,11 @@ public:
 
     //Create
     pyMass createMass(){pyMass pm(sim.createMass());  return pm;}
-//    pyMass createMass(py::array_t<double>);
+    pyMass createMass(py::array_t<double> arr);
 
     pySpring createSpring(){ pySpring ps(sim.createSpring());  return ps;}
-//    pySpring createSpring();
+    pySpring createSpring(pyMass m1, pyMass m2 ){ pySpring ps (sim.createSpring(m1.pointer, m2.pointer));
+    return ps;}
 
     // Delete
 //    void deleteMass(pyMass pm);
@@ -41,8 +42,8 @@ public:
     void setAll(){ sim.setAll();};
 
     // Constraints
-//    void createPlane(const Vec & abc, double d );
-//    void createBall(const Vec & center, double r );
+    void createPlane(py::array_t<double> abc, double d );
+    void createBall(py::array_t<double> abc, double r );
 
     void clearConstraints(){sim.clearConstraints();};
 

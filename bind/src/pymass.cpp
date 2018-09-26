@@ -17,6 +17,12 @@ py::array_t<double> pyMass::pos() {
     return pypos;
 }
 
+void pyMass::pos(py::array_t<double> arr){
+    for (int i = 0; i< 3; i++){
+        pointer -> pos[i] = * arr.data(i);
+    }
+}
+
 py::array_t<double> pyMass::vel() {
 
     auto pyvel = py::array_t<double>(sizeof(double) * 3);

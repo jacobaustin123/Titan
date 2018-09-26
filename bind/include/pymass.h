@@ -27,6 +27,7 @@ public:
     double dt() { return (pointer -> dt);} // update interval
     double T() { return (pointer -> T);} // local time
     py::array_t<double> pos(); // position in m
+    void pos(py::array_t<double> arr); // set position in m
     py::array_t<double> vel();
     py::array_t<double> acc();
     py::array_t<double> force();

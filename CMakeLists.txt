@@ -3,11 +3,11 @@ cmake_minimum_required(VERSION 3.9)
 project(Loch LANGUAGES CXX CUDA) # use CXX, CUDA by default (since CUDA is a language, don't need cuda_add_executable)
 
 set(BUILD_SHARED_LIBS OFF)
-set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON )
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(CMAKE_CXX_STANDARD 14) # set C++ standard to C++11
-set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++14") # same thing, may be unnecessary
+#set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++14") # same thing, may be unnecessary
 set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
 set_property(GLOBAL PROPERTY CUDA_SEPARABLE_COMPILATION ON)
 
@@ -22,11 +22,13 @@ set(LOCH_HEADER_FILES include/object.h include/graphics.h include/mass.h include
 set(LOCH_FILES ${LOCH_HEADER_FILES} ${LOCH_SOURCE_FILES})
 set(LOCH_INCLUDE_DIR include)
 #SET PYTHON BINDING DIRECTORIES
-set(LOCH_BIND_SOURCE_FILES bind/src/pysimulation.cpp bind/src/bind.cpp bind/src/bind_mass.cpp  bind/src/bind_sim.cpp
-        bind/src/bind_spring.cpp bind/src/pyspring.cpp bind/src/pymass.cpp)
+set(LOCH_BIND_SOURCE_FILES  bind/src/pysimulation.cpp bind/src/pymass.cpp bind/src/pyspring.cpp bind/src/bind.cpp
+        bind/src/bind_mass.cpp  bind/src/bind_sim.cpp bind/src/bind_spring.cpp bind/src/pyspring.cpp
+        bind/src/pymass.cpp)
 set(LOCH_BIND_HEADER_FILES bind/include/pysimulation.h bind/include/pyspring.h bind/include/pymass.h)
 set(LOCH_BIND_FILES ${LOCH_BIND_HEADER_FILES} ${LOCH_BIND_SOURCE_FILES})
 set(LOCH_BIND_INCLUDE_DIR bind/include)
+
 #IMPORT PACKAGES
 find_package(CUDA REQUIRED) # find and include CUDA
 if (CUDA_FOUND)
@@ -100,7 +102,7 @@ set_target_properties(cu_lib PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 set_target_properties(cu_lib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(cu_lib PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 
-#target_compile_definitions(cu_lib PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
+target_compile_definitions(cu_lib PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
 #target_compile_definitions(cu_lib PRIVATE GRAPHICS) # defines the GRAPHICS preprocessor variable
 
 target_compile_features(cu_lib PUBLIC cxx_std_11)

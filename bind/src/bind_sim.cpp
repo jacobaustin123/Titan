@@ -21,19 +21,18 @@ void bind_sim(py::module &m){
                  py::call_guard<py::scoped_ostream_redirect,
                          py::scoped_estream_redirect>(), py::return_value_policy::reference)
 
+            .def("createMass", (pyMass (pySimulation::*)(py::array_t<double> arr)) &pySimulation::createMass,
+                 py::call_guard<py::scoped_ostream_redirect,
+                         py::scoped_estream_redirect>(), py::return_value_policy::reference)
+
 
 //            .def("createMass", (pyMass (pySimulation::*)(const Vec & pos)) &pySimulation::createMass,
 //                 py::call_guard<py::scoped_ostream_redirect,
 //                         py::scoped_estream_redirect>(), py::return_value_policy::reference)
             .def("createSpring", (pySpring (pySimulation::*)()) &pySimulation::createSpring)
-            .def("createSpring", (pySpring (pySimulation::*)(pyMass m1, pyMass m2)) &pySimulation::createSpring)
-//            .def("createPlane", &pySimulation::createPlane)
-//            .def("createPlane", [](py::array_t<double> array, double d, void (Simulation::* createPlaneFunc) (const Vec &, double) = &Simulation::createPlane){
-//                Vec array_vec;
-//                std::memcpy(&array_vec[0], array.data(), array.size() *sizeof(double));
-//                createPlaneFunc(array_vec, d);
-//
-//            })
+            .def("createSpring", (pySpring (pySimulation::*)(pyMass m1, pyMass m2)) &pySimulation::createSpring, py::return_value_policy::reference)
+            .def("createPlane", &pySimulation::createPlane)
+            .def("createBall", &pySimulation::createBall)
 // NOT WORKING BECAUSE IT IS NOT POSSIBLE TO CALL A FUNCTION POINTER TO A METHOD WOTHOUR KNOWING THE
 //            OBJECT IT IS APPLIED TO IMPLICITLY
 
