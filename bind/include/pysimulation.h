@@ -22,8 +22,7 @@ public:
     pyMass createMass(py::array_t<double> arr);
 
     pySpring createSpring(){ pySpring ps(sim.createSpring());  return ps;}
-    pySpring createSpring(pyMass m1, pyMass m2 ){ pySpring ps (sim.createSpring(m1.pointer, m2.pointer));
-    return ps;}
+    pySpring createSpring(pyMass m1, pyMass m2 ){ pySpring ps (sim.createSpring(m1.pointer, m2.pointer)); return ps;}
 
     // Delete
 //    void deleteMass(pyMass pm);

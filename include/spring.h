@@ -43,10 +43,11 @@ public:
     //Get
     Vec getForce(); // computes force on right object. left force is - right force.
 
-private:
-    Mass * _left; // pointer to left mass object // private
+    CUDA_SPRING * arrayptr; //Pointer to struct version for GPU cudaMalloc
+    Mass * _left; // pointer to left mass object
     Mass * _right; // pointer to right mass object
-    CUDA_SPRING *arrayptr; //Pointer to struct version for GPU cudaMalloc
+
+private:
 
     friend class Simulation;
     friend struct CUDA_SPRING;

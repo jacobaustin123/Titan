@@ -235,6 +235,7 @@ Spring * Simulation::createSpring(Spring * s) {
 
     if (!STARTED) {
         springs.push_back(s);
+
         return s;
     } else {
         if (RUNNING) {
@@ -845,12 +846,17 @@ CUDA_SPRING ** Simulation::springToArray() {
     d_springs = thrust::device_vector<CUDA_SPRING *>(d_ptrs, d_ptrs + springs.size());
 
     CUDA_SPRING * h_spring = new CUDA_SPRING[springs.size()];
+
 //still works
     int count = 0;
     for (Spring * s : springs) {
         s -> arrayptr = d_ptrs[count];
 
-        h_spring[count] = CUDA_SPRING(*s, s -> _left -> arrayptr, s -> _right -> arrayptr); //this line kills the kernel: FIX
+        if (s -> _left && s -> _right) {
+            h_spring[count] = CUDA_SPRING(*s, s -> _left -> arrayptr, s -> _right -> arrayptr);
+        } else {
+            h_spring[count] = CUDA_SPRING(*s);
+        }
         count++;
     }
 
@@ -886,7 +892,8 @@ void Simulation::toArray() {
     }
 
     CUDA_MASS ** d_mass = massToArray(); // must come first
-    CUDA_SPRING ** d_spring = springToArray();
+
+    CUDA_SPRING ** d_spring = springToArray(); // CAUSES PYBIND11 TO CRASH
 
 }
 
@@ -1326,8 +1333,8 @@ void Simulation::start(double time) {
 
 //    cudaDeviceSetLimit(cudaLimitMallocHeapSize, 5 * (masses.size() * sizeof(CUDA_MASS) + springs.size() * sizeof(CUDA_SPRING)));
 
+    toArray(); // CAUSES PYBIND11 TO CRASH
 
-    toArray();
 
     d_mass = thrust::raw_pointer_cast(d_masses.data());
     d_spring = thrust::raw_pointer_cast(d_springs.data());

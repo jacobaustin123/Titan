@@ -80,16 +80,16 @@ public:
 
     Mass(const Vec & position, double mass = 0.1, bool fixed = false, double dt = 0.0001);
 
+    CUDA_MASS * arrayptr; //Pointer to struct version for GPU cudaMemAlloc
+    friend struct CUDA_SPRING;
+
 private:
     void decrementRefCount();
-
-    CUDA_MASS * arrayptr; //Pointer to struct version for GPU cudaMemAlloc
 
     void operator=(CUDA_MASS & mass);
 
     friend class Simulation;
     friend class Spring;
-    friend struct CUDA_SPRING;
     friend class Container;
     friend class Lattice;
     friend class Cube;
