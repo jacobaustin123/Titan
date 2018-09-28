@@ -62,7 +62,14 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=f
     if (code != cudaSuccess)
     {
         fprintf(stderr,"GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
-        if (abort) exit(code);
+
+        if (abort) {
+            char buffer[200];
+            snprintf(buffer, sizeof(buffer), "GPUassert error in CUDA kernel: %s %s %d\n", cudaGetErrorString(code), file, line);
+            std::string buffer_string = buffer;
+            throw std::runtime_error(buffer_string);
+            exit(code);
+        }
     }
 }
 
