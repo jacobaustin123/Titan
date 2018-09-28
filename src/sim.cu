@@ -843,7 +843,11 @@ CUDA_SPRING ** Simulation::springToArray() {
     int count = 0;
     for (Spring * s : springs) {
         s -> arrayptr = d_ptrs[count];
-        h_spring[count] = CUDA_SPRING(*s, s -> _left -> arrayptr, s -> _right -> arrayptr);
+        if (s -> _left && s -> _right) {
+            h_spring[count] = CUDA_SPRING(*s, s -> _left -> arrayptr, s -> _right -> arrayptr);
+        } else {
+            h_spring[count] = CUDA_SPRING(*s);
+        }
         count++;
     }
 
