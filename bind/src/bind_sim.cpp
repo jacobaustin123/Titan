@@ -59,7 +59,9 @@ void bind_sim(py::module &m){
 
                     //Control
 
-            .def("start", &pySimulation::start)
+            .def("start", &pySimulation::start,
+                 py::call_guard<py::scoped_ostream_redirect,
+                         py::scoped_estream_redirect>(),py::return_value_policy::reference)
             .def("stop", (void (pySimulation::*)()) &pySimulation::stop)
             .def("stop", (void (pySimulation::*)(double time)) &pySimulation::stop)
             .def("pause", &pySimulation::pause)

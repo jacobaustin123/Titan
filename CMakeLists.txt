@@ -102,7 +102,7 @@ set_target_properties(cu_lib PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 set_target_properties(cu_lib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(cu_lib PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 
-target_compile_definitions(cu_lib PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
+#target_compile_definitions(cu_lib PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
 #target_compile_definitions(cu_lib PRIVATE GRAPHICS) # defines the GRAPHICS preprocessor variable
 
 target_compile_features(cu_lib PUBLIC cxx_std_11)

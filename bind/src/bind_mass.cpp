@@ -25,8 +25,6 @@ void bind_mass(py::module &m){
             .def("T", &pyMass::T);
 
 
-//
-//            .def_readwrite("m", &Mass::m)
 //            .def_readwrite("pos", &Mass::pos)
 //            .def_readwrite("vel", &Mass::vel)
 //            .def_readwrite("acc", &Mass::acc)

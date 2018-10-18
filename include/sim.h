@@ -104,6 +104,8 @@ public:
     Mass * getMassByIndex(int i);
     Container * getContainerByIndex(int i);
 
+    std::vector<Mass *> masses;
+    std::vector<Spring *> springs;
 private:
 
     void freeGPU();
@@ -132,8 +134,7 @@ private:
     bool ENDED;
     bool FREED;
 
-    std::vector<Mass *> masses;
-    std::vector<Spring *> springs;
+
     std::vector<Constraint *> constraints;
     std::vector<Container *> objs;
 
