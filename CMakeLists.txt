@@ -14,27 +14,13 @@ set(LOCH_HEADER_FILES ${LOCH_INCLUDE_DIR}/sim.h ${LOCH_INCLUDE_DIR}/mass.h ${LOC
         ${LOCH_INCLUDE_DIR}/spring.h ${LOCH_INCLUDE_DIR}/vec.h ${LOCH_INCLUDE_DIR}/graphics.h ${LOCH_INCLUDE_DIR}/shader.h
         ${LOCH_INCLUDE_DIR}/stlparser.h)
 
-if (LOCH_SHARED_BUILD)
-    set(BUILD_SHARED_LIBS ON)
-    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-    set(POSITION_INDEPENDENT_CODE ON)
-endif()
-
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-set(POSITION_INDEPENDENT_CODE ON)
-
-add_library(Loch ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
+add_executable(Loch main.cpp ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
 
 set_target_properties(Loch PROPERTIES CUDA_SEPARABLE_COMPILATION ON) # needed for library compilation
 set_target_properties(Loch PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
 
 target_compile_definitions(Loch PUBLIC GRAPHICS)
 target_compile_definitions(Loch PUBLIC CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
-
-if (NOT LOCH_SHARED_BUILD)
-    target_compile_definitions(Loch PUBLIC _MWAITXINTRIN_H_INCLUDED)
-    target_compile_features(Loch PUBLIC cxx_std_11) # same as above, may be unnecessary
-endif()
 
 find_package(CUDA REQUIRED) # find and include CUDA
 if (CUDA_FOUND)
@@ -80,31 +66,4 @@ if (glm_FOUND)
     message(STATUS "GLM FOUND")
     target_include_directories(Loch PRIVATE ${glm_INCLUDE_DIRS})
     target_link_libraries(Loch PRIVATE ${glm_LIBRARIES} glm)
-endif()
-
-target_include_directories(Loch PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Loch>
-        $<INSTALL_INTERFACE:include>)
-
-set_target_properties(Loch PROPERTIES PUBLIC_HEADER "${LOCH_HEADER_FILES}")
-
-install(TARGETS Loch
-        EXPORT LochTargets
-        PUBLIC_HEADER DESTINATION include/Loch
-        LIBRARY DESTINATION bin
-        ARCHIVE DESTINATION lib
-        RUNTIME DESTINATION bin
-        )
-
-if (LOCH_SHARED_BUILD)
-    install(EXPORT LochTargets
-            FILE LochConfig.cmake
-            DESTINATION share/loch)
-else()
-    install(EXPORT LochTargets
-            FILE LochTargets.cmake
-            DESTINATION share/loch)
-
-    configure_file(cmake/LochConfig.cmake.in2
-            ${CMAKE_INSTALL_PREFIX}/share/loch/LochConfig.cmake @ONLY)
 endif()
