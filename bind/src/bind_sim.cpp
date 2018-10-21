@@ -16,7 +16,6 @@ void bind_sim(py::module &m){
 
     py::class_<pySimulation>(m, "Sim")
             .def(py::init<>(),py::return_value_policy::reference)
-            //Creators/Destructors
             .def("createMass", (pyMass (pySimulation::*)()) &pySimulation::createMass,
                  py::call_guard<py::scoped_ostream_redirect,
                          py::scoped_estream_redirect>(), py::return_value_policy::reference)
@@ -29,8 +28,6 @@ void bind_sim(py::module &m){
             .def("createSpring", (pySpring (pySimulation::*)(pyMass m1, pyMass m2)) &pySimulation::createSpring, py::return_value_policy::reference)
             .def("createPlane", &pySimulation::createPlane, py::return_value_policy::reference)
             .def("createBall", &pySimulation::createBall, py::return_value_policy::reference)
-// NOT WORKING BECAUSE IT IS NOT POSSIBLE TO CALL A FUNCTION POINTER TO A METHOD WOTHOUR KNOWING THE
-//            OBJECT IT IS APPLIED TO IMPLICITLY
 
 //            .def("createLattice", &pySimulation::createLattice)
 

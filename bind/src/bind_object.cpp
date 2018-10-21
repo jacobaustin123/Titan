@@ -20,23 +20,18 @@ void bind_object(py::module &m) {
             .def("add", (void (Container::*)(Container *c)) &Container::add);
 
 
-//    py::class_<Cube>(m, "Cube", Container /* <- specify Python parent type */)
-//            .def(py::init<>())
+    py::class_<Cube>(m, "Cube", Container /* <- specify Python parent type */)
+            .def(py::init<>())
 //
-//    py::class_<Lattice>(m, "Lattice", Container /* <- specify Python parent type */)
-//            .def(py::init<>())
+    py::class_<Lattice>(m, "Lattice", Container /* <- specify Python parent type */)
+            .def(py::init<>())
 //
 //
-//    py::class_<Ball>(m, "Ball", Constraint /* <- specify Python parent type */)
-//            .def(py::init<>());
+    py::class_<Ball>(m, "Ball", Constraint /* <- specify Python parent type */)
+            .def(py::init<>());
 //
-//    py::class_<ContactPlane>(m, "ContactPlane", Constraint /* <- specify Python parent type */)
-//            .def(py::init<>());
+    py::class_<ContactPlane>(m, "ContactPlane", Constraint /* <- specify Python parent type */)
+            .def(py::init<>());
 //
 
-
-    //PLANE
-    //CUBE
-    //LATTICE
-    //
 }

@@ -16,6 +16,7 @@ void bind_spring(py::module &m){
             .def("setRight", &pySpring::setRight, py::return_value_policy::reference)
             .def("setMasses", &pySpring::setMasses, py::return_value_policy::reference)
 
+//LEGACY
 //            .def_readwrite("pointer", &pySpring::pointer)
 //            .def("setK", &pySpring::pysetK)
 //            .def("defaultLength", &pySpring::pydefaultLength)

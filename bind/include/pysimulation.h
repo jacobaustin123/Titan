@@ -24,7 +24,7 @@ public:
     pySpring createSpring(){ pySpring ps(sim.createSpring());  return ps;}
     pySpring createSpring(pyMass m1, pyMass m2 ){ pySpring ps (sim.createSpring(m1.pointer, m2.pointer)); return ps;}
 
-    // Delete
+    // Delete DON't FORGET TO ENABLE IN FINAL VERSION AFTER TESTING
 //    void deleteMass(pyMass pm);
 //    void deleteSpring(pySpring ps);
 //    void deleteContainer(Container * c);
@@ -46,8 +46,9 @@ public:
 
     void clearConstraints(){sim.clearConstraints();};
 
-    // Containers
-    Container * createContainer() {sim.createContainer();};
+    // Containers NEED FINAL TOUCHES . WAIT FOR NEW C++ BUILD
+    Container * createContainer() {sim.createContainer();}
+
 //    Cube * createCube(const Vec & center, double side_length);
 //    Lattice * createLattice(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
 
