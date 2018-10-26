@@ -3,8 +3,8 @@
 //
 
 #ifdef GRAPHICS
-#ifndef LOCH_GRAPHICS_H
-#define LOCH_GRAPHICS_H
+#ifndef TITAN_GRAPHICS_H
+#define TITAN_GRAPHICS_H
 
 // Include GLEW
 #include <GL/glew.h>
@@ -19,5 +19,5 @@ using namespace glm;
 
 glm::mat4 getProjection(const Vec & camera, const Vec & looks_at, const Vec & up);
 
-#endif //LOCH_GRAPHICS_H
+#endif //TITAN_GRAPHICS_H
 #endif

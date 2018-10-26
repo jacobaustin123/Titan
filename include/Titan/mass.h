@@ -2,8 +2,8 @@
 // Created by Jacob Austin on 5/17/18.
 //
 
-#ifndef LOCH_MASS_H
-#define LOCH_MASS_H
+#ifndef TITAN_MASS_H
+#define TITAN_MASS_H
 
 #include "vec.h"
 #include "object.h"
@@ -89,4 +89,4 @@ private:
 #endif
 };
 
-#endif //LOCH_MASS_H
+#endif //TITAN_MASS_H

@@ -4,17 +4,17 @@ project(test1 LANGUAGES CXX CUDA) # use CXX, CUDA by default (since CUDA is a la
 set(CMAKE_CXX_STANDARD 14) # set C++ standard to C++11
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++14") # same thing, may be unnecessary
 
-set(LOCH_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../src)
-set(LOCH_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../include/Loch)
+set(TITAN_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../src)
+set(TITAN_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/../../include/Titan)
 
-set(LOCH_SOURCE_FILES ${LOCH_SOURCE_DIR}/vec.cu ${LOCH_SOURCE_DIR}/sim.cu ${LOCH_SOURCE_DIR}/shader.cpp
-        ${LOCH_SOURCE_DIR}/sim.cu ${LOCH_SOURCE_DIR}/mass.cu ${LOCH_SOURCE_DIR}/spring.cu
-        ${LOCH_SOURCE_DIR}/object.cu ${LOCH_SOURCE_DIR}/graphics.cpp)
+set(TITAN_SOURCE_FILES ${TITAN_SOURCE_DIR}/vec.cu ${TITAN_SOURCE_DIR}/sim.cu ${TITAN_SOURCE_DIR}/shader.cpp
+        ${TITAN_SOURCE_DIR}/sim.cu ${TITAN_SOURCE_DIR}/mass.cu ${TITAN_SOURCE_DIR}/spring.cu
+        ${TITAN_SOURCE_DIR}/object.cu ${TITAN_SOURCE_DIR}/graphics.cpp)
 
-set(LOCH_HEADER_FILES ${LOCH_INCLUDE_DIR}/sim.h ${LOCH_INCLUDE_DIR}/mass.h ${LOCH_INCLUDE_DIR}/object.h
-        ${LOCH_INCLUDE_DIR}/spring.h ${LOCH_INCLUDE_DIR}/vec.h ${LOCH_INCLUDE_DIR}/graphics.h ${LOCH_INCLUDE_DIR}/shader.h)
+set(TITAN_HEADER_FILES ${TITAN_INCLUDE_DIR}/sim.h ${TITAN_INCLUDE_DIR}/mass.h ${TITAN_INCLUDE_DIR}/object.h
+        ${TITAN_INCLUDE_DIR}/spring.h ${TITAN_INCLUDE_DIR}/vec.h ${TITAN_INCLUDE_DIR}/graphics.h ${TITAN_INCLUDE_DIR}/shader.h)
 
-include_directories(${LOCH_INCLUDE_DIR})
+include_directories(${TITAN_INCLUDE_DIR})
 
 find_package(CUDA REQUIRED) # find and include CUDA
 if (CUDA_FOUND)
@@ -54,7 +54,7 @@ if (glm_FOUND)
     link_libraries(${glm_LIBRARIES})
 endif()
 
-add_executable(test1 ${CMAKE_CURRENT_LIST_DIR}/test1.cpp ${LOCH_SOURCE_FILES} ${LOCH_HEADER_FILES})
+add_executable(test1 ${CMAKE_CURRENT_LIST_DIR}/test1.cpp ${TITAN_SOURCE_FILES} ${TITAN_HEADER_FILES})
 target_compile_definitions(test1 PRIVATE GRAPHICS)
 target_compile_definitions(test1 PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
 

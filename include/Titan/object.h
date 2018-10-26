@@ -1,5 +1,5 @@
-#ifndef LOCH_OBJECT_H
-#define LOCH_OBJECT_H
+#ifndef TITAN_OBJECT_H
+#define TITAN_OBJECT_H
 
 //#include "mass.h"
 //#include "spring.h"
@@ -272,4 +272,4 @@ public:
     int nx, ny, nz;
     Vec _center, _dims;
 };
-#endif //LOCH_OBJECT_H
+#endif //TITAN_OBJECT_H

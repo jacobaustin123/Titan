@@ -2,8 +2,8 @@
 // Created by Jacob Austin on 5/17/18.
 //
 
-#ifndef LOCH_SPRING_H
-#define LOCH_SPRING_H
+#ifndef TITAN_SPRING_H
+#define TITAN_SPRING_H
 
 #include "mass.h"
 #include "vec.h"
@@ -69,4 +69,4 @@ struct CUDA_SPRING {
     double _rest; // spring rest length (meters)
 };
 
-#endif //LOCH_SPRING_H
+#endif //TITAN_SPRING_H

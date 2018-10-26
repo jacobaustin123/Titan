@@ -1,14 +1,14 @@
-# Loch
-**Loch** is a versitile CUDA-based physics simulation library that provides a powerful GPU-accelerated simulation environment for physics primatives like springs and masses. Library users can create masses, springs, and more complicated objects, apply constraints, and modify simulation parameters in real time, while the simulation runs asynchronous on the GPU.
+# Titan
+**Titan** is a versitile CUDA-based physics simulation library that provides a powerful GPU-accelerated simulation environment for physics primatives like springs and masses. Library users can create masses, springs, and more complicated objects, apply constraints, and modify simulation parameters in real time, while the simulation runs asynchronous on the GPU.
 
 ## Installation
 
-Detailed instructions can be found in the [user wiki](https://github.com/ja3067/Loch/wiki/Set-Up) for building and installing the Loch physics library.
+Detailed instructions can be found in the [user wiki](https://github.com/ja3067/Titan/wiki/Set-Up) for building and installing the Titan physics library.
 
-**Try a simple Loch physics simulation**
+**Try a simple Titan physics simulation**
 
 ```C++
-#include <Loch/sim.h>
+#include <Titan/sim.h>
 
 int main() {
   sim.createLattice(Vec(0, 0, 10), Vec(5, 5, 5), 5, 5, 5); // create lattice with center at (0, 0, 10) and given dimensions
@@ -21,7 +21,7 @@ This simple program produces a large lattice bouncing on the given plane:
 
 <img src="https://i.imgur.com/zdB0ZPg.gif" width="400" height="400">
 
-For more examples and troubleshooting, see the [github wiki](https://github.com/ja3067/Loch/wiki/Using-CMake-or-Visual-Studio). 
+For more examples and troubleshooting, see the [github wiki](https://github.com/ja3067/Titan/wiki/Using-CMake-or-Visual-Studio). 
 
 ## License
 

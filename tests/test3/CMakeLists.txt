@@ -3,5 +3,5 @@ project(test3 LANGUAGES CXX) # use CXX, CUDA by default (since CUDA is a languag
 
 add_executable(test3 ${CMAKE_CURRENT_LIST_DIR}/test3.cpp)
 
-find_package(Loch CONFIG REQUIRED)
-target_link_libraries(test3 PRIVATE Loch)
+find_package(Titan CONFIG REQUIRED)
+target_link_libraries(test3 PRIVATE Titan)

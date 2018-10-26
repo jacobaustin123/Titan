@@ -1,4 +1,4 @@
-#include "../Loch/include/Loch/sim.h"
+#include "../Titan/include/Titan/sim.h"
 
 int main() {
     Simulation sim;

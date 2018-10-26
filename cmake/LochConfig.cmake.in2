@@ -30,4 +30,4 @@ find_dependency(OpenGL)
 #    set(CMAKE_CUDA_DEVICE_LINK_EXECUTABLE "<CMAKE_CUDA_COMPILER>  <FLAGS> -Xcompiler=-fPIC -Wno-deprecated-gpu-targets -shared -dlink <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
 #endif()
 
-include("${CMAKE_CURRENT_LIST_DIR}/LochTargets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/TitanTargets.cmake")

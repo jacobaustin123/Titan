@@ -1,1 +1,1 @@
-Temporary copyright for the Loch library for vcpkg compatibility.
+Temporary copyright for the Titan library for vcpkg compatibility.
