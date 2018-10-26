@@ -11,30 +11,14 @@
 
 include(vcpkg_common_functions)
 
-#set(SOURCE_PATH ${CURRENT_BUILDTREES_DIR}/src/zlib1211-2)
-#vcpkg_download_distfile(ARCHIVE
-#    URLS "http://zlib.net/zlib1211.zip"
-#    FILENAME "zlib1211-2.zip"
-#    SHA512 9069fe4a9bfae1d45bcf000404c9f89605741b67987b8ca412b84ba937ed1b7bba4b8b174b6f9bc6814776def5f4b34ec7785cd84aa410002d87ddd1b507f11a
-#)
-
-vcpkg_extract_source_archive(${VCPKG_ROOT_DIR}/downloads/Titan.zip)
-
-#vcpkg_from_github(OUT_SOURCE_PATH SOURCE_PATH
-#        REPO ja3067/Titan
-#        REF 70a6c2217f1b5dd199123e419e51853fe7a290cc
-#        SHA512 1
-#        HEAD_REF package
-#        )
-
-#vcpkg_from_github(OUT_SOURCE_PATH SOURCE_PATH
-#        REPO Microsoft/vcpkg
-#        REF 2035d0124dd01ea3ebabfdcc99c7275f723cab13
-#        SHA512 8291639d16ebf9f5394f601b7951028dbb095dfece47c57deb1b2e43f5a893c0b128632d82157bfe1f0ce26f21837a598a638cc399e16d1906d825a3ed5e10ac
-#        HEAD_REF master
-#        )
-
 set(SOURCE_PATH ${CURRENT_BUILDTREES_DIR}/src/Titan)
+
+vcpkg_from_github(OUT_SOURCE_PATH SOURCE_PATH
+        REPO ja3067/Titan
+        REF 1c45f7f4a50c7cc089db1e9c9f81ed13acdb0cc3
+        SHA512 1
+        HEAD_REF master
+        )
 
 find_program(NVCC
         NAMES nvcc nvcc.exe
@@ -55,8 +39,6 @@ endif()
 set(CMAKE_CUDA_COMPILER:FILEPATH ${NVCC})
 
 if(VCPKG_LIBRARY_LINKAGE STREQUAL "static")
-#    message(FATAL_ERROR "The Titan library does not currently support static compilation. Please use the x64-windows or x64-osx triplets")
-
     vcpkg_configure_cmake( # may be added later
             SOURCE_PATH ${SOURCE_PATH}
             PREFER_NINJA
