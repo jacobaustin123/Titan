@@ -1968,7 +1968,7 @@ void Simulation::printSprings() {
     std::cout << std::endl;
 }
 
-void Simulation::setGlobalForce(const Vec & global) {
+void Simulation::setGlobalAcceleration(const Vec & global) {
     if (RUNNING) {
         throw std::runtime_error("The simulation is running. The global force parameter cannot be changed during runtime");
     }

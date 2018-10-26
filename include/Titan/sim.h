@@ -111,7 +111,7 @@ public:
     std::vector<Spring *> springs;
     std::vector<Container *> containers;
 
-    void setGlobalForce(const Vec & global);
+    void setGlobalAcceleration(const Vec & global);
 
 #ifdef GRAPHICS
     void setViewport(const Vec & camera_position, const Vec & target_location, const Vec & up_vector);

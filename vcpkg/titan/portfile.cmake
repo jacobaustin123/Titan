@@ -15,8 +15,8 @@ set(SOURCE_PATH ${CURRENT_BUILDTREES_DIR}/src/Titan)
 
 vcpkg_from_github(OUT_SOURCE_PATH SOURCE_PATH
         REPO ja3067/Titan
-        REF 1c45f7f4a50c7cc089db1e9c9f81ed13acdb0cc3
-        SHA512 1
+        REF 167d14c5ce33a165e36d4ff2f0ee91420888144f
+        SHA512 26c3c764312a8acac615ef9511bf7971a650f7bc0927376d0332a5bb2a63bcb74afbd0aa5b8e138b6326c4c968fcf9e4a064ac4dfbda43f610b6fca9b753b64d
         HEAD_REF master
         )
 
