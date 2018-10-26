@@ -83,4 +83,4 @@ file(
 )
 
 # Handle copyright
-file(INSTALL ${SOURCE_PATH}/vcpkg/copyright.txt DESTINATION ${CURRENT_PACKAGES_DIR}/share/loch RENAME copyright)
+file(INSTALL ${SOURCE_PATH}/vcpkg/copyright.txt DESTINATION ${CURRENT_PACKAGES_DIR}/share/titan RENAME copyright)

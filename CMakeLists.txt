@@ -99,12 +99,12 @@ install(TARGETS Titan
 if (TITAN_SHARED_BUILD)
     install(EXPORT TitanTargets
             FILE TitanConfig.cmake
-            DESTINATION share/loch)
+            DESTINATION share/titan)
 else()
     install(EXPORT TitanTargets
             FILE TitanTargets.cmake
-            DESTINATION share/loch)
+            DESTINATION share/titan)
 
     configure_file(cmake/TitanConfig.cmake.in2
-            ${CMAKE_INSTALL_PREFIX}/share/loch/TitanConfig.cmake @ONLY)
+            ${CMAKE_INSTALL_PREFIX}/share/titan/TitanConfig.cmake @ONLY)
 endif()
