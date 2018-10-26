@@ -2,8 +2,8 @@
 // Created by Jacob Austin on 5/17/18.
 //
 
-#ifndef LOCH_SIM_H
-#define LOCH_SIM_H
+#ifndef TITAN_SIM_H
+#define TITAN_SIM_H
 
 #include "spring.h"
 #include "mass.h"
@@ -213,4 +213,4 @@ private:
 #endif
 };
 
-#endif //LOCH_SIM_H
+#endif //TITAN_SIM_H
