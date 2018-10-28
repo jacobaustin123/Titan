@@ -25,4 +25,4 @@ For more examples and troubleshooting, see the [github wiki](https://github.com/
 
 ## License
 
-This software was written by Jacob Austin and Rafael Corrales Fatou as part of a project led by Professor Hod Lipson at Columbia University. The software is currently closed-source, but may be open-sourced in the future. Please do not redistribute until that time.
+This software was written by Jacob Austin and Rafael Corrales Fatou as part of a project led by Professor Hod Lipson at the Creative Machines Lab at Columbia University. You are welcome to use and modify the software as desired, but we ask that you give credit to the original source.
