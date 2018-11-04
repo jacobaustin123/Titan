@@ -21,7 +21,7 @@ This simple program produces a large lattice bouncing on the given plane:
 
 <img src="https://i.imgur.com/zdB0ZPg.gif" width="400" height="400">
 
-For more examples and troubleshooting, see the [github wiki](https://github.com/ja3067/Titan/wiki/Using-CMake-or-Visual-Studio). 
+For more examples and troubleshooting, see the [github wiki](https://github.com/ja3067/Titan/wiki/Set-Up). 
 
 ## License
 
