@@ -1,7 +1,7 @@
 //
 // Created by Jacob Austin on 5/17/18.
 //
-
+#define GLM_FORCE_PURE
 #include "spring.h"
 
 Vec Spring::getForce() { // computes force on right object. left force is - right force.

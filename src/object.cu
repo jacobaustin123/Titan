@@ -1,7 +1,7 @@
 //
 // Created by Jacob Austin on 5/21/18.
 //
-
+#define GLM_FORCE_PURE
 #include "object.h"
 #include <cmath>
 #include "sim.h"

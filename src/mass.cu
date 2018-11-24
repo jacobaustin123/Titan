@@ -1,7 +1,7 @@
 //
 // Created by Jacob Austin on 5/17/18.
 //
-
+#define GLM_FORCE_PURE
 #include "mass.h"
 
 

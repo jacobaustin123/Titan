@@ -2,6 +2,7 @@
 // Created by Jacob Austin on 5/17/18.
 //
 
+#define GLM_FORCE_PURE
 #include "sim.h"
 #include "stlparser.h"
 
@@ -23,6 +24,7 @@
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 #endif
 #endif
+
 
 __global__ void createSpringPointers(CUDA_SPRING ** ptrs, CUDA_SPRING * data, int size);
 __global__ void createMassPointers(CUDA_MASS ** ptrs, CUDA_MASS * data, int size);
