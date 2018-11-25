@@ -11,6 +11,7 @@ Detailed instructions can be found in the [user wiki](https://github.com/ja3067/
 #include <Titan/sim.h>
 
 int main() {
+  Simulation sim;
   sim.createLattice(Vec(0, 0, 10), Vec(5, 5, 5), 5, 5, 5); // create lattice with center at (0, 0, 10) and given dimensions
   sim.createPlane(Vec(0, 0, 1), 0); // create constraint plane
   sim.start();
