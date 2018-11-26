@@ -224,7 +224,7 @@ public:
 
     void setMassValues(double m); // set masses for all Mass objects
     void setSpringConstants(double k); // set k for all Spring objects
-    void setDeltaT(double m); // set masses for all Mass objects
+    void setDeltaT(double dt); // set delta-t of all masses to dt
     void setRestLengths(double len); // set masses for all Mass objects
 
 #ifdef CONSTRAINTS
