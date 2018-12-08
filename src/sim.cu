@@ -1088,7 +1088,7 @@ __global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, Vec global, CUDA_GLOBAL
 #endif
 
         mass.acc = mass.force / mass.m;
-        mass.vel = mass.vel + mass.acc * mass.dt;
+        mass.vel = (mass.vel + mass.acc * mass.dt)*mass.damping;
         mass.pos = mass.pos + mass.vel * mass.dt;
 
         mass.force = Vec(0, 0, 0);
@@ -1360,6 +1360,7 @@ void Simulation::_run() { // repeatedly start next
     GPU_DONE = true;
 }
 
+#ifdef GRAPHICS
 void Simulation::setViewport(const Vec & camera_position, const Vec & target_location, const Vec & up_vector) {
     if (RUNNING) {
         throw std::runtime_error("The simulation is running. Cannot modify viewport during simulation run.");
@@ -1385,6 +1386,7 @@ void Simulation::moveViewport(const Vec & displacement) {
         this -> MVP = getProjection(camera, looks_at, up); // compute perspective projection matrix
     }
 }
+#endif
 
 void Simulation::updateCudaParameters() {
     massBlocksPerGrid = (masses.size() + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK;
@@ -1426,7 +1428,7 @@ void Simulation::execute() {
     while (1) {
         if (!bpts.empty() && *bpts.begin() <= T) {
             cudaDeviceSynchronize(); // synchronize before updating the springs and mass positions
-            std::cout << "Breakpoint set for time " << *bpts.begin() << " reached at simulation time " << T << "!" << std::endl;
+	    //            std::cout << "Breakpoint set for time " << *bpts.begin() << " reached at simulation time " << T << "!" << std::endl;
             bpts.erase(bpts.begin());
             RUNNING = false;
 
