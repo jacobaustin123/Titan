@@ -19,6 +19,7 @@ struct CUDA_MASS {
     double m; // mass in kg
     double dt; // update interval
     double T; // local time
+    double damping;
     Vec pos; // position in m
     Vec vel; // velocity in m/s
     Vec acc; // acceleration in m/s^2
@@ -42,6 +43,7 @@ public:
     double m; // mass in kg
     double dt; // update interval
     double T; // local time
+    double damping; // damping mass velocity
     Vec pos; // position in m
     Vec vel; // velocity in m/s
     Vec acc; // acceleration in m/s^2
