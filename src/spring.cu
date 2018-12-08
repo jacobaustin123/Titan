@@ -3,10 +3,19 @@
 //
 #define GLM_FORCE_PURE
 #include "spring.h"
+#include <cmath>
+
+const double EDGE_DAMPING = 20; // f_damp = delta_v_along_spring*edge_damping_constant;
 
 Vec Spring::getForce() { // computes force on right object. left force is - right force.
-    Vec temp = (_right -> pos) - (_left -> pos);
-    return _k * (_rest - temp.norm()) * (temp / temp.norm());
+  //    Vec temp = (_right -> pos) - (_left -> pos);
+  //    return _k * (_rest - temp.norm()) * (temp / temp.norm());
+
+    Vec temp = (_left -> pos) - (_right -> pos);
+    Vec spring_force = _k * (temp.norm() - _rest) * (temp / temp.norm());
+
+    spring_force += dot( (_left->vel - _right->vel) , temp/temp.norm() )*EDGE_DAMPING* (temp/temp.norm());
+    return spring_force;
 }
 
 void Spring::setForce() { // computes force on right object. left force is - right force.
