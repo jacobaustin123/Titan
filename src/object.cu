@@ -6,7 +6,10 @@
 #include <cmath>
 #include "sim.h"
 
-__device__ const double NORMAL = 100000;
+
+__device__ const double NORMAL = 200000;
+__device__ const double FRICTION_S = 1.0;  // static friction coeff rubber-on-concrete
+__device__ const double FRICTION_K = 0.8;  // kinetic friction coeff
 
 #ifdef CONSTRAINTS
 void Container::addConstraint(CONSTRAINT_TYPE type, const Vec & v, double d) {
@@ -50,7 +53,30 @@ CudaContactPlane::CudaContactPlane(const ContactPlane & p) {
 
 CUDA_CALLABLE_MEMBER void CudaContactPlane::applyForce(CUDA_MASS * m) {
     double disp = dot(m -> pos, _normal) - _offset;
-    m -> force += (disp < 0) ? - disp * NORMAL * _normal : 0 * _normal; // TODO fix this for the host
+    //    m -> force += (disp < 0) ? - disp * NORMAL * _normal : 0 * _normal; // TODO fix this for the host
+
+    Vec fn_ground_v = (disp < 0) ? - disp * NORMAL * _normal : 0 * _normal;
+    double fn_ground = fn_ground_v.norm();
+    m -> force +=  fn_ground_v; // TODO fix this for the host
+    if (disp<0) {
+      //TODO this currently only support when normal is (0,0,1), extend to general cases
+      double vxy_sq2 = m->vel[0] * m->vel[0] + m->vel[1] * m->vel[1];
+      if (vxy_sq2 > 1e-16) {
+	double friction_mag = FRICTION_K * fn_ground / std::sqrt(vxy_sq2);
+	m->force[0] -= m->vel[0] * friction_mag;
+	m->force[1] -= m->vel[1] * friction_mag;
+      } else {
+	double fxy = std::sqrt(m->force[0] * m->force[0] + m->force[1] * m->force[1]);
+	if (FRICTION_S * fn_ground > fxy) {
+	  m->force[0] = 0;
+	  m->force[1] = 0;
+	} else {
+	  double friction_mag = FRICTION_K * fn_ground / fxy;
+	  m->force[0] -= m->force[0] * friction_mag;
+	  m->force[1] -= m->force[1] * friction_mag;
+	}
+      }
+    }
 }
 
 CUDA_CALLABLE_MEMBER CudaConstraintPlane::CudaConstraintPlane(const Vec & normal, double friction) {
