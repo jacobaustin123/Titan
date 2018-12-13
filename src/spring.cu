@@ -55,6 +55,8 @@ CUDA_SPRING::CUDA_SPRING(const Spring & s) {
     _right = (s._right == nullptr) ? nullptr : s. _right -> arrayptr;
     _k = s._k;
     _rest = s._rest;
+    _type = s._type;
+    _omega = s._omega;
 }
 
 CUDA_SPRING::CUDA_SPRING(const Spring & s, CUDA_MASS * left, CUDA_MASS * right) {
@@ -62,4 +64,6 @@ CUDA_SPRING::CUDA_SPRING(const Spring & s, CUDA_MASS * left, CUDA_MASS * right) 
     _right = right;
     _k = s._k;
     _rest = s._rest;
+    _type = s._type;
+    _omega = s._omega;
 }
