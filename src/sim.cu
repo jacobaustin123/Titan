@@ -1552,7 +1552,7 @@ void Simulation::wait(double t) {
 }
 
 void Simulation::waitUntil(double t) {
-    if (ENDED) {
+    if (ENDED && !FREED) {
         throw std::runtime_error("The simulation has ended. Control functions cannot be called.");
     }
 
