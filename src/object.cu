@@ -6,6 +6,12 @@
 #include <cmath>
 #include "sim.h"
 
+#ifdef GRAPHICS
+const Vec RED(1.0, 0.2, 0.2);
+const Vec GREEN(0.2, 1.0, 0.2);
+const Vec BLUE(0.2, 0.2, 1.0);
+const Vec PURPLE(0.5, 0.2, 0.5);
+#endif
 
 __device__ const double NORMAL = 200000;
 __device__ const double FRICTION_S = 1.0;  // static friction coeff rubber-on-concrete
@@ -412,6 +418,9 @@ Robot::Robot(const Vec & center, const cppn& encoding, double side_length,  doub
 			      j / (RobotDim - 1.0) - 0.5,
 			      k / (RobotDim - 1.0) - 0.5) * dims + _center);
 	    }
+#ifdef GRAPHICS
+	    m -> color = Vec(0,0,0);
+#endif
 	    masses.push_back(m);
 	    _masses[i][j][k] = m;
 	  }
@@ -447,14 +456,31 @@ Robot::Robot(const Vec & center, const cppn& encoding, double side_length,  doub
 		spr -> _omega = omega;
 		if (type==0){// green, contract then expand
 		  spr -> _k = k_soft;
+#ifdef GRAPHICS
+		  _masses[i+l_x][j+l_y][k+l_z]->color += GREEN/16;
+		  _masses[i+r_x][j+r_y][k+r_z]->color += GREEN/16;
+#endif
+		
 		}else if(type==1){ // red, expand then contract
 		  spr -> _k = k_soft;
+#ifdef GRAPHICS
+		  _masses[i+l_x][j+l_y][k+l_z]->color += RED/16;
+		  _masses[i+r_x][j+r_y][k+r_z]->color += RED/16;
+#endif
+		
 		}else if(type==2){ // passive soft
 		  spr -> _k = k_soft;
+#ifdef GRAPHICS
+		  _masses[i+l_x][j+l_y][k+l_z]->color += BLUE/16;
+		  _masses[i+r_x][j+r_y][k+r_z]->color += BLUE/16;
+#endif
 		}else{ // passive stiff
 		  spr -> _k = k_stiff;
+#ifdef GRAPHICS
+		  _masses[i+l_x][j+l_y][k+l_z]->color += PURPLE/16;
+		  _masses[i+r_x][j+r_y][k+r_z]->color += PURPLE/16;
+#endif
 		}
-		
 		springs.push_back(spr);
 	      }
 	    }

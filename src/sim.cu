@@ -1021,7 +1021,7 @@ __global__ void computeSpringForces(CUDA_SPRING ** d_spring, int num_springs, do
 	if (spring._type == ACTIVE_CONTRACT_THEN_EXPAND){
 	  scale = (1 - 0.2*sin(spring._omega * t));
 	}else if (spring._type == ACTIVE_EXPAND_THEN_CONTRACT){
-	  scale = (1 - 0.2*sin(spring._omega * t));
+	  scale = (1 + 0.2*sin(spring._omega * t));
 	}
 	
         Vec force = spring._k * (spring._rest * scale - temp.norm()) * (temp / temp.norm());

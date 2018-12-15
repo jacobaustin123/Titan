@@ -59,6 +59,10 @@ public:
     void fix();
     void unfix();
 #endif
+    
+#ifdef GRAPHICS
+    Vec color;
+#endif
 
 private:
     bool valid;
@@ -85,9 +89,6 @@ private:
 
 #endif
 
-#ifdef GRAPHICS
-    Vec color;
-#endif
 };
 
 #endif //TITAN_MASS_H
