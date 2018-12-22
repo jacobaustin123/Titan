@@ -82,6 +82,15 @@ if (glm_FOUND)
     target_link_libraries(Titan PRIVATE ${glm_LIBRARIES} glm)
 endif()
 
+find_package(pybind11 REQUIRED)  #pybind11
+if (pybind11_FOUND)
+    message(STATUS "pybind11 FOUND")
+    #no need ot target_include or target_link. done later through add module
+else()
+    message(STATUS "pybind11 NOT FOUND")
+endif()
+
+
 target_include_directories(Titan PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/Titan>
         $<INSTALL_INTERFACE:include>)
@@ -108,3 +117,32 @@ else()
     configure_file(cmake/TitanConfig.cmake.in2
             ${CMAKE_INSTALL_PREFIX}/share/titan/TitanConfig.cmake @ONLY)
 endif()
+
+
+#Create Library with .cu files
+add_library(cu_lib ${LOCH_FILES})
+target_include_directories(cu_lib PRIVATE ${LOCH_INCLUDE_DIR}} ${CUDA_INCLUDE_DIRS} )
+set_target_properties(cu_lib PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+set_target_properties(cu_lib PROPERTIES POSITION_INDEPENDENT_CODE ON)
+set_target_properties(cu_lib PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
+
+#target_compile_definitions(cu_lib PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
+#target_compile_definitions(cu_lib PRIVATE GRAPHICS) # defines the GRAPHICS preprocessor variable
+
+target_compile_features(cu_lib PUBLIC cxx_std_11)
+target_link_libraries(cu_lib PRIVATE cuda cudart glm)
+
+if ( WIN32 ) # use GLFW on Windows
+    target_link_libraries(cu_lib PRIVATE GLEW::GLEW)
+    target_link_libraries(cu_lib PRIVATE glfw)
+endif()
+
+#PYBIND11
+#CREATE PYTHON BINDINGS
+pybind11_add_module(bindloch ${LOCH_BIND_FILES} ${LOCH_HEADER_FILES})
+
+#Add linking dependencies to the binding library
+target_include_directories(bindloch PRIVATE ${LOCH_BIND_INCLUDE_DIR}
+        ${LOCH_INCLUDE_DIR})
+add_dependencies(bindloch cu_lib)
+target_link_libraries(bindloch PRIVATE cu_lib)
