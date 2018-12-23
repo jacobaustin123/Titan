@@ -31,6 +31,11 @@ py::array_t<double> pyMass::vel() {
     std::memcpy(pyvel_ptr, &pointer->pos.data, 3 * sizeof(double));
     return pyvel;
 }
+void pyMass::vel(py::array_t<double> arr){
+    for (int i = 0; i< 3; i++){
+        pointer -> vel[i] = * arr.data(i);
+    }
+}
 
 py::array_t<double> pyMass::acc() {
 
@@ -41,6 +46,12 @@ py::array_t<double> pyMass::acc() {
     return pyacc;
 }
 
+void pyMass::acc(py::array_t<double> arr){
+    for (int i = 0; i< 3; i++){
+        pointer -> acc[i] = * arr.data(i);
+    }
+}
+
 py::array_t<double> pyMass::force() {
 
     auto pyforce = py::array_t<double>(sizeof(double) * 3);
@@ -48,4 +59,10 @@ py::array_t<double> pyMass::force() {
     double *pyforce_ptr = (double *) pyforce_buffer.ptr;
     std::memcpy(pyforce_ptr, &pointer->pos.data, 3 * sizeof(double));
     return pyforce;
+}
+
+void pyMass::force(py::array_t<double> arr){
+    for (int i = 0; i< 3; i++){
+        pointer -> force[i] = * arr.data(i);
+    }
 }

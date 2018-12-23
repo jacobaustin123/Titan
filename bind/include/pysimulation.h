@@ -1,20 +1,15 @@
-//
-// Created by rcorr on 9/13/2018.
-//
-
 #ifndef LOCH_PYSIMULATION_H
 #define LOCH_PYSIMULATION_H
 
 #include "sim.h"
 #include "pymass.h"
 #include "pyspring.h"
+#include "pyobject.h"
 
 class pySimulation{
 public:
     //constructor
     pySimulation() = default;
-//    ~pySimulation();
-
     Simulation sim;
 
     //Create
@@ -24,21 +19,33 @@ public:
     pySpring createSpring(){ pySpring ps(sim.createSpring());  return ps;}
     pySpring createSpring(pyMass m1, pyMass m2 ){ pySpring ps (sim.createSpring(m1.pointer, m2.pointer)); return ps;}
 
-    // Delete DON't FORGET TO ENABLE IN FINAL VERSION AFTER TESTING
-//    void deleteMass(pyMass pm);
-//    void deleteSpring(pySpring ps);
-//    void deleteContainer(Container * c);
-//
-//    void get(pyMass pm);
-//    void get(pySpring ps);
-//    void get(Container *c);
-//
-//    void set(pyMass pm);
-//    void set(pySpring ps);
-//    void set(Container * c);
+    pyContainer createContainer() {pyContainer pc (sim.createContainer()); return pc;}
 
+    //delete
+    void deleteMass(pyMass pm);
+    void deleteSpring(pySpring ps);
+    void deleteContainer(pyContainer pc);
+
+    //getters
+    void get(pyMass pm);
+    void get(pySpring ps);
+    void get(pyContainer pc);
+    void getMassByIndex(int i);
+    void getSpringByIndex(int i);
     void getAll(){ sim.getAll();};
+
+    //setters
+    void set(pyMass pm);
+    void set(pySpring ps);
+    void set(pyContainer pc);
     void setAll(){ sim.setAll();};
+
+    //Containers
+    void createCube(py::array_t<double> center, double side_lenght);
+    void createLattice(py::array_t<double> center, double side_lenght);
+    void createRobot(py::array_t<double> center, double side_lenght);
+    void createBeam(py::array_t<double> center, double side_lenght);
+    void importFromSTL(std::string abc, double density );
 
     // Constraints
     void createPlane(py::array_t<double> abc, double d );
@@ -46,29 +53,27 @@ public:
 
     void clearConstraints(){sim.clearConstraints();};
 
-    // Containers NEED FINAL TOUCHES . WAIT FOR NEW C++ BUILD
-    Container * createContainer() {sim.createContainer();}
-
-//    Cube * createCube(const Vec & center, double side_length);
-//    Lattice * createLattice(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
 
     // Bulk modifications, only update CPU
-    void setSpringConstant(double k) {sim.setSpringConstant(k);}
-    void setMassValues(double m){sim.setMassValues(m);}
-    void setDeltaT(double dt){sim.setDeltaT(dt);}
+    void setAllSpringConstantValues(double k) {sim.setAllSpringConstantValues(k);}
+    void setAllMassValues(double m){ sim.setAllMassValues(m);}
+    void setAllDeltaTValues(double dt){sim.setAllDeltaTValues(dt);}
 
     void defaultRestLength(){sim.defaultRestLength();}
 
     // Control
-    void start(double time = 1E20) {sim.start(time);}
+    void start() {sim.start();}
 
     void stop(){sim.stop();}
     void stop(double time){sim.stop(time);}
 
     void pause(double t){sim.pause(t);}
     void resume(){sim.resume();}
+    void setBreakpoint(double time){sim.setBreakpoint(time);}
 
     void wait(double t){sim.wait(t);}
+    void waitUntil(double t);
+    void waitForEvent();
 
     double time() { return sim.time();}
     double running() { return sim.running();}
@@ -76,8 +81,5 @@ public:
     void printPositions(){sim.printPositions();}
     void printForces(){sim.printForces();}
 
-//    pyMass getMassByIndex(int i);
-//    pySpring getSpringByIndex(int i);
-//    Container * getContainerByIndex(int i);
 };
 #endif //LOCH_PYSIMULATION_H

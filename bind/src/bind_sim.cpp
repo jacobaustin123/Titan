@@ -16,6 +16,7 @@ void bind_sim(py::module &m){
 
     py::class_<pySimulation>(m, "Sim")
             .def(py::init<>(),py::return_value_policy::reference)
+            //create mass function. with and without coordinate vector
             .def("createMass", (pyMass (pySimulation::*)()) &pySimulation::createMass,
                  py::call_guard<py::scoped_ostream_redirect,
                          py::scoped_estream_redirect>(), py::return_value_policy::reference)
@@ -24,29 +25,32 @@ void bind_sim(py::module &m){
                  py::call_guard<py::scoped_ostream_redirect,
                          py::scoped_estream_redirect>(), py::return_value_policy::reference)
 
+             //create spring function. with and without specification of attached masses
             .def("createSpring", (pySpring (pySimulation::*)()) &pySimulation::createSpring, py::return_value_policy::reference)
             .def("createSpring", (pySpring (pySimulation::*)(pyMass m1, pyMass m2)) &pySimulation::createSpring, py::return_value_policy::reference)
+
+            //create contacts
             .def("createPlane", &pySimulation::createPlane, py::return_value_policy::reference)
             .def("createBall", &pySimulation::createBall, py::return_value_policy::reference)
 
-//            .def("createLattice", &pySimulation::createLattice)
+            .def("createLattice", &pySimulation::createLattice)
 
-//            .def("deleteMass", &pySimulation::deleteMass)
-//            .def("deleteSpring", &pySimulation::deleteSpring)
-//            .def("deleteContainer", &pySimulation::deleteContainer)
+            .def("deleteMass", &pySimulation::deleteMass)
+            .def("deleteSpring", &pySimulation::deleteSpring)
+            .def("deleteContainer", &pySimulation::deleteContainer)
 //            .def("clearConstraints", &pySimulation::clearConstraints)
-//                    //Setters
-//            .def("set", (void (pySimulation::*)(Mass *m)) &pySimulation::set)
-//            .def("set", (void (pySimulation::*)(Spring *s)) &pySimulation::set)
-//            .def("set", (void (pySimulation::*)(Container *c)) &pySimulation::set)
+             //Setters
+            .def("set", (void (pySimulation::*)(Mass *m)) &pySimulation::set)
+            .def("set", (void (pySimulation::*)(Spring *s)) &pySimulation::set)
+            .def("set", (void (pySimulation::*)(Container *c)) &pySimulation::set)
             .def("setAll", &pySimulation::setAll)
-//
-//            //Getters
-//            .def("get", (void (pySimulation::*)(Mass *m)) &pySimulation::get)
-//            .def("get", (void (pySimulation::*)(Spring *s)) &pySimulation::get)
-//            .def("get", (void (pySimulation::*)(Container *c)) &pySimulation::get)
 
-                    //Bulk
+            //Getters
+            .def("get", (void (pySimulation::*)(pyMass)) &pySimulation::get)
+            .def("get", (void (pySimulation::*)(pySpring)) &pySimulation::get)
+            .def("get", (void (pySimulation::*)(pyContainer *c)) &pySimulation::get)
+
+//Bulk
             .def("setSpringConstant", &pySimulation::setSpringConstant)
             .def("setMass", &pySimulation::setMassValues)
             .def("setMassDeltaT", &pySimulation::setDeltaT)

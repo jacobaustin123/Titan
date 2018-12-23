@@ -1,8 +1,6 @@
 #ifndef TITAN_OBJECT_H
 #define TITAN_OBJECT_H
 
-//#include "mass.h"
-//#include "spring.h"
 #include "vec.h"
 
 #ifdef GRAPHICS
