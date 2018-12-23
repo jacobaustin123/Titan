@@ -27,11 +27,11 @@ public:
     void deleteContainer(pyContainer pc);
 
     //getters
-    void get(pyMass pm);
-    void get(pySpring ps);
-    void get(pyContainer pc);
-    void getMassByIndex(int i);
-    void getSpringByIndex(int i);
+    void get(pyMass pm) {sim.get(pm.pointer);}
+    void get(pySpring ps){sim.get(ps.pointer);}
+    void get(pyContainer pc){sim.get(pc.pointer);}
+    void getMassByIndex(int i){sim.getMassByIndex(i);}
+    void getSpringByIndex(int i){getSpringByIndex(i);}
     void getAll(){ sim.getAll();};
 
     //setters

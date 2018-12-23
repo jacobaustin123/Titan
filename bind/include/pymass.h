@@ -19,10 +19,15 @@ public:
     //Properties
     double m() { return (pointer -> m);}  // get mass [kg]
     void m(double m) {pointer -> m = m;} // set mass [kg]
+
     double dt() { return (pointer -> dt);} // get interval [s]
     void dt(double deltat) {pointer -> dt = deltat;} //set interval [s]
+
     double T() { return (pointer -> T);} // get local time [s]
     void T(double time){pointer -> T = time;} //set local time [s]
+
+    double damping() {return pointer -> damping;} //get damping coefficient
+    void damping(double damping){pointer-> damping = damping;} //set damping coefficient
 
 
     py::array_t<double> pos(); // get position [m]

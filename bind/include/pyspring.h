@@ -24,6 +24,12 @@ public:
     double k (){return pointer -> _k;} // spring constant (N/m)
     double rest () {return pointer -> _rest;} // spring rest length (meters)
 
+    //BREATHING
+    int _type() {return pointer -> _type;} // get  type 0-3
+    void _type(int _type){pointer -> _type = _type} //set type
+    double _omega() {return pointer -> _omega;} // get frequency
+    void _omega(double _omega) { pointer -> _omega = _omega} // set frequency
+
     //Set
 
     void setK(double k) { pointer -> _k = k; } //sets K
