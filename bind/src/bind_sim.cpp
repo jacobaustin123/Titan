@@ -33,16 +33,16 @@ void bind_sim(py::module &m){
             .def("createPlane", &pySimulation::createPlane, py::return_value_policy::reference)
             .def("createBall", &pySimulation::createBall, py::return_value_policy::reference)
 
-            .def("createLattice", &pySimulation::createLattice)
+            .def("createLattice", &pySimulation::createLattice, py::return_value_policy::reference)
 
-            .def("deleteMass", &pySimulation::deleteMass)
+            .def("deleteMass", (void (pySimulation::*)(pyMass pm)) &pySimulation::deleteMass)
             .def("deleteSpring", &pySimulation::deleteSpring)
             .def("deleteContainer", &pySimulation::deleteContainer)
 //            .def("clearConstraints", &pySimulation::clearConstraints)
              //Setters
-            .def("set", (void (pySimulation::*)(Mass *m)) &pySimulation::set)
-            .def("set", (void (pySimulation::*)(Spring *s)) &pySimulation::set)
-            .def("set", (void (pySimulation::*)(Container *c)) &pySimulation::set)
+            .def("set", (void (pySimulation::*)(pyMass pm)) &pySimulation::set)
+            .def("set", (void (pySimulation::*)(pySpring ps)) &pySimulation::set)
+            .def("set", (void (pySimulation::*)(pyContainer pc)) &pySimulation::set)
             .def("setAll", &pySimulation::setAll)
 
             //Getters

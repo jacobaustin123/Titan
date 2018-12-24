@@ -277,6 +277,7 @@ Lattice::Lattice(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
     }
 }
 
+#ifdef CONSTRAINTS
 Beam::Beam(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
     _center = center;
     _dims = dims;
@@ -343,6 +344,7 @@ Beam::Beam(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
     }
 }
 
+#endif
 
 Robot::Robot(const Vec & center, const cppn& encoding, double side_length,  double omega, double k_soft, double k_stiff){
     _center = center;

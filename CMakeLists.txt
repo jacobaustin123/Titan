@@ -221,7 +221,7 @@
 
 
 #set(PYTHON_EXECUTABLE C:/Users/rcorr/Anaconda3/python.exe)
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.11)
 project(Loch LANGUAGES CXX CUDA) # use CXX, CUDA by default (since CUDA is a language, don't need cuda_add_executable)
 
 set(BUILD_SHARED_LIBS OFF)
@@ -229,20 +229,18 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 set(CMAKE_CXX_STANDARD 14) # set C++ standard to C++11
-#set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -std=c++14") # same thing, may be unnecessary
 set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
 set_property(GLOBAL PROPERTY CUDA_SEPARABLE_COMPILATION ON)
 
-set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src") # set SOURCE_DIR to src directory
-set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include/Titan") # set SOURCE_DIR to src directory
+set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src) # set SOURCE_DIR to src directory
+set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include/Titan) # set SOURCE_DIR to src directory
 
-include_directories(include) # include the include directory (can find headers there)
+include_directories(include/Titan) # include the include directory (can find headers there)
 
 #SET CPP PLOCH PROJECT
-set(LOCH_SOURCE_FILES src/object.cu src/graphics.cpp src/mass.cu src/sim.cu src/spring.cu src/vec.cu src/shader.cpp)
+set(LOCH_SOURCE_FILES  src/object.cu src/graphics.cpp src/mass.cu src/sim.cu src/spring.cu src/vec.cu src/shader.cpp)
 set(LOCH_HEADER_FILES ${INCLUDE_DIR}/object.h ${INCLUDE_DIR}/graphics.h ${INCLUDE_DIR}/mass.h ${INCLUDE_DIR}/sim.h ${INCLUDE_DIR}/spring.h ${INCLUDE_DIR}/vec.h)
 set(LOCH_FILES ${LOCH_HEADER_FILES} ${LOCH_SOURCE_FILES})
-set(LOCH_INCLUDE_DIR include/Titan)
 #SET PYTHON BINDING DIRECTORIES
 set(LOCH_BIND_SOURCE_FILES  bind/src/pysimulation.cpp bind/src/pymass.cpp bind/src/pyspring.cpp bind/src/pyobject.cpp bind/src/bind.cpp
         bind/src/bind_mass.cpp  bind/src/bind_sim.cpp bind/src/bind_spring.cpp bind/src/bind_object.cpp )
@@ -307,7 +305,7 @@ endif()
 
 #Create Library with .cu files
 add_library(cu_lib ${LOCH_FILES})
-target_include_directories(cu_lib PRIVATE ${LOCH_INCLUDE_DIR}} ${CUDA_INCLUDE_DIRS} )
+target_include_directories(cu_lib PRIVATE ${INCLUDE_DIR}} ${CUDA_INCLUDE_DIRS} )
 set_target_properties(cu_lib PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 set_target_properties(cu_lib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 set_target_properties(cu_lib PROPERTIES CUDA_RESOLVE_DEVICE_SYMBOLS ON)
@@ -332,4 +330,11 @@ target_include_directories(bindloch PRIVATE ${LOCH_BIND_INCLUDE_DIR}
         ${LOCH_INCLUDE_DIR})
 add_dependencies(bindloch cu_lib)
 target_link_libraries(bindloch PRIVATE cu_lib)
+
+set_target_properties( bindloch
+        PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/python_module"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/python_module"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/python_module"
+        )
 

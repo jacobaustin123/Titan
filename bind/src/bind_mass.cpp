@@ -10,7 +10,6 @@ void bind_mass(py::module &m){
             .def(py::init<>(), py::return_value_policy::reference)
 
             //properties
-            .def_readwrite("pointer", &pyMass::pointer)
             .def("m", (double (pyMass::*)()) &pyMass::m, py::return_value_policy::reference)
             .def("m", (void (pyMass::*)(double m)) &pyMass::m, py::return_value_policy::reference)
             .def("dt", (double  (pyMass::*)()) &pyMass::dt, py::return_value_policy::reference)

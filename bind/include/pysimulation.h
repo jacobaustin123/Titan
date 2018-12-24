@@ -22,36 +22,37 @@ public:
     pyContainer createContainer() {pyContainer pc (sim.createContainer()); return pc;}
 
     //delete
-    void deleteMass(pyMass pm);
-    void deleteSpring(pySpring ps);
-    void deleteContainer(pyContainer pc);
+    void deleteMass(pyMass pm){sim.deleteMass(pm.pointer);}
+    void deleteSpring(pySpring ps){sim.deleteSpring(ps.pointer);}
+    void deleteContainer(pyContainer pc){sim.deleteContainer(pc.pointer);}
 
     //getters
     void get(pyMass pm) {sim.get(pm.pointer);}
     void get(pySpring ps){sim.get(ps.pointer);}
     void get(pyContainer pc){sim.get(pc.pointer);}
     void getMassByIndex(int i){sim.getMassByIndex(i);}
-    void getSpringByIndex(int i){getSpringByIndex(i);}
+    void getSpringByIndex(int i){sim.getSpringByIndex(i);}
     void getAll(){ sim.getAll();};
 
     //setters
-    void set(pyMass pm);
-    void set(pySpring ps);
-    void set(pyContainer pc);
-    void setAll(){ sim.setAll();};
+    void set(pyMass pm){sim.set(pm.pointer);}
+    void set(pySpring ps){sim.set(ps.pointer);}
+    void set(pyContainer pc){sim.set(pc.pointer);}
+    void setAll(){ sim.setAll();}
 
     //Containers
     void createCube(py::array_t<double> center, double side_lenght);
-    void createLattice(py::array_t<double> center, double side_lenght);
-    void createRobot(py::array_t<double> center, double side_lenght);
-    void createBeam(py::array_t<double> center, double side_lenght);
-    void importFromSTL(std::string abc, double density );
+    void createLattice(py::array_t<double> center, py::array_t<double> dims, int nx = 10, int ny = 10, int nz = 10);
+    //void createRobot(py::array_t<double> center, double side_lenght);
+    void createBeam(py::array_t<double> center, py::array_t<double> dims, int nx = 10, int ny = 10, int nz = 10);
+
+    void importFromSTL(std::string abc, double density = 10.0, int num_rays = 5 ){sim.importFromSTL(abc, density, num_rays);}
 
     // Constraints
     void createPlane(py::array_t<double> abc, double d );
     void createBall(py::array_t<double> abc, double r );
 
-    void clearConstraints(){sim.clearConstraints();};
+    void clearConstraints(){sim.clearConstraints();}
 
 
     // Bulk modifications, only update CPU

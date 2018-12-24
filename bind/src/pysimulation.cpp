@@ -9,9 +9,35 @@ pyMass pySimulation::createMass(py::array_t<double> arr){
     return pm;
 }
 
+void pySimulation::createCube(py::array_t<double> center, double side_lenght)
+{
+
+    Vec centervec (* center.data(0), * center.data(1), * center.data(2));
+    sim.createCube(centervec, side_lenght);
+
+}
+void pySimulation::createLattice(py::array_t<double> center, py::array_t<double> dims, int nx, int ny, int nz){
+
+    Vec centervec (* center.data(0), * center.data(1), * center.data(2));
+    Vec dimsvec (* dims.data(0), * dims.data(1), * dims.data(2));
+    sim.createLattice(centervec, dimsvec, nx, ny, nz);
+}
+
+//void pySimulation::createRobot(py::array_t<double> center, double side_lenght){
+//
+//    Vec centervec (* center.data(0), * center.data(1), * center.data(2));
+//    sim.createRobot(centervec, side_lenght);
+//}
+
+void pySimulation::createBeam(py::array_t<double> center, py::array_t<double> dims, int nx, int ny, int nz){
+    Vec centervec (* center.data(0), * center.data(1), * center.data(2));
+    Vec dimsvec (* dims.data(0), * dims.data(1), * dims.data(2));
+    sim.createBeam(centervec, dimsvec, nx, ny, nz);
+}
+
+
 void pySimulation::createPlane(py::array_t<double> arr, double d) {
 
-    Vec abc (* arr.data(0), * arr.data(1), * arr.data(2));
     sim.createPlane(Vec (* arr.data(0), * arr.data(1), * arr.data(2)), d);
 }
 
