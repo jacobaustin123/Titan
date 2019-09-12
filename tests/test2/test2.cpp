@@ -4,7 +4,7 @@ int main() {
     Simulation sim;
 
     Lattice * l2 = sim.createLattice(Vec(0, 0, 10), Vec(5, 5, 5), 10, 10, 10);
-    sim.setViewport(Vec(5, -10, 3), Vec(0, 0, 2), Vec(0, 0, 1));
+    sim.setViewport(Vec(5, -15, 10), Vec(0, 0, 6), Vec(0, 0, 1));
 
     sim.setAllSpringConstantValues(1E5);
     l2 -> rotate(Vec(0, 0, 1), -0.78);
