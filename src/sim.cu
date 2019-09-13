@@ -100,6 +100,35 @@ Simulation::Simulation() {
 #endif
 }
 
+void Simulation::reset() {
+    this -> masses.clear();
+    this -> springs.clear();
+    this -> containers.clear();
+    this -> constraints.clear();
+
+    RUNNING = false;
+    STARTED = false;
+    ENDED = false;
+    FREED = false;
+    GPU_DONE = false;
+
+    update_constraints = true;
+    global = Vec(0, 0, -9.81);
+
+#ifdef GRAPHICS
+    resize_buffers = true;
+    update_colors = true;
+    update_indices = true;
+
+    lineWidth = 1;
+    pointSize = 3;
+
+    camera = Vec(15, 15, 7);
+    looks_at = Vec(0, 0, 2);
+    up = Vec(0, 0, 1);
+#endif
+}
+
 void Simulation::freeGPU() {
     for (Spring * s : springs) {
         if (s -> _left && ! s -> _left -> valid) {
