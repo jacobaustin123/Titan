@@ -73,6 +73,8 @@ public:
     void run(); // should set dt to min(mass dt) if not 0, resets everything
     void resume(); // same as above but w/out reset
 
+    void reset(); // clears all masses and springs
+
     double time() { return T; }
 
     void printPositions();

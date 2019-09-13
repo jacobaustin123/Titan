@@ -292,9 +292,9 @@ void Ball::draw() {
 void Plane::generateBuffers() {
     glm::vec3 color = {0.22f, 0.71f, 0.0f};
 
-    std::cout << "normal: " << _normal << std::endl;
+    // std::cout << "normal: " << _normal << std::endl;
 
-    std::cout << cross(Vec(0, 0, 1), Vec(0, 1, 0)) << std::endl;
+    // std::cout << cross(Vec(0, 0, 1), Vec(0, 1, 0)) << std::endl;
 
     Vec temp = (dot(_normal, Vec(0, 1, 0)) < 0.8) ? Vec(0, 1, 0) : Vec(1, 0, 0);
 
@@ -304,7 +304,7 @@ void Plane::generateBuffers() {
     Vec v2 = cross(_normal, v1);
     v2 = v2 / v2.norm();
 
-    std::cout << "v1: " << v1 << " v2: " << v2 << std::endl;
+    // std::cout << "v1: " << v1 << " v2: " << v2 << std::endl;
 
     const static GLfloat vertex_buffer_platform[108] = {
             -1, -1, -1,
@@ -351,7 +351,7 @@ void Plane::generateBuffers() {
         Vec temp = Vec(vertex_buffer_platform[3 * i], vertex_buffer_platform[3 * i + 1], vertex_buffer_platform[3 * i + 2]);
         Vec vertex = dot(v1, temp) * v1 + dot(v2, temp) * v2 + _normal * (_offset + dot(_normal, temp));
 
-        std::cout << vertex << std::endl;
+        // std::cout << vertex << std::endl;
 
         vertex_data[3 * i] = 10 * vertex[0];
         vertex_data[3 * i + 1] = 10 * vertex[1];

@@ -3,6 +3,7 @@
 //
 
 #include "sim.h"
+#include <cstring>
 #include <cmath>
 
 Simulation::~Simulation() {
@@ -46,6 +47,13 @@ Spring * Simulation::createSpring(Mass * m1, Mass * m2, double k, double len) {
     Spring * s = new Spring(m1, m2, k, len);
     springs.push_back(s);
     return s;
+}
+
+void Simulation::reset() {
+    this -> masses.clear();
+    this -> springs.clear();
+    this -> constraints.clear();
+    this -> objs.clear();
 }
 
 void Simulation::setBreakpoint(double time) {
