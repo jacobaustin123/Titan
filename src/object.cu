@@ -55,8 +55,8 @@ CUDA_CALLABLE_MEMBER void CudaBall::applyForce(CUDA_MASS * m) {
 CUDA_CALLABLE_MEMBER CudaContactPlane::CudaContactPlane(const Vec & normal, double offset) {
     _normal = normal / normal.norm();
     _offset = offset;
-    _FRICTION_S = 1.0;
-    _FRICTION_K = 0.8;
+    _FRICTION_S = 0.0;
+    _FRICTION_K = 0.0;
 }
 
 CudaContactPlane::CudaContactPlane(const ContactPlane & p) {
@@ -73,21 +73,21 @@ CUDA_CALLABLE_MEMBER void CudaContactPlane::applyForce(CUDA_MASS * m) {
     double disp = dot(m -> pos, _normal) - _offset; // displacement into the plane
     Vec f_normal = dot(m -> force, _normal) * _normal; // normal force
 
-    if (disp < 0) { // if inside the plane
+    if (disp < 0 && (_FRICTION_S > 0 || _FRICTION_K > 0)) { // if inside the plane
         Vec v_perp = m -> vel - dot(m -> vel, _normal) * _normal; // perpendicular velocity
         double v_norm = v_perp.norm();
 
         if (v_norm > 1e-16) { // kinetic friction domain
             double friction_mag = _FRICTION_K * f_normal.norm();
-            m->force -= v_perp * friction_mag / v_perp.norm();
+            m->force -= v_perp * friction_mag / v_norm;
         } else { // static friction
             Vec f_perp = m -> force - f_normal; // perpendicular force
 	        if (_FRICTION_S * f_normal.norm() > f_perp.norm()) {
                 m -> force -= f_perp;
-	        } else { // kinetic domain again
-                double friction_mag = _FRICTION_K * f_normal.norm();
-                m->force -= v_perp * friction_mag / v_perp.norm();
-	        }
+	        } // else { // kinetic domain again
+            //     double friction_mag = _FRICTION_K * f_normal.norm();
+            //     m->force -= v_perp * friction_mag / v_norm;
+	        // }
         }
     }
 

@@ -101,8 +101,8 @@ struct ContactPlane : public Constraint {
         _normal = normal / normal.norm();
         _offset = offset;
 
-        _FRICTION_K = 0.8;
-        _FRICTION_S = 1.0;
+        _FRICTION_K = 0.0;
+        _FRICTION_S = 0.0;
 
 #ifdef GRAPHICS
         _initialized = false;
