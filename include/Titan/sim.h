@@ -59,6 +59,8 @@ public:
 
     // Global constraints (can be rendered)
     void createPlane(const Vec & abc, double d ); // creates half-space ax + by + cz < d
+    void createPlane(const Vec &abc, double d, double FRICTION_K, double FRICTION_S);  // creates half-space ax + by + cz < d
+
     void createBall(const Vec & center, double r ); // creates ball with radius r at position center
 
     void clearConstraints(); // clears global constraints only

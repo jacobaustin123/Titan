@@ -1966,8 +1966,8 @@ void Simulation::createPlane(const Vec & abc, double d, double FRICTION_K, doubl
     }
 
     ContactPlane * new_plane = new ContactPlane(abc, d);
-    new_plane -> FRICTION_K = FRICTION_K;
-    new_plane -> FRICTION_S = FRICTION_S;
+    new_plane -> _FRICTION_K = FRICTION_K;
+    new_plane -> _FRICTION_S = FRICTION_S;
 
     constraints.push_back(new_plane);
     d_planes.push_back(CudaContactPlane(*new_plane));
