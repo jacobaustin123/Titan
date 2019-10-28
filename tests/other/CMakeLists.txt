@@ -25,18 +25,18 @@ else()
     message(STATUS "CUDA NOT FOUND")
 endif()
 
-find_package(OPENGL REQUIRED) # find and include OpenGL
-if (OPENGL_FOUND)
+find_package(OpenGL REQUIRED) # find and include OpenGL
+if (OpenGL_FOUND)
     message(STATUS "OPENGL FOUND")
-    include_directories(${OPENGL_INCLUDE_DIRS})
-    link_libraries(${OPENGL_LIBRARIES})
+    include_directories(${OpenGL_INCLUDE_DIRS})
+    link_libraries(${OpenGL_LIBRARIES} GL)
 endif()
 
 find_package(glfw3 CONFIG REQUIRED)
 if (glfw3_FOUND)
     message(STATUS "GLFW FOUND")
     include_directories(${glfw3_INCLUDE_DIRS})
-    link_libraries(${glfw3_LIBRARIES})
+    link_libraries(${glfw3_LIBRARIES} glfw)
 endif()
 
 
@@ -51,7 +51,7 @@ find_package(glm CONFIG REQUIRED) # glm
 if (glm_FOUND)
     message(STATUS "GLM FOUND")
     include_directories(${glm_INCLUDE_DIRS})
-    link_libraries(${glm_LIBRARIES})
+    link_libraries(${glm_LIBRARIES} glm)
 endif()
 
 add_executable(test1 ${CMAKE_CURRENT_LIST_DIR}/test1.cpp ${TITAN_SOURCE_FILES} ${TITAN_HEADER_FILES})
