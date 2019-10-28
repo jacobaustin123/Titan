@@ -85,7 +85,7 @@ CUDA_CALLABLE_MEMBER void CudaContactPlane::applyForce(CUDA_MASS * m) {
 	        if (_FRICTION_S * f_normal.norm() > f_perp.norm()) {
                 m -> force -= f_perp;
 	        } else { // kinetic domain again
-                double friction_mag = _FRICTION_K * f_normal.norm(), 
+                double friction_mag = _FRICTION_K * f_normal.norm();
                 m->force -= v_perp * friction_mag / v_perp.norm();
 	        }
         }
