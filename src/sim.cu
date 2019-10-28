@@ -1534,7 +1534,7 @@ void Simulation::execute() {
 #else
 
         for (int i = 0; i < NUM_QUEUED_KERNELS; i++) {
-	  computeSpringForces<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(d_spring, springs.size(), T); // compute mass forces after syncing
+	        computeSpringForces<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(d_spring, springs.size(), T); // compute mass forces after syncing
             gpuErrchk( cudaPeekAtLastError() );
             massForcesAndUpdate<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, global, d_constraints, masses.size());
             gpuErrchk( cudaPeekAtLastError() );
@@ -1585,7 +1585,7 @@ void Simulation::wait(double t) {
 
     double current_time = time();
     while (RUNNING && time() <= current_time + t) {
-        std::this_thread::sleep_for(std::chrono::microseconds(10));
+        std::this_thread::sleep_for(std::chrono::microseconds(10)); // TODO replace this with wait queue. 
     }
 }
 
@@ -1948,12 +1948,27 @@ Robot * Simulation::createRobot(const Vec & center, const cppn& encoding, double
 }
 
 
-void Simulation::createPlane(const Vec & abc, double d ) { // creates half-space ax + by + cz < d
+void Simulation::createPlane(const Vec & abc, double d) { // creates half-space ax + by + cz < d
     if (ENDED) {
         throw std::runtime_error("The simulation has ended. New objects cannot be created.");
     }
 
     ContactPlane * new_plane = new ContactPlane(abc, d);
+    constraints.push_back(new_plane);
+    d_planes.push_back(CudaContactPlane(*new_plane));
+
+    update_constraints = true;
+}
+
+void Simulation::createPlane(const Vec & abc, double d, double FRICTION_K, double FRICTION_S) { // creates half-space ax + by + cz < d
+    if (ENDED) {
+        throw std::runtime_error("The simulation has ended. New objects cannot be created.");
+    }
+
+    ContactPlane * new_plane = new ContactPlane(abc, d);
+    new_plane -> FRICTION_K = FRICTION_K;
+    new_plane -> FRICTION_S = FRICTION_S;
+
     constraints.push_back(new_plane);
     d_planes.push_back(CudaContactPlane(*new_plane));
 

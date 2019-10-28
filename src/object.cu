@@ -1,6 +1,11 @@
 //
 // Created by Jacob Austin on 5/21/18.
-//
+// object.cu defines constraint objects like planes and balls that allow the users
+// to enforce limitations on movements of objects within the scene.
+// Generally, an object defines the applyForce method that determines whether to apply a force
+// to a mass, for example a normal force pushing the mass out of a constaint object or
+// a frictional force.
+
 #define GLM_FORCE_PURE
 #include "object.h"
 #include <cmath>
@@ -13,7 +18,7 @@ const Vec BLUE(0.2, 0.2, 1.0);
 const Vec PURPLE(0.5, 0.2, 0.5);
 #endif
 
-__device__ const double NORMAL = 200000;
+__device__ const double NORMAL = 200000; // normal force coefficient for contact constaints
 __device__ const double FRICTION_S = 1.0;  // static friction coeff rubber-on-concrete
 __device__ const double FRICTION_K = 0.8;  // kinetic friction coeff
 
@@ -50,39 +55,47 @@ CUDA_CALLABLE_MEMBER void CudaBall::applyForce(CUDA_MASS * m) {
 CUDA_CALLABLE_MEMBER CudaContactPlane::CudaContactPlane(const Vec & normal, double offset) {
     _normal = normal / normal.norm();
     _offset = offset;
+    _FRICTION_S = 1.0;
+    _FRICTION_K = 0.8;
 }
 
 CudaContactPlane::CudaContactPlane(const ContactPlane & p) {
     _normal = p._normal;
     _offset = p._offset;
+
+    _FRICTION_S = p._FRICTION_S;
+    _FRICTION_K = p._FRICTION_K;
 }
 
 CUDA_CALLABLE_MEMBER void CudaContactPlane::applyForce(CUDA_MASS * m) {
-    double disp = dot(m -> pos, _normal) - _offset;
     //    m -> force += (disp < 0) ? - disp * NORMAL * _normal : 0 * _normal; // TODO fix this for the host
 
-    Vec fn_ground_v = (disp < 0) ? - disp * NORMAL * _normal : 0 * _normal;
-    double fn_ground = fn_ground_v.norm();
-    m -> force +=  fn_ground_v; // TODO fix this for the host
-    if (disp<0) {
-      //TODO this currently only support when normal is (0,0,1), extend to general cases
-      double vxy_sq2 = m->vel[0] * m->vel[0] + m->vel[1] * m->vel[1];
-      if (vxy_sq2 > 1e-16) {
-	double friction_mag = FRICTION_K * fn_ground / std::sqrt(vxy_sq2);
-	m->force[0] -= m->vel[0] * friction_mag;
-	m->force[1] -= m->vel[1] * friction_mag;
-      } else {
-	double fxy = std::sqrt(m->force[0] * m->force[0] + m->force[1] * m->force[1]);
-	if (FRICTION_S * fn_ground > fxy) {
-	  m->force[0] = 0;
-	  m->force[1] = 0;
-	} else {
-	  double friction_mag = FRICTION_K * fn_ground / fxy;
-	  m->force[0] -= m->force[0] * friction_mag;
-	  m->force[1] -= m->force[1] * friction_mag;
-	}
-      }
+    double disp = dot(m -> pos, _normal) - _offset; // displacement into the plane
+    Vec f_normal = dot(m -> force, _normal) * _normal; // normal force
+
+    if (disp < 0) { // if inside the plane
+        Vec v_perp = m -> vel - dot(m -> vel, _normal) * _normal; // perpendicular velocity
+        double v_norm = v_perp.norm();
+
+        if (v_norm > 1e-16) { // kinetic friction domain
+            double friction_mag = _FRICTION_K * f_normal.norm();
+            m->force -= v_perp * friction_mag / v_perp.norm();
+        } else { // static friction
+            Vec f_perp = m -> force - f_normal; // perpendicular force
+	        if (_FRICTION_S * f_normal.norm() > f_perp.norm()) {
+                m -> force -= f_perp;
+	        } else { // kinetic domain again
+                double friction_mag = _FRICTION_K * f_normal.norm(), 
+                m->force -= v_perp * friction_mag / v_perp.norm();
+	        }
+        }
     }
+
+    // now apply the offset force to push the object out of the plane.
+    Vec contact = (disp < 0) ? - disp * NORMAL * _normal : 0 * _normal; // displacement force
+    double f_norm = contact.norm();
+    m -> force += contact;
+
 }
 
 CUDA_CALLABLE_MEMBER CudaConstraintPlane::CudaConstraintPlane(const Vec & normal, double friction) {
@@ -406,87 +419,90 @@ Robot::Robot(const Vec & center, const cppn& encoding, double side_length,  doub
   
     // create masses
     for (int i = 0; i < RobotDim+1; i++) {
-      for (int j = 0; j < RobotDim+1; j++) {
-	for (int k = 0; k < RobotDim+1; k++) {
-	  if (mass_conn[i][j][k]>0){
-	    Mass * m;
-	    if (RobotDim==1){
-	      m = new Mass(Vec(i-0.5,j-0.5,k-0.5) * dims + _center);
-	    }else{
-	      
-	      m= new Mass(Vec(i / (RobotDim - 1.0) - 0.5,
-			      j / (RobotDim - 1.0) - 0.5,
-			      k / (RobotDim - 1.0) - 0.5) * dims + _center);
-	    }
+        for (int j = 0; j < RobotDim+1; j++) {
+            for (int k = 0; k < RobotDim + 1; k++) {
+                if (mass_conn[i][j][k] > 0){
+                    Mass * m;
+                    if (RobotDim == 1) {
+                    m = new Mass(Vec(i-0.5, j-0.5, k-0.5) * dims + _center);
+                    } else {
+                        m = new Mass(Vec(i / (RobotDim - 1.0) - 0.5,
+                                j / (RobotDim - 1.0) - 0.5,
+                                k / (RobotDim - 1.0) - 0.5) * dims + _center);
+                    }
+
 #ifdef GRAPHICS
-	    m -> color = Vec(0,0,0);
+                    m -> color = Vec(0,0,0);
 #endif
-	    masses.push_back(m);
-	    _masses[i][j][k] = m;
-	  }
-	}
-      }
+
+                    masses.push_back(m);
+                    _masses[i][j][k] = m;
+                }
+            }
+        }
     }
 
 
     // create springs
     for (int i = 0; i < RobotDim; i++) {
-      for (int j = 0; j < RobotDim; j++) {
-	for (int k = 0; k < RobotDim; k++) {
+        for (int j = 0; j < RobotDim; j++) {
+	        for (int k = 0; k < RobotDim; k++) {
 	
-	  int exist = encoding[i][j][k][0];
+            int exist = encoding[i][j][k][0];
 
-	  if (exist){
-	    int type = encoding[i][j][k][1];
-	  
-	    for(int l=0; l<8; l++){
-	      int l_x = (l<4)? 0:1;
-	      int l_y = (l<2)? 0:(l<4)?1:(l<6)?0:1;
-	      int l_z = (l%2)? 1:0;
-	    
-	      for(int m=l+1; m<8; m++){
-		int r_x = (m<4)? 0:1;
-		int r_y = (m<2)? 0:(m<4)?1:(m<6)?0:1;
-		int r_z = (m%2)? 1:0;
+            if (exist) {
+                int type = encoding[i][j][k][1];
+            
+                for(int l=0; l<8; l++) {
+                    int l_x = (l<4)? 0:1;
+                    int l_y = (l<2)? 0:(l<4)?1:(l<6)?0:1;
+                    int l_z = (l%2)? 1:0;
+                
+                    for (int m=l+1; m<8; m++) {
+                        int r_x = (m<4)? 0:1;
+                        int r_y = (m<2)? 0:(m<4)?1:(m<6)?0:1;
+                        int r_z = (m%2)? 1:0;
 
-		Spring * spr = new Spring(_masses[i+l_x][j+l_y][k+l_z],
-					  _masses[i+r_x][j+r_y][k+r_z]);
-		
-		spr -> _type = type;
-		spr -> _omega = omega;
-		if (type==0){// green, contract then expand
-		  spr -> _k = k_soft;
+                        Spring * spr = new Spring(_masses[i+l_x][j+l_y][k+l_z],
+                                    _masses[i+r_x][j+r_y][k+r_z]);
+                        
+                        spr -> _type = type;
+                        spr -> _omega = omega;
+
+                        if (type==0) { // green, contract then expand
+                            spr -> _k = k_soft;
+
 #ifdef GRAPHICS
-		  _masses[i+l_x][j+l_y][k+l_z]->color += GREEN/16;
-		  _masses[i+r_x][j+r_y][k+r_z]->color += GREEN/16;
+                            _masses[i+l_x][j+l_y][k+l_z]->color += GREEN/16;
+                            _masses[i+r_x][j+r_y][k+r_z]->color += GREEN/16;
 #endif
-		
-		}else if(type==1){ // red, expand then contract
-		  spr -> _k = k_soft;
+                        } else if (type==1) { // red, expand then contract
+                            spr -> _k = k_soft;
 #ifdef GRAPHICS
-		  _masses[i+l_x][j+l_y][k+l_z]->color += RED/16;
-		  _masses[i+r_x][j+r_y][k+r_z]->color += RED/16;
+                            _masses[i+l_x][j+l_y][k+l_z]->color += RED/16;
+                            _masses[i+r_x][j+r_y][k+r_z]->color += RED/16;
 #endif
-		
-		}else if(type==2){ // passive soft
-		  spr -> _k = k_soft;
+                
+                        } else if (type==2) { // passive soft
+                            spr -> _k = k_soft;
 #ifdef GRAPHICS
-		  _masses[i+l_x][j+l_y][k+l_z]->color += BLUE/16;
-		  _masses[i+r_x][j+r_y][k+r_z]->color += BLUE/16;
+                            _masses[i+l_x][j+l_y][k+l_z]->color += BLUE/16;
+                            _masses[i+r_x][j+r_y][k+r_z]->color += BLUE/16;
 #endif
-		}else{ // passive stiff
-		  spr -> _k = k_stiff;
+                        } else { // passive stiff
+                            spr -> _k = k_stiff;
 #ifdef GRAPHICS
-		  _masses[i+l_x][j+l_y][k+l_z]->color += PURPLE/16;
-		  _masses[i+r_x][j+r_y][k+r_z]->color += PURPLE/16;
+                            _masses[i+l_x][j+l_y][k+l_z]->color += PURPLE/16;
+                            _masses[i+r_x][j+r_y][k+r_z]->color += PURPLE/16;
 #endif
-		}
-		springs.push_back(spr);
-	      }
-	    }
-	  }
-	}
-      }
+                        }
+
+		                springs.push_back(spr);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     
