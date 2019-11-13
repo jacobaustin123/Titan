@@ -1,5 +1,5 @@
 # Titan
-**Titan** is a versitile CUDA-based physics simulation library that provides a GPU-accelerated environment for physics primatives like springs and masses. Library users can create masses, springs, and more complicated objects, apply constraints, and modify simulation parameters in real time, while the simulation runs asynchronously on the GPU.
+**Titan** is a versitile CUDA-based physics simulation library that provides a GPU-accelerated environment for physics primatives like springs and masses. Library users can create masses, springs, and more complicated objects, apply constraints, and modify simulation parameters in real time, while the simulation runs asynchronously on the GPU. Titan has been used for GPU-accelerated reinforcement learning, physics and biomedical research, and topology optimization.
 
 ## Installation
 
@@ -24,6 +24,6 @@ This simple program produces a large lattice bouncing on the given plane:
 
 For more examples and troubleshooting, see the [github wiki](https://github.com/ja3067/Titan/wiki/Set-Up). 
 
-## License
+## About
 
-This software was written by Jacob Austin and Rafael Corrales Fatou as part of a project led by Professor Hod Lipson at the Creative Machines Lab at Columbia University. You are welcome to use and modify the software as desired, but we ask that you give credit to the original source.
+This software was written by Jacob Austin and Rafael Corrales Fatou as part of a project led by Professor Hod Lipson at the Creative Machines Lab at Columbia University. This software is released under an Apache 2.0 license.

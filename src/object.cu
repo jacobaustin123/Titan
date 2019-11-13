@@ -108,10 +108,11 @@ CUDA_CALLABLE_MEMBER CudaConstraintPlane::CudaConstraintPlane(const Vec & normal
 CUDA_CALLABLE_MEMBER void CudaConstraintPlane::applyForce(CUDA_MASS * m) {
     double normal_force = dot(m -> force, _normal);
     m -> force += - _normal * normal_force; // constraint force
+    double v_norm = m -> vel.norm();
 
-    if (m -> vel.norm() != 0.0) {
+    if (v_norm >= 1e-16) {
         m -> vel += - _normal * dot(m -> vel, _normal); // constraint velocity
-        m -> force += - _friction * normal_force * (m -> vel) / (m -> vel).norm(); // apply friction force
+        m -> force += - _friction * normal_force * m -> vel / v_norm; // apply friction force
     }
 }
 
@@ -126,7 +127,7 @@ CUDA_CALLABLE_MEMBER void CudaDirection::applyForce(CUDA_MASS * m) {
     Vec normal_force = m -> force - dot(m -> force, _tangent) * _tangent;
     m -> force += - normal_force;
 
-    if (m -> vel.norm() != 0.0) {
+    if (m -> vel.norm() >= 1e-16) {
         m -> vel = _tangent * dot(m -> vel, _tangent);
         m -> force += - normal_force.norm() * _friction * _tangent;
     }
