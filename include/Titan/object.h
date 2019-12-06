@@ -101,6 +101,9 @@ struct ContactPlane : public Constraint {
         _normal = normal / normal.norm();
         _offset = offset;
 
+        _FRICTION_K = 0.0;
+        _FRICTION_S = 0.0;
+
 #ifdef GRAPHICS
         _initialized = false;
 #endif
@@ -108,6 +111,9 @@ struct ContactPlane : public Constraint {
 
     Vec _normal;
     double _offset;
+
+    double _FRICTION_K;
+    double _FRICTION_S;
 
 #ifdef GRAPHICS
     ~ContactPlane() {
@@ -132,6 +138,9 @@ struct CudaContactPlane {
 
     Vec _normal;
     double _offset;
+
+    double _FRICTION_K;
+    double _FRICTION_S;
 };
 
 

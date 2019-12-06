@@ -15,11 +15,15 @@ int main() {
 
     // Lattice * l2 = sim.createLattice(Vec(0, 0, 10), Vec(5, 5, 5), 10, 10, 10);
     // sim.setAllSpringConstantValues(1E5);
-    sim.setViewport(Vec(0, 0, 5 * SIZE), Vec(NUM_X * (SIZE + SPACE) / 2, NUM_Y * (SIZE + SPACE) / 2, SIZE / 2), Vec(0, 0, 1)); 
-    sim.createPlane(Vec(0, 0, 1), 0);
+    sim.setViewport(Vec(0, 0, 10 * SIZE), Vec(NUM_X * (SIZE + SPACE) / 2, NUM_Y * (SIZE + SPACE) / 2, SIZE / 2), Vec(0, 0, 1)); 
+    //sim.createPlane(Vec(0, 0, 1), 0, 0, 0);
 
     sim.setGlobalAcceleration(Vec(0, 0, -9.8));
 
+    //Lattice * l1 = sim.createLattice(Vec(5, 5, 5), Vec(5, 5, 5), 5, 5, 5);
+//    Lattice * l2 = sim.createLattice(Vec(0, 0, 5), Vec(5, 5, 5), 5, 5, 5);
+//    sim.createSpring(l1 -> masses[0], l2 -> masses[0]);
+//    sim.setViewport(Vec(-10, -10, 10), Vec(0, 0, 5), Vec(0, 0, 1));
     Lattice * grid[NUM_Y][NUM_X];
 
     for (int i = 0; i < NUM_Y; i++) {
@@ -27,26 +31,6 @@ int main() {
             grid[i][j] = sim.createLattice(Vec((SIZE + SPACE) * j + SIZE / 2, (SIZE + SPACE) * i + SIZE / 2, SIZE / 2), Vec(SIZE, SIZE, SIZE), DENSITY, DENSITY, DENSITY);
         }
     }
-
-    // int j = 0;
-    // std::vector<Vec> values = {Vec(0, 0, 0), Vec(5, 0, 0), Vec(0, 5, 0), Vec(0, 0, 5), Vec(5, 5, 0), Vec(0, 5, 5), Vec(5, 0, 5), Vec(5, 5, 5)};
-    // Mass * m;
-    // for (int i = 0; i < grid[0][0] -> masses.size(); i++) {
-    //     m = grid[0][0] -> masses[i];
-    //     for (Vec v : values) {
-    //         if (m -> pos == v) {
-    //             std::cout << i << " " << v << std::endl;
-    //         }
-    //     }
-
-    //     // if (m -> pos[0] == value[0] && m -> pos[1] == value[1] && m -> pos[2] == value[2]) {
-    //     //     j = i;
-    //     //     break;
-    //     // }
-    // }
-
-    // std::cout << j << " " << value << std::endl;
-
     Mass * m1, *m2;
     Spring * s1, *s2;
 
@@ -62,19 +46,25 @@ int main() {
                 // std::cout << m1 -> pos << " " << m2 -> pos << std::endl;
 
                 s1 = sim.createSpring(m1, m2);
-                s1 -> _k = 20;
+                s1 -> _k = 0.01;
                 s1 -> defaultLength();
+                //s1 -> _rest = s1 -> _rest + 0.0001;
             }
 
             for (auto pair : up) {
                 m1 = grid[i][j] -> masses[std::get<0>(pair)];
                 m2 = grid[i+1][j] -> masses[std::get<1>(pair)];
                 s1 = sim.createSpring(m1, m2);
-                s1 -> _k = 20;
+                s1 -> _k = 0.01;
                 s1 -> defaultLength();
+                //s1 -> _rest = s1 -> _rest + 0.0001;
             }
         }
     }
 
+    sim.defaultRestLength();
     sim.start();
+    sim.pause(0.1);
+    sim.getAll();
+    sim.printPositions();
 }

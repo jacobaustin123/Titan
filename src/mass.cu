@@ -4,7 +4,6 @@
 #define GLM_FORCE_PURE
 #include "mass.h"
 
-
 Mass::Mass() {
     m = 1.0;
     dt = 0.0001;
