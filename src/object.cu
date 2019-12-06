@@ -18,7 +18,7 @@ const Vec BLUE(0.2, 0.2, 1.0);
 const Vec PURPLE(0.5, 0.2, 0.5);
 #endif
 
-__device__ const double NORMAL = 200000; // normal force coefficient for contact constaints
+__device__ const double NORMAL = 20000; // normal force coefficient for contact constaints
 __device__ const double FRICTION_S = 1.0;  // static friction coeff rubber-on-concrete
 __device__ const double FRICTION_K = 0.8;  // kinetic friction coeff
 
@@ -290,6 +290,7 @@ Lattice::Lattice(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
     }
 }
 
+#ifdef CONSTRAINTS
 Beam::Beam(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
     _center = center;
     _dims = dims;
@@ -300,10 +301,10 @@ Beam::Beam(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
     for (int i = 0; i < nx; i++) {
         for (int j = 0; j < ny; j++) {
             for (int k = 0; k < nz; k++) {
-	      masses.push_back(new Mass(Vec((nx > 1) ? (double) i / (nx - 1.0) - 0.5 : 0, (ny > 1) ? j / (ny - 1.0) - 0.5 : 0, (nz > 1) ? k / (nz - 1.0) - 0.5 : 0) * dims + center));
-	      if (i == 0) {
-		masses[masses.size() - 1] -> constraints.fixed = true;
-	      }
+	            masses.push_back(new Mass(Vec((nx > 1) ? (double) i / (nx - 1.0) - 0.5 : 0, (ny > 1) ? j / (ny - 1.0) - 0.5 : 0, (nz > 1) ? k / (nz - 1.0) - 0.5 : 0) * dims + center));
+                if (i == 0) {
+                    masses[masses.size() - 1] -> constraints.fixed = true;
+                }
             }
         }
     }
@@ -355,7 +356,7 @@ Beam::Beam(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
         s -> setRestLength((s -> _right -> pos - s -> _left -> pos).norm());
     }
 }
-
+#endif
 
 Robot::Robot(const Vec & center, const cppn& encoding, double side_length,  double omega, double k_soft, double k_stiff){
     _center = center;

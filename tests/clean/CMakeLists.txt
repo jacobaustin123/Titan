@@ -55,8 +55,8 @@ if (glm_FOUND)
 endif()
 
 add_executable(test1 ${CMAKE_CURRENT_LIST_DIR}/test1.cpp ${TITAN_SOURCE_FILES} ${TITAN_HEADER_FILES})
-target_compile_definitions(test1 PRIVATE GRAPHICS)
-target_compile_definitions(test1 PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
+target_compile_definitions(test1 PRIVATE NOGRAPHICS)
+# target_compile_definitions(test1 PRIVATE CONSTRAINTS) # defines the CONSTRAINTS preprocessor variable (enables local constraints)
 
 target_compile_features(test1 PUBLIC cxx_std_11) # same as above
 set_target_properties(test1 PROPERTIES CUDA_SEPARABLE_COMPILATION ON)

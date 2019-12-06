@@ -10,7 +10,7 @@ int main() {
     l2 -> rotate(Vec(0, 0, 1), -0.78);
 
     std::cout << sim.masses.size() << " " << sim.springs.size() << std::endl;
-    sim.createPlane(Vec(0, 0, 1), 0);
+    sim.createPlane(Vec(0, 0, 1), 0, 10, 10);
 
     sim.setGlobalAcceleration(Vec(0, 0, -9.8));
 
