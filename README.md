@@ -30,10 +30,13 @@ This software was written by Jacob Austin and Rafael Corrales Fatou as part of a
 
 If using this software in published work, please cite
 
+```
 J. Austin, R. Corrales-Fatou, S. Wyetzner, and H. Lipson, “Titan: A Parallel Asynchronous Library for Multi-Agent and Soft-Body Robotics using NVIDIA CUDA,” ICRA 2020, May 2020.
+```
 
 or use the BibTex
 
+```
 @inproceedings {TitanICRA,
    title	= {Titan: A Parallel Asynchronous Library for Multi-Agent and Soft-Body Robotics using NVIDIA CUDA},
    author	= {Jacob Austin, Raphael Corrales-Fatou, Soia Wyetzner, and Hod Lipson},
@@ -42,4 +45,5 @@ or use the BibTex
    year		= {2020},
    location	= {Paris, France}
 }
+```
 
