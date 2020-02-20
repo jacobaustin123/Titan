@@ -81,6 +81,10 @@ CUDA_MASS::CUDA_MASS(Mass &mass) {
 }
 
 #ifdef CONSTRAINTS
+void addExternalForce(const Vec & vec) {
+    
+}
+
 void Mass::addConstraint(CONSTRAINT_TYPE type, const Vec & vec, double num) { // TODO make this more efficient
     if (type == 0) {
         this -> constraints.constraint_plane.push_back(CudaConstraintPlane(vec, num));

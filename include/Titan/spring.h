@@ -12,56 +12,70 @@ class Mass;
 struct CUDA_SPRING;
 struct CUDA_MASS;
 
-//Struct with CPU Spring properties used for optimal memory allocation on GPU memory
-const int ACTIVE_CONTRACT_THEN_EXPAND = 0;
-const int ACTIVE_EXPAND_THEN_CONTRACT = 1;
-const int PASSIVE_SOFT = 2;
-const int PASSIVE_STIFF = 3;
-
+enum SpringType {PASSIVE_SOFT, PASSIVE_STIFF, ACTIVE_CONTRACT_THEN_EXPAND, ACTIVE_EXPAND_THEN_CONTRACT};
 
 class Spring {
 public:
-
-    //Properties
     double _k; // spring constant (N/m)
     double _rest; // spring rest length (meters)
 
-    // BREATHING
-    int _type; // 0-3
-    double _omega; // frequency
-    
+    SpringType _type; // 0-3, for oscillating springs
+    double _omega; // frequency of oscillation
+    double _damping; // damping on the masses.
+
     Mass * _left; // pointer to left mass object // private
     Mass * _right; // pointer to right mass object
 
-    //Set
-    Spring() { _left = nullptr; _right = nullptr; arrayptr = nullptr; _k = 10000.0; _rest = 1.0; _type=PASSIVE_STIFF; _omega=0.0; }; //Constructor
+    Spring() { 
+        _left = nullptr; 
+        _right = nullptr; 
+        arrayptr = nullptr; 
+        _k = 10000.0; 
+        _rest = 1.0; 
+        _type = PASSIVE_SOFT; 
+        _omega = 0.0; 
+        _damping = 0.0;
+    };
     
-    Spring(const CUDA_SPRING & spr);
+    // Spring(const CUDA_SPRING & spr);
 
-    Spring(Mass * left, Mass * right, double k = 10000.0, double rest_len = 1.0) :
-            _k(k), _rest(rest_len), _left(left), _right(right), arrayptr(nullptr) {}; //
+    Spring(Mass * left, Mass * right) {
+        this -> _left = left;
+        this -> _right = right;
+        this -> defaultLength();
+        this -> arrayptr = nullptr;
+        _type = PASSIVE_SOFT;
+        _omega = 0.0; 
+        _damping = 0.0;
+    };
 
-    Spring(double k, double rest_length, Mass * left, Mass * right) :
-            _k(k), _rest(rest_length), _left(left), _right(right) {};
+    Spring(Mass * left, Mass * right, double k, double rest_length) {
+        this -> _left = left;
+        this -> _right = right;
+        this -> _rest = rest_length;
+        this -> k = k;
+        _type = PASSIVE_SOFT;
+        _omega = 0.0; 
+        _damping = 0.0;
+    }
 
-    Spring(double k, double rest_length, Mass * left, Mass * right, int type, double omega) :
+    Spring(Mass * left, Mass * right, double k, double rest_length, int type, double omega) :
             _k(k), _rest(rest_length), _left(left), _right(right), _type(type), _omega(omega) {};
 	    
     void setForce(); // will be private
     void setRestLength(double rest_length) { _rest = rest_length; } //sets Rest length
     void defaultLength(); //sets rest length
+    void changeType(SpringType type, double omaga) { _type = type; _omega = omega;}
+    void addDamping(double constant) { _damping = constant; }
 
     void setLeft(Mass * left); // sets left mass (attaches spring to mass 1)
     void setRight(Mass * right);
 
     void setMasses(Mass * left, Mass * right) { _left = left; _right = right; } //sets both right and left masses
 
-    //Get
     Vec getForce(); // computes force on right object. left force is - right force.
 
 private:
-    //    Mass * _left; // pointer to left mass object // private
-    //    Mass * _right; // pointer to right mass object
     CUDA_SPRING *arrayptr; //Pointer to struct version for GPU cudaMalloc
 
     friend class Simulation;
@@ -85,8 +99,9 @@ struct CUDA_SPRING {
   double _rest; // spring rest length (meters)
 
   // Breathing
-  int _type;
+  SpringType _type;
   double _omega;
+  double _damping;
 };
 
 #endif //TITAN_SPRING_H

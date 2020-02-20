@@ -26,6 +26,7 @@
 #include <cuda.h>
 #include <iostream>
 #include <cmath>
+#include <vector>
 
 class Vec {
 public:
@@ -46,6 +47,12 @@ public:
         data[1] = y;
         data[2] = z;
     } // initialization from x, y, and z values
+
+    CUDA_CALLABLE_MEMBER Vec(const std::vector<double> & v) {
+        data[0] = v[0];
+        data[1] = v[1];
+        data[2] = v[2];
+    }
 
     CUDA_CALLABLE_MEMBER Vec & operator=(const Vec & v) {
         if (this == &v) {

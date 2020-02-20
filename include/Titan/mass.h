@@ -19,7 +19,6 @@ struct CUDA_MASS {
     double m; // mass in kg
     double dt; // update interval
     double T; // local time
-    double damping;
     Vec pos; // position in m
     Vec vel; // velocity in m/s
     Vec acc; // acceleration in m/s^2
@@ -43,12 +42,11 @@ public:
     double m; // mass in kg
     double dt; // update interval
     double T; // local time
-    double damping; // damping mass velocity
     Vec pos; // position in m
     Vec vel; // velocity in m/s
     Vec acc; // acceleration in m/s^2
     Vec force; // force in kg m / s^2
-    
+
     Mass(const Vec & position, double mass = 0.1, bool fixed = false, double dt = 0.0001);
 #ifdef CONSTRAINTS
     void addConstraint(CONSTRAINT_TYPE type, const Vec & vec, double num);

@@ -1044,16 +1044,19 @@ __global__ void computeSpringForces(CUDA_SPRING ** d_spring, int num_springs, do
             return;
 
         Vec temp = (spring._right -> pos) - (spring._left -> pos);
-	//	printf("%d, %f, %f\n",spring._type, spring._omega,t);
-	double scale=1.0;
-	if (spring._type == ACTIVE_CONTRACT_THEN_EXPAND){
-	  scale = (1 - 0.2*sin(spring._omega * t));
-	}else if (spring._type == ACTIVE_EXPAND_THEN_CONTRACT){
-	  scale = (1 + 0.2*sin(spring._omega * t));
-	}
+
+        double scale = 1.0;
+        if (spring._type == ACTIVE_CONTRACT_THEN_EXPAND){
+            scale = (1 - 0.2 * sin(spring._omega * t));
+        } else if (spring._type == ACTIVE_EXPAND_THEN_CONTRACT){
+            scale = (1 + 0.2 * sin(spring._omega * t));
+	    }
 	
         Vec force = spring._k * (spring._rest * scale - temp.norm()) * (temp / temp.norm());
-
+        
+        if (spring._damping != 0) {
+            force += dot(spring._left -> vel - spring._right -> vel, temp / temp.norm()) * spring._damping * (temp / temp.norm());
+        }
 
 #ifdef CONSTRAINTS
         if (spring._right -> constraints.fixed == false) {
@@ -1063,8 +1066,8 @@ __global__ void computeSpringForces(CUDA_SPRING ** d_spring, int num_springs, do
             spring._left->force.atomicVecAdd(-force);
         }
 #else
-        spring._right->force.atomicVecAdd(force);
-        spring._left->force.atomicVecAdd(-force);
+        spring._right -> force.atomicVecAdd(force);
+        spring._left -> force.atomicVecAdd(-force);
 #endif
 
     }
@@ -1090,6 +1093,7 @@ __global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, Vec global, CUDA_GLOBAL
 #endif
 
         mass.force += mass.m * global;
+        // mass.force += mass.external;
 
         for (int j = 0; j < c.num_planes; j++) { // global constraints
             c.d_planes[j].applyForce(&mass);
@@ -1123,99 +1127,12 @@ __global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, Vec global, CUDA_GLOBAL
 #endif
 
         mass.acc = mass.force / mass.m;
-        mass.vel = (mass.vel + mass.acc * mass.dt)*mass.damping;
+        mass.vel = mass.vel + mass.acc * mass.dt;
         mass.pos = mass.pos + mass.vel * mass.dt;
 
         mass.force = Vec(0, 0, 0);
     }
 }
-
-// __global__ void combinedKernel(CUDA_MASS ** d_mass, CUDA_SPRING ** d_spring, int num_masses, int num_springs, Vec global, CUDA_GLOBAL_CONSTRAINTS c, double t) {
-//     int i = blockDim.x * blockIdx.x + threadIdx.x;
-
-//     for (int j = 0; j < 10; j++) {    
-//         if ( i < num_springs ) {
-//             CUDA_SPRING & spring = *d_spring[i];
-
-//             if (spring._left == nullptr || spring._right == nullptr || ! spring._left -> valid || ! spring._right -> valid) // TODO might be expensive with CUDA instruction set
-//                 return;
-
-//             Vec temp = (spring._right -> pos) - (spring._left -> pos);
-//         //	printf("%d, %f, %f\n",spring._type, spring._omega,t);
-        
-//             double scale = 1.0;
-//             if (spring._type == ACTIVE_CONTRACT_THEN_EXPAND){
-//                 scale = (1 - 0.2 * sin(spring._omega * t));
-//             } else if (spring._type == ACTIVE_EXPAND_THEN_CONTRACT){
-//                 scale = (1 + 0.2 * sin(spring._omega * t));
-//             }
-        
-//             Vec force = spring._k * (spring._rest * scale - temp.norm()) * (temp / temp.norm());
-
-
-//     #ifdef CONSTRAINTS
-//             if (spring._right -> constraints.fixed == false) {
-//                 spring._right->force.atomicVecAdd(force); // need atomics here
-//             }
-//             if (spring._left -> constraints.fixed == false) {
-//                 spring._left->force.atomicVecAdd(-force);
-//             }
-//     #else
-//             spring._right->force.atomicVecAdd(force);
-//             spring._left->force.atomicVecAdd(-force);
-//     #endif
-
-//         }
-        
-//         if (i < num_masses) {
-//             CUDA_MASS &mass = *d_mass[i];
-
-//     #ifdef CONSTRAINTS
-//             if (mass.constraints.fixed == 1)
-//                 return;
-//     #endif
-
-//             mass.force += global;
-
-//             for (int j = 0; j < c.num_planes; j++) { // global constraints
-//                 c.d_planes[j].applyForce(&mass);
-//             }
-
-//             for (int j = 0; j < c.num_balls; j++) {
-//                 c.d_balls[j].applyForce(&mass);
-//             }
-
-//     #ifdef CONSTRAINTS
-//             for (int j = 0; j < mass.constraints.num_contact_planes; j++) { // local constraints
-//                 mass.constraints.contact_plane[j].applyForce(&mass);
-//             }
-
-//             for (int j = 0; j < mass.constraints.num_balls; j++) {
-//                 mass.constraints.ball[j].applyForce(&mass);
-//             }
-
-//             for (int j = 0; j < mass.constraints.num_constraint_planes; j++) {
-//                 mass.constraints.constraint_plane[j].applyForce(&mass);
-//             }
-
-//             for (int j = 0; j < mass.constraints.num_directions; j++) {
-//                 mass.constraints.direction[j].applyForce(&mass);
-//             }
-
-//             if (mass.vel.norm() != 0.0) { // NOTE TODO this is really janky. On certain platforms, the following code causes excessive memory usage on the GPU.
-//                 double norm = mass.vel.norm();
-//                 mass.force += - mass.constraints.drag_coefficient * pow(norm, 2) * mass.vel / norm; // drag
-//             }
-//     #endif
-
-//             mass.acc = mass.force / mass.m;
-//             mass.vel = (mass.vel + mass.acc * mass.dt)*mass.damping;
-//             mass.pos = mass.pos + mass.vel * mass.dt;
-
-//             mass.force = Vec(0, 0, 0);
-//         }
-//     }
-// }
 
 #ifdef GRAPHICS
 void Simulation::clearScreen() {
@@ -1483,6 +1400,10 @@ void Simulation::_run() { // repeatedly start next
 }
 
 #ifdef GRAPHICS
+glm::mat4 & getProjectionMatrix() {
+    return this -> MVP;
+}
+
 void Simulation::setViewport(const Vec & camera_position, const Vec & target_location, const Vec & up_vector) {
     if (RUNNING) {
         throw std::runtime_error("The simulation is running. Cannot modify viewport during simulation run.");
@@ -1496,6 +1417,7 @@ void Simulation::setViewport(const Vec & camera_position, const Vec & target_loc
         this -> MVP = getProjection(camera, looks_at, up); // compute perspective projection matrix
     }
 }
+
 
 void Simulation::moveViewport(const Vec & displacement) {
     if (RUNNING) {

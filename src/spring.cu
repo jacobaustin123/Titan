@@ -5,8 +5,6 @@
 #include "spring.h"
 #include <cmath>
 
-const double EDGE_DAMPING = 20; // f_damp = delta_v_along_spring*edge_damping_constant;
-
 Vec Spring::getForce() { // computes force on right object. left force is - right force.
   //    Vec temp = (_right -> pos) - (_left -> pos);
   //    return _k * (_rest - temp.norm()) * (temp / temp.norm());
@@ -14,7 +12,8 @@ Vec Spring::getForce() { // computes force on right object. left force is - righ
     Vec temp = (_left -> pos) - (_right -> pos);
     Vec spring_force = _k * (temp.norm() - _rest) * (temp / temp.norm());
 
-    spring_force += dot( (_left->vel - _right->vel) , temp/temp.norm() )*EDGE_DAMPING* (temp/temp.norm());
+    spring_force += dot(_left -> vel - _right -> vel, temp / temp.norm()) * _damping * (temp / temp.norm());
+
     return spring_force;
 }
 
@@ -24,10 +23,10 @@ void Spring::setForce() { // computes force on right object. left force is - rig
     _left -> force += -f;
 }
 
-Spring::Spring(const CUDA_SPRING & spr) {
-    this -> _k = spr._k;
-    this -> _rest = spr._rest;
-}
+// Spring::Spring(const CUDA_SPRING & spr) {
+//     this -> _k = spr._k;
+//     this -> _rest = spr._rest;
+// }
 
 void Spring::defaultLength() { _rest = (_left -> pos - _right -> pos).norm() ; } //sets Rest Lenght
 
@@ -57,6 +56,7 @@ CUDA_SPRING::CUDA_SPRING(const Spring & s) {
     _rest = s._rest;
     _type = s._type;
     _omega = s._omega;
+    _damping = s._damping;
 }
 
 CUDA_SPRING::CUDA_SPRING(const Spring & s, CUDA_MASS * left, CUDA_MASS * right) {
@@ -66,4 +66,5 @@ CUDA_SPRING::CUDA_SPRING(const Spring & s, CUDA_MASS * left, CUDA_MASS * right) 
     _rest = s._rest;
     _type = s._type;
     _omega = s._omega;
+    _damping = s._damping;
 }
