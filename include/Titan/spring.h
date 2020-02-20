@@ -65,7 +65,7 @@ public:
     void setForce(); // will be private
     void setRestLength(double rest_length) { _rest = rest_length; } //sets Rest length
     void defaultLength(); //sets rest length
-    void changeType(SpringType type, double omaga) { _type = type; _omega = omega;}
+    void changeType(SpringType type, double omega) { _type = type; _omega = omega;}
     void addDamping(double constant) { _damping = constant; }
 
     void setLeft(Mass * left); // sets left mass (attaches spring to mass 1)
