@@ -53,14 +53,14 @@ public:
         this -> _left = left;
         this -> _right = right;
         this -> _rest = rest_length;
-        this -> k = k;
+        this -> _k = k;
         _type = PASSIVE_SOFT;
         _omega = 0.0; 
         _damping = 0.0;
     }
 
     void update(const CUDA_SPRING & spr);
-    
+
     Spring(Mass * left, Mass * right, double k, double rest_length, SpringType type, double omega) :
             _k(k), _rest(rest_length), _left(left), _right(right), _type(type), _omega(omega) {};
 	    
