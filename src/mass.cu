@@ -7,7 +7,6 @@
 Mass::Mass() {
     m = 1.0;
     dt = 0.0001;
-    damping = 1.0;
     T = 0;
     valid = true;
     arrayptr = nullptr;
@@ -22,7 +21,6 @@ void Mass::operator=(CUDA_MASS & mass) {
     m = mass.m;
     dt = mass.dt;
     T = mass.T;
-    damping = mass.damping;
     pos = mass.pos;
     vel = mass.vel;
     acc = mass.acc;
