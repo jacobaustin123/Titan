@@ -59,7 +59,9 @@ public:
         _damping = 0.0;
     }
 
-    Spring(Mass * left, Mass * right, double k, double rest_length, int type, double omega) :
+    void update(const CUDA_SPRING & spr);
+    
+    Spring(Mass * left, Mass * right, double k, double rest_length, SpringType type, double omega) :
             _k(k), _rest(rest_length), _left(left), _right(right), _type(type), _omega(omega) {};
 	    
     void setForce(); // will be private

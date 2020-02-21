@@ -23,12 +23,11 @@ void Spring::setForce() { // computes force on right object. left force is - rig
     _left -> force += -f;
 }
 
-// Spring::Spring(const CUDA_SPRING & spr) {
-//     this -> _k = spr._k;
-//     this -> _rest = spr._rest;
-// }
+// this function is currently unneeded because springs do not need to be updated.
+// this should be updated if any features are implemented to change spring parameters.
+void Spring::update(const CUDA_SPRING & spr) {}
 
-void Spring::defaultLength() { _rest = (_left -> pos - _right -> pos).norm() ; } //sets Rest Lenght
+void Spring::defaultLength() { _rest = (_left -> pos - _right -> pos).norm() ; } // sets rest length
 
 void Spring::setLeft(Mass * left) {
     if (_left) {

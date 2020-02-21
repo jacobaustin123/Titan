@@ -616,7 +616,7 @@ void Simulation::get(Spring * s) {
 
     CUDA_SPRING temp;
     gpuErrchk(cudaMemcpy(&temp, s -> arrayptr, sizeof(CUDA_SPRING), cudaMemcpyDeviceToHost));
-    *s = Spring(temp);
+    s -> update(temp);
 }
 
 void Simulation::set(Spring * s) {
