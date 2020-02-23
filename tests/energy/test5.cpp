@@ -1,5 +1,7 @@
-#include <Titan/sim.h> 
+#include "../../include/Titan/sim.h"
 #include <iostream>
+
+using namespace std;
 
 void energy(Simulation & sim) {
     double potential_g = 0;
@@ -22,8 +24,8 @@ void energy(Simulation & sim) {
 int main() {
     Simulation sim;
     sim.createPlane(Vec(0, 0, 1), 0, 0, 0);
-    Lattice * l1 = sim.createLattice(Vec(0, 0, 5), Vec(4, 4, 4), 10, 10, 10);
-    //Mass * m1 = sim.createMass(Vec(0, 0, 1));
+    //Lattice * l1 = sim.createLattice(Vec(0, 0, 5), Vec(4, 4, 4), 20, 20, 20);
+    Mass * m1 = sim.createMass(Vec(0, 0, 1));
     sim.setAllSpringConstantValues(100);
     sim.setAllDeltaTValues(0.0001);
     sim.setGlobalAcceleration(Vec(0, 0, -9.8));
@@ -32,8 +34,12 @@ int main() {
     sim.start();
 
     while (sim.time() < 10) {
-        sim.wait(0.5);
-        energy(sim);
+        sim.setBreakpoint(sim.time() + 0.5);
+        sim.waitForEvent();
+        sim.get(m1);
+        cout << m1 -> pos << endl;
+        
+        //energy(sim);
         sim.resume();
     }
 
