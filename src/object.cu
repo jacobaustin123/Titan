@@ -359,159 +359,159 @@ Beam::Beam(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
 }
 #endif
 
-Robot::Robot(const Vec & center, const cppn& encoding, double side_length,  double omega, double k_soft, double k_stiff){
-    _center = center;
-    _side_length = side_length;
-    _omega = omega;
-    _k_soft = k_soft;
-    _k_stiff = k_stiff;
-    _encoding = encoding;
+// Robot::Robot(const Vec & center, const cppn& encoding, double side_length,  double omega, double k_soft, double k_stiff){
+//     _center = center;
+//     _side_length = side_length;
+//     _omega = omega;
+//     _k_soft = k_soft;
+//     _k_stiff = k_stiff;
+//     _encoding = encoding;
     
-    int RobotDim = encoding.size(); // number of cubes per side
-    Vec dims(side_length,side_length,side_length);
-    // keep trace of number of cubes that each mass is connected to 
-    std::vector<std::vector<std::vector<int>>> mass_conn(RobotDim+1, std::vector<std::vector<int>>(RobotDim+1,std::vector<int>(RobotDim+1,0)));
+//     int RobotDim = encoding.size(); // number of cubes per side
+//     Vec dims(side_length,side_length,side_length);
+//     // keep trace of number of cubes that each mass is connected to 
+//     std::vector<std::vector<std::vector<int>>> mass_conn(RobotDim+1, std::vector<std::vector<int>>(RobotDim+1,std::vector<int>(RobotDim+1,0)));
     
-    std::vector<std::vector<std::vector<Mass *>>> _masses(RobotDim+1, std::vector<std::vector<Mass *>>(RobotDim+1,std::vector<Mass *>(RobotDim+1,nullptr)));
+//     std::vector<std::vector<std::vector<Mass *>>> _masses(RobotDim+1, std::vector<std::vector<Mass *>>(RobotDim+1,std::vector<Mass *>(RobotDim+1,nullptr)));
   
-    // store number of cubes that should be connected to each mass
-    for (int i = 0; i < RobotDim+1; i++) {
-      for (int j = 0; j < RobotDim+1; j++) {
-	for (int k = 0; k < RobotDim+1; k++) {
-	  // if index mode RobotDim+1 is 0, then it is on the edge
-	  int i_edge = (i % (RobotDim)) ? 0:1; 
-	  int j_edge = (j % (RobotDim)) ? 0:1;
-	  int k_edge = (k % (RobotDim)) ? 0:1;
+//     // store number of cubes that should be connected to each mass
+//     for (int i = 0; i < RobotDim+1; i++) {
+//       for (int j = 0; j < RobotDim+1; j++) {
+// 	for (int k = 0; k < RobotDim+1; k++) {
+// 	  // if index mode RobotDim+1 is 0, then it is on the edge
+// 	  int i_edge = (i % (RobotDim)) ? 0:1; 
+// 	  int j_edge = (j % (RobotDim)) ? 0:1;
+// 	  int k_edge = (k % (RobotDim)) ? 0:1;
 
 	
-	  if (i_edge + j_edge + k_edge ==0){
-	    mass_conn[i][j][k] = 8; //corner
-	  }else if (i_edge+j_edge+k_edge ==3){
-	    mass_conn[i][j][k] = 1; //corner
-	  }else if (i_edge+j_edge+k_edge ==2){
-	    mass_conn[i][j][k] = 2; //edge
-	  }else{
-	    mass_conn[i][j][k] = 4; //surface
-	  }	
-	}
-      }
-    }
+// 	  if (i_edge + j_edge + k_edge ==0){
+// 	    mass_conn[i][j][k] = 8; //corner
+// 	  }else if (i_edge+j_edge+k_edge ==3){
+// 	    mass_conn[i][j][k] = 1; //corner
+// 	  }else if (i_edge+j_edge+k_edge ==2){
+// 	    mass_conn[i][j][k] = 2; //edge
+// 	  }else{
+// 	    mass_conn[i][j][k] = 4; //surface
+// 	  }	
+// 	}
+//       }
+//     }
 
-    // Remove appropriate masses
-    for (int i = 0; i < RobotDim; i++) {
-      for (int j = 0; j < RobotDim; j++) {
-	for (int k = 0; k < RobotDim; k++) {
+//     // Remove appropriate masses
+//     for (int i = 0; i < RobotDim; i++) {
+//       for (int j = 0; j < RobotDim; j++) {
+// 	for (int k = 0; k < RobotDim; k++) {
 	
-	  int exist = encoding[i][j][k][0];
+// 	  int exist = encoding[i][j][k][0];
 
-	  if (!exist){
-	    // subtract connectedness of each mass for the cube
-	    mass_conn[i][j][k] -= 1;
-	    mass_conn[i][j][k+1] -= 1;
-	    mass_conn[i][j+1][k] -= 1;
-	    mass_conn[i][j+1][k+1] -= 1;
-	    mass_conn[i+1][j][k] -= 1;
-	    mass_conn[i+1][j][k+1] -= 1;
-	    mass_conn[i+1][j+1][k] -= 1;
-	    mass_conn[i+1][j+1][k+1] -= 1;
-	  }
-	}
-      }
-    }
+// 	  if (!exist){
+// 	    // subtract connectedness of each mass for the cube
+// 	    mass_conn[i][j][k] -= 1;
+// 	    mass_conn[i][j][k+1] -= 1;
+// 	    mass_conn[i][j+1][k] -= 1;
+// 	    mass_conn[i][j+1][k+1] -= 1;
+// 	    mass_conn[i+1][j][k] -= 1;
+// 	    mass_conn[i+1][j][k+1] -= 1;
+// 	    mass_conn[i+1][j+1][k] -= 1;
+// 	    mass_conn[i+1][j+1][k+1] -= 1;
+// 	  }
+// 	}
+//       }
+//     }
   
-    // create masses
-    for (int i = 0; i < RobotDim+1; i++) {
-        for (int j = 0; j < RobotDim+1; j++) {
-            for (int k = 0; k < RobotDim + 1; k++) {
-                if (mass_conn[i][j][k] > 0){
-                    Mass * m;
-                    if (RobotDim == 1) {
-                    m = new Mass(Vec(i-0.5, j-0.5, k-0.5) * dims + _center);
-                    } else {
-                        m = new Mass(Vec(i / (RobotDim - 1.0) - 0.5,
-                                j / (RobotDim - 1.0) - 0.5,
-                                k / (RobotDim - 1.0) - 0.5) * dims + _center);
-                    }
+//     // create masses
+//     for (int i = 0; i < RobotDim+1; i++) {
+//         for (int j = 0; j < RobotDim+1; j++) {
+//             for (int k = 0; k < RobotDim + 1; k++) {
+//                 if (mass_conn[i][j][k] > 0){
+//                     Mass * m;
+//                     if (RobotDim == 1) {
+//                     m = new Mass(Vec(i-0.5, j-0.5, k-0.5) * dims + _center);
+//                     } else {
+//                         m = new Mass(Vec(i / (RobotDim - 1.0) - 0.5,
+//                                 j / (RobotDim - 1.0) - 0.5,
+//                                 k / (RobotDim - 1.0) - 0.5) * dims + _center);
+//                     }
 
-#ifdef GRAPHICS
-                    m -> color = Vec(0,0,0);
-#endif
+// #ifdef GRAPHICS
+//                     m -> color = Vec(0,0,0);
+// #endif
 
-                    masses.push_back(m);
-                    _masses[i][j][k] = m;
-                }
-            }
-        }
-    }
+//                     masses.push_back(m);
+//                     _masses[i][j][k] = m;
+//                 }
+//             }
+//         }
+//     }
 
 
-    // create springs
-    for (int i = 0; i < RobotDim; i++) {
-        for (int j = 0; j < RobotDim; j++) {
-	        for (int k = 0; k < RobotDim; k++) {
+//     // create springs
+//     for (int i = 0; i < RobotDim; i++) {
+//         for (int j = 0; j < RobotDim; j++) {
+// 	        for (int k = 0; k < RobotDim; k++) {
 	
-            int exist = encoding[i][j][k][0];
+//             int exist = encoding[i][j][k][0];
 
-            if (exist) {
-                int type = encoding[i][j][k][1];
+//             if (exist) {
+//                 int type = encoding[i][j][k][1];
             
-                for(int l=0; l<8; l++) {
-                    int l_x = (l<4)? 0:1;
-                    int l_y = (l<2)? 0:(l<4)?1:(l<6)?0:1;
-                    int l_z = (l%2)? 1:0;
+//                 for(int l=0; l<8; l++) {
+//                     int l_x = (l<4)? 0:1;
+//                     int l_y = (l<2)? 0:(l<4)?1:(l<6)?0:1;
+//                     int l_z = (l%2)? 1:0;
                 
-                    for (int m=l+1; m<8; m++) {
-                        int r_x = (m<4)? 0:1;
-                        int r_y = (m<2)? 0:(m<4)?1:(m<6)?0:1;
-                        int r_z = (m%2)? 1:0;
+//                     for (int m=l+1; m<8; m++) {
+//                         int r_x = (m<4)? 0:1;
+//                         int r_y = (m<2)? 0:(m<4)?1:(m<6)?0:1;
+//                         int r_z = (m%2)? 1:0;
 
-                        Spring * spr = new Spring(_masses[i+l_x][j+l_y][k+l_z],
-                                    _masses[i+r_x][j+r_y][k+r_z]);
+//                         Spring * spr = new Spring(_masses[i+l_x][j+l_y][k+l_z],
+//                                     _masses[i+r_x][j+r_y][k+r_z]);
                         
-                        spr -> _type = type;
-                        spr -> _omega = omega;
+//                         spr -> _type = type;
+//                         spr -> _omega = omega;
 
-                        if (type==0) { // green, contract then expand
-                            spr -> _k = k_soft;
+//                         if (type==0) { // green, contract then expand
+//                             spr -> _k = k_soft;
 
-#ifdef GRAPHICS
-                            _masses[i+l_x][j+l_y][k+l_z]->color += GREEN/16;
-                            _masses[i+r_x][j+r_y][k+r_z]->color += GREEN/16;
-#endif
-                        } else if (type==1) { // red, expand then contract
-                            spr -> _k = k_soft;
-#ifdef GRAPHICS
-                            _masses[i+l_x][j+l_y][k+l_z]->color += RED/16;
-                            _masses[i+r_x][j+r_y][k+r_z]->color += RED/16;
-#endif
+// #ifdef GRAPHICS
+//                             _masses[i+l_x][j+l_y][k+l_z]->color += GREEN/16;
+//                             _masses[i+r_x][j+r_y][k+r_z]->color += GREEN/16;
+// #endif
+//                         } else if (type==1) { // red, expand then contract
+//                             spr -> _k = k_soft;
+// #ifdef GRAPHICS
+//                             _masses[i+l_x][j+l_y][k+l_z]->color += RED/16;
+//                             _masses[i+r_x][j+r_y][k+r_z]->color += RED/16;
+// #endif
                 
-                        } else if (type==2) { // passive soft
-                            spr -> _k = k_soft;
-#ifdef GRAPHICS
-                            _masses[i+l_x][j+l_y][k+l_z]->color += BLUE/16;
-                            _masses[i+r_x][j+r_y][k+r_z]->color += BLUE/16;
-#endif
-                        } else { // passive stiff
-                            spr -> _k = k_stiff;
-#ifdef GRAPHICS
-                            _masses[i+l_x][j+l_y][k+l_z]->color += PURPLE/16;
-                            _masses[i+r_x][j+r_y][k+r_z]->color += PURPLE/16;
-#endif
-                        }
+//                         } else if (type==2) { // passive soft
+//                             spr -> _k = k_soft;
+// #ifdef GRAPHICS
+//                             _masses[i+l_x][j+l_y][k+l_z]->color += BLUE/16;
+//                             _masses[i+r_x][j+r_y][k+r_z]->color += BLUE/16;
+// #endif
+//                         } else { // passive stiff
+//                             spr -> _k = k_stiff;
+// #ifdef GRAPHICS
+//                             _masses[i+l_x][j+l_y][k+l_z]->color += PURPLE/16;
+//                             _masses[i+r_x][j+r_y][k+r_z]->color += PURPLE/16;
+// #endif
+//                         }
 
-		                springs.push_back(spr);
-                        }
-                    }
-                }
-            }
-        }
-    }
+// 		                springs.push_back(spr);
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
 
     
-    for (Spring * s : springs) {
-        s -> setRestLength((s -> _right -> pos - s -> _left -> pos).norm());
-    }
-}
+//     for (Spring * s : springs) {
+//         s -> setRestLength((s -> _right -> pos - s -> _left -> pos).norm());
+//     }
+// }
 
 #ifdef CONSTRAINTS
 
