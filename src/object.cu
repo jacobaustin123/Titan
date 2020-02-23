@@ -19,8 +19,6 @@ const Vec PURPLE(0.5, 0.2, 0.5);
 #endif
 
 __device__ const double NORMAL = 20000; // normal force coefficient for contact constaints
-//__device__ const double FRICTION_S = 1.0;  // static friction coeff rubber-on-concrete
-//__device__ const double FRICTION_K = 0.8;  // kinetic friction coeff
 
 #ifdef CONSTRAINTS
 void Container::addConstraint(CONSTRAINT_TYPE type, const Vec & v, double d) {

@@ -1047,11 +1047,8 @@ __global__ void computeSpringForces(CUDA_SPRING ** d_spring, int num_springs, do
             scale = (1 + 0.2 * sin(spring._omega * t));
 	    }
 	
-        Vec force = spring._k * (spring._rest * scale - temp.norm()) * (temp / temp.norm());
-        
-        if (spring._damping != 0) {
-            force += dot(spring._left -> vel - spring._right -> vel, temp / temp.norm()) * spring._damping * (temp / temp.norm());
-        }
+        Vec force = spring._k * (spring._rest * scale - temp.norm()) * (temp / temp.norm()); // normal spring force
+        force += dot(spring._left -> vel - spring._right -> vel, temp / temp.norm()) * spring._damping * (temp / temp.norm()); // damping
 
 #ifdef CONSTRAINTS
         if (spring._right -> constraints.fixed == false) {
