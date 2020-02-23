@@ -1392,7 +1392,7 @@ void Simulation::_run() { // repeatedly start next
 }
 
 #ifdef GRAPHICS
-glm::mat4 & getProjectionMatrix() {
+glm::mat4 & Simulation::getProjectionMatrix() {
     return this -> MVP;
 }
 
