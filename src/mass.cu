@@ -46,7 +46,6 @@ Mass::Mass(const Vec & position, double mass, bool fixed, double dt) {
     this -> dt = dt;
 
     T = 0;
-    damping = 1.0;
     
     valid = true;
     arrayptr = nullptr;
@@ -61,7 +60,6 @@ CUDA_MASS::CUDA_MASS(Mass &mass) {
     m = mass.m;
     dt = mass.dt;
     T = mass.T;
-    damping = mass.damping;
     
     pos = mass.pos;
     vel = mass.vel;

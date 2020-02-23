@@ -43,6 +43,7 @@ public:
         this -> _left = left;
         this -> _right = right;
         this -> defaultLength();
+        this -> _k = 10000.0;
         this -> arrayptr = nullptr;
         _type = PASSIVE_SOFT;
         _omega = 0.0; 
