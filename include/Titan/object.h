@@ -283,23 +283,23 @@ public:
 };
 
 
-typedef std::vector<std::vector<std::vector<std::vector<int>>>> cppn;
-class Robot : public Container {
-public:
-    ~Robot() {};
+// typedef std::vector<std::vector<std::vector<std::vector<int>>>> cppn;
+// class Robot : public Container {
+// public:
+//     ~Robot() {};
     
-    // with known encoding
-    Robot(const Vec & center, const cppn& encoding, double side_length,  double omega=1.0, double k_soft=2e3, double k_stiff=2e5);
+//     // with known encoding
+//     Robot(const Vec & center, const cppn& encoding, double side_length,  double omega=1.0, double k_soft=2e3, double k_stiff=2e5);
     
-    Vec _center;
-    cppn _encoding;
-    double _side_length;
-    double _omega;
-    double _k_soft;
-    double _k_stiff;
-    /* Vec _com; */
-    /* double _score; */
-};
+//     Vec _center;
+//     cppn _encoding;
+//     double _side_length;
+//     double _omega;
+//     double _k_soft;
+//     double _k_stiff;
+//     /* Vec _com; */
+//     /* double _score; */
+// };
 
 
 #endif //TITAN_OBJECT_H

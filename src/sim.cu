@@ -815,16 +815,14 @@ __global__ void createMassPointers(CUDA_MASS ** ptrs, CUDA_MASS * data, int size
 CUDA_MASS ** Simulation::massToArray() {
     CUDA_MASS ** d_ptrs = new CUDA_MASS * [masses.size()]; // array of pointers
     for (int i = 0; i < masses.size(); i++) { // potentially slow
-        gpuErrchk(cudaMalloc((void **) d_ptrs + i, sizeof(CUDA_MASS *)));
+        gpuErrchk(cudaMalloc((void **) (d_ptrs + i), sizeof(CUDA_MASS))); // TODO Fix this shit
     }
 
     d_masses = thrust::device_vector<CUDA_MASS *>(d_ptrs, d_ptrs + masses.size());
 
-
     CUDA_MASS * h_data = new CUDA_MASS[masses.size()]; // copy masses into single array for copying to the GPU, set GPU pointers
 
     int count = 0;
-
     for (Mass * m : masses) {
         m -> arrayptr = d_ptrs[count];
         h_data[count] = CUDA_MASS(*m);
@@ -834,19 +832,20 @@ CUDA_MASS ** Simulation::massToArray() {
 
     delete [] d_ptrs;
 
-
-
     CUDA_MASS * d_data; // copy to the GPU
     gpuErrchk(cudaMalloc((void **)&d_data, sizeof(CUDA_MASS) * masses.size()));
     gpuErrchk(cudaMemcpy(d_data, h_data, sizeof(CUDA_MASS) * masses.size(), cudaMemcpyHostToDevice));
 
     delete [] h_data;
 
-
     massBlocksPerGrid = (masses.size() + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK;
 
     if (massBlocksPerGrid > MAX_BLOCKS) {
         massBlocksPerGrid = MAX_BLOCKS;
+    }
+
+    if (massBlocksPerGrid < 1) {
+        massBlocksPerGrid = 1;
     }
 
     createMassPointers<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(thrust::raw_pointer_cast(d_masses.data()), d_data, masses.size());
@@ -868,11 +867,10 @@ CUDA_SPRING ** Simulation::springToArray() {
     CUDA_SPRING ** d_ptrs = new CUDA_SPRING * [springs.size()]; // array of pointers
 
     for (int i = 0; i < springs.size(); i++) { // potentially slow, allocate memory for every spring
-        gpuErrchk(cudaMalloc((void **) d_ptrs + i, sizeof(CUDA_SPRING *)));
+        gpuErrchk(cudaMalloc((void **) d_ptrs + i, sizeof(CUDA_SPRING)));
     }
 
     d_springs = thrust::device_vector<CUDA_SPRING *>(d_ptrs, d_ptrs + springs.size()); // copy those pointers to the GPU using thrust
-
 
     CUDA_SPRING * h_spring = new CUDA_SPRING[springs.size()]; // array for the springs themselves
 
@@ -993,11 +991,9 @@ void Simulation::massFromArray() {
 }
 
 void Simulation::springFromArray() {
-//    cudaFree(d_spring);
 }
 
 void Simulation::constraintsFromArray() {
-    //
 }
 
 void Simulation::fromArray() {
@@ -1592,7 +1588,6 @@ void Simulation::wait(double t) {
         throw std::runtime_error("The simulation has ended. Control functions cannot be called.");
     }
 
-
     double current_time = time();
     while (RUNNING && time() <= current_time + t) {
         std::this_thread::sleep_for(std::chrono::microseconds(10)); // TODO replace this with wait queue. 
@@ -1603,7 +1598,6 @@ void Simulation::waitUntil(double t) {
     if (ENDED && !FREED) {
         throw std::runtime_error("The simulation has ended. Control functions cannot be called.");
     }
-
 
     while (RUNNING && time() <= t) {
         std::this_thread::sleep_for(std::chrono::microseconds(10));
@@ -1932,31 +1926,31 @@ Beam * Simulation::createBeam(const Vec & center, const Vec & dims, int nx, int 
 }
 #endif
 
-Robot * Simulation::createRobot(const Vec & center, const cppn& encoding, double side_length,  double omega, double k_soft, double k_stiff){
+// Robot * Simulation::createRobot(const Vec & center, const cppn& encoding, double side_length,  double omega, double k_soft, double k_stiff){
   
-    if (ENDED) {
-        throw std::runtime_error("The simulation has ended. New objects cannot be created.");
-    }
+//     if (ENDED) {
+//         throw std::runtime_error("The simulation has ended. New objects cannot be created.");
+//     }
 
-    Robot * l = new Robot(center, encoding, side_length, omega, k_soft, k_stiff);
+//     Robot * l = new Robot(center, encoding, side_length, omega, k_soft, k_stiff);
 
     
 	   
-    d_masses.reserve(masses.size() + l -> masses.size());
-    d_springs.reserve(springs.size() + l -> springs.size());
+//     d_masses.reserve(masses.size() + l -> masses.size());
+//     d_springs.reserve(springs.size() + l -> springs.size());
 
-    for (Mass * m : l -> masses) {
-        createMass(m);
-    }
+//     for (Mass * m : l -> masses) {
+//         createMass(m);
+//     }
 
-    for (Spring * s : l -> springs) {
-        createSpring(s);
-    }
+//     for (Spring * s : l -> springs) {
+//         createSpring(s);
+//     }
 
-    containers.push_back(l);
+//     containers.push_back(l);
 
-    return l;
-}
+//     return l;
+// }
 
 
 void Simulation::createPlane(const Vec & abc, double d) { // creates half-space ax + by + cz < d
@@ -2069,4 +2063,3 @@ void Simulation::setGlobalAcceleration(const Vec & global) {
 
     this -> global = global;
 }
-
