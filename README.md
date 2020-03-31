@@ -3,7 +3,7 @@
 
 ## Installation
 
-Detailed instructions can be found in the [user wiki](https://github.com/ja3067/Titan/wiki/Set-Up) for building and installing the Titan physics library.
+Detailed instructions can be found in the [user wiki](https://github.com/jacobaustin123/Titan/wiki/Set-Up) for building and installing the Titan physics library.
 
 **Try a simple Titan physics simulation**
 
@@ -22,7 +22,7 @@ This simple program produces a large lattice bouncing on the given plane:
 
 <img src="https://i.imgur.com/zdB0ZPg.gif" width="400" height="400">
 
-For more examples and troubleshooting, see the [github wiki](https://github.com/ja3067/Titan/wiki/Set-Up). We also have a user [Google Group](https://groups.google.com/forum/#!forum/titan-library) where you can ask questions about installation and usage, and make feature requests.
+For more examples and troubleshooting, see the [github wiki](https://github.com/jacobaustin123/Titan/wiki/Set-Up). We also have a user [Google Group](https://groups.google.com/forum/#!forum/titan-library) where you can ask questions about installation and usage, and make feature requests.
 
 ## About
 

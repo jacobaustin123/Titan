@@ -14,11 +14,9 @@ include(vcpkg_common_functions)
 set(SOURCE_PATH ${CURRENT_BUILDTREES_DIR}/src/Titan)
 
 vcpkg_from_github(OUT_SOURCE_PATH SOURCE_PATH
-        REPO ja3067/Titan
-        REF 23c071602e252c705fae2a3
-        SHA512 1687b694be713ab27f2f34011fe3d2186432526255be77cfeceffe6d450d8edf5963d8d845667fa840b9a1f52eaba3c33ac2161378dbad4d00eb15a277caa532
+        REPO jacobaustin123/Titan
         HEAD_REF master
-        )
+)
 
 find_program(NVCC
         NAMES nvcc nvcc.exe
