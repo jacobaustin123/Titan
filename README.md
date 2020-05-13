@@ -24,6 +24,8 @@ This simple program produces a large lattice bouncing on the given plane:
 
 For more examples and troubleshooting, see the [github wiki](https://github.com/jacobaustin123/Titan/wiki/Set-Up). We also have a user [Google Group](https://groups.google.com/forum/#!forum/titan-library) where you can ask questions about installation and usage, and make feature requests.
 
+Also see [this overview video](https://www.youtube.com/watch?v=IvZNL8jd77s) for an overview of the library and its capabilities.
+
 ## About
 
 This software was written by Jacob Austin and Rafael Corrales Fatou as part of a project led by Professor Hod Lipson at the Creative Machines Lab at Columbia University. This software is released under an Apache 2.0 license.
