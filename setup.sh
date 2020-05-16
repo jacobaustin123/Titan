@@ -11,5 +11,5 @@ if [ ! -d "$gtestpath" ]; then
     cd ~- # change back to previous dir and no output to terminal
 fi
 
-sudo apt-get install -y --no-install-recommends 
+sudo apt-get install -y --no-install-recommends \
     libglew-dev libglfw3-dev libglm-dev libgl-dev

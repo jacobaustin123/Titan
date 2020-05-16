@@ -4,14 +4,15 @@ project("Titan"
         DESCRIPTION "CUDA physics simulator for soft robotics and reinforcement learning"
         LANGUAGES C CXX CUDA)
 
-option(TITAN_ENABLE_TEST "Enable unit tests to be built." OFF)
+option(TITAN_BUILD_TESTS "Enable unit tests to be built." OFF)
 option(TITAN_SHARED_BUILD "Enables shared library build (static by default)" OFF)
 option(GRAPHICS "Enables Titan OpenGL graphics support" ON)
 option(CONSTRAINTS "Enables Titan support for constraints" ON)
 option(TITAN_INSTALL "Install Titan files at path specified by CMAKE_INSTALL_PREFIX" OFF)
 
-if (TITAN_ENABLE_TEST AND GRAPHICS)
-    message(FATAL_ERROR "Cannot run tests while building with graphics support")
+if (TITAN_BUILD_TESTS AND GRAPHICS)
+    message(WARNING "Cannot run tests while building with graphics support. Disabling graphics support.")
+    set(GRAPHICS OFF)
 endif()
 
 set(CMAKE_CXX_STANDARD 14) # set C++ standard to C++11
@@ -57,13 +58,13 @@ add_library(Titan ${TITAN_SOURCE_FILES} ${TITAN_HEADER_FILES})
 
 # if enabled, compiles with support for graphics using OpenGL.
 if (GRAPHICS)
-    message("Enabling support for OpenGL graphics...")
+    message(STATUS "Enabling support for OpenGL graphics...")
     target_compile_definitions(Titan PUBLIC GRAPHICS)
 endif()
 
 # if enabled, compiles with support for constraints.
 if (CONSTRAINTS)
-    message("Enabling support for Constraints..")
+    message(STATUS "Enabling support for Constraints..")
     target_compile_definitions(Titan PUBLIC CONSTRAINTS) 
 endif()
 
@@ -178,7 +179,7 @@ endif()
 set(GTEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/googletest/googletest)
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib ${PROJECT_BINARY_DIR}/lib)
 
-if (TITAN_ENABLE_TEST)
+if (TITAN_BUILD_TESTS)
     include(CTest)
     enable_testing()
     add_subdirectory(${PROJECT_SOURCE_DIR}/test ${PROJECT_BINARY_DIR}/test)
