@@ -1,8 +1,11 @@
 //
 // Created by Jacob Austin on 5/17/18.
 //
-#define GLM_FORCE_PURE
 #include "mass.h"
+
+using namespace titan;
+
+namespace titan {
 
 Mass::Mass() {
     m = 1.0;
@@ -152,3 +155,5 @@ void Mass::decrementRefCount() {
         delete this;
     }
 }
+
+} // namespace titan

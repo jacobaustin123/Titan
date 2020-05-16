@@ -8,6 +8,8 @@
 #include "vec.h"
 #include "object.h"
 
+namespace titan {
+
 class Mass;
 struct CUDA_MASS;
 
@@ -19,13 +21,13 @@ struct CUDA_MASS {
     double m; // mass in kg
     double dt; // update interval
     double T; // local time
-    Vec pos; // position in m
-    Vec vel; // velocity in m/s
-    Vec acc; // acceleration in m/s^2
-    Vec force; // force in kg m / s^2
+    titan::Vec pos; // position in m
+    titan::Vec vel; // velocity in m/s
+    titan::Vec acc; // acceleration in m/s^2
+    titan::Vec force; // force in kg m / s^2
 
 #ifdef GRAPHICS
-    Vec color;
+    titan::Vec color;
 #endif
 
     bool valid;
@@ -42,14 +44,14 @@ public:
     double m; // mass in kg
     double dt; // update interval
     double T; // local time
-    Vec pos; // position in m
-    Vec vel; // velocity in m/s
-    Vec acc; // acceleration in m/s^2
-    Vec force; // force in kg m / s^2
+    titan::Vec pos; // position in m
+    titan::Vec vel; // velocity in m/s
+    titan::Vec acc; // acceleration in m/s^2
+    titan::Vec force; // force in kg m / s^2
 
-    Mass(const Vec & position, double mass = 0.1, bool fixed = false, double dt = 0.0001);
+    Mass(const titan::Vec & position, double mass = 0.1, bool fixed = false, double dt = 0.0001);
 #ifdef CONSTRAINTS
-    void addConstraint(CONSTRAINT_TYPE type, const Vec & vec, double num);
+    void addConstraint(CONSTRAINT_TYPE type, const titan::Vec & vec, double num);
     void clearConstraints(CONSTRAINT_TYPE type);
     void clearConstraints();
 
@@ -59,7 +61,7 @@ public:
 #endif
     
 #ifdef GRAPHICS
-    Vec color;
+    titan::Vec color;
 #endif
 
 private:
@@ -88,5 +90,7 @@ private:
 #endif
 
 };
+
+} // namespace titan
 
 #endif //TITAN_MASS_H

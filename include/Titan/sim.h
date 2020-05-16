@@ -5,18 +5,6 @@
 #ifndef TITAN_SIM_H
 #define TITAN_SIM_H
 
-#include "spring.h"
-#include "mass.h"
-#include "object.h"
-#include "vec.h"
-
-#define MAX_BLOCKS 65535 // max number of CUDA blocks
-#define THREADS_PER_BLOCK 1024
-
-#ifndef GRAPHICS
-#define NUM_QUEUED_KERNELS 4 // number of kernels to queue at a given time (this will reduce the frequency of updates from the CPU by this factor
-#endif
-
 #ifdef GRAPHICS
 
 #include "graphics.h"
@@ -32,6 +20,20 @@
 #include <vector>
 #include <set>
 #include <thread>
+
+#include "spring.h"
+#include "mass.h"
+#include "object.h"
+#include "vec.h"
+
+namespace titan {
+
+#define MAX_BLOCKS 65535 // max number of CUDA blocks
+#define THREADS_PER_BLOCK 1024
+
+#ifndef GRAPHICS
+#define NUM_QUEUED_KERNELS 4 // number of kernels to queue at a given time (this will reduce the frequency of updates from the CPU by this factor
+#endif
 
 class Simulation {
 public:
@@ -218,5 +220,7 @@ private:
     static Vec up;
 #endif
 };
+
+} // namespace titan
 
 #endif //TITAN_SIM_H

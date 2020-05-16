@@ -41,8 +41,13 @@ if(VCPKG_LIBRARY_LINKAGE STREQUAL "static")
             SOURCE_PATH ${SOURCE_PATH}
             PREFER_NINJA
             OPTIONS
-            -DTITAN_SHARED_BUILD=OFF
             -DCMAKE_CUDA_COMPILER:FILEPATH=${NVCC}
+            -DTITAN_SHARED_BUILD=OFF
+            -DTITAN_INSTALL=ON
+            -DGRAPHICS=ON
+            -DCONSTRAINTS=ON
+            -DTITAN_ENABLE_TEST=OFF
+            
     )
 else()
     message(STATUS "Building SHARED library")
@@ -52,6 +57,11 @@ else()
             OPTIONS
             -DTITAN_SHARED_BUILD=ON
             -DCMAKE_CUDA_COMPILER:FILEPATH=${NVCC}
+            -DTITAN_INSTALL=ON
+            -DGRAPHICS=ON
+            -DCONSTRAINTS=ON
+            -DTITAN_ENABLE_TEST=OFF
+            -DTITAN_INSTALL=ON
     )
 endif()
 

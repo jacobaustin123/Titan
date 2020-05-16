@@ -1,28 +1,30 @@
 #ifndef TITAN_OBJECT_H
 #define TITAN_OBJECT_H
 
-//#include "mass.h"
-//#include "spring.h"
+#include <vector>
 #include "vec.h"
 
 #ifdef GRAPHICS
+
+#define GLM_FORCE_PURE
+
 // Include GLEW
 #include <GL/glew.h>
 
 // Include GLFW
-#include <GLFW/glfw3.h> // TODO add SDL2 instead
+// TODO add SDL2 instead
+#include <GLFW/glfw3.h>
 
 // Include GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
 #endif
-
-#include <vector>
 
 #ifdef CONSTRAINTS
 #include <thrust/device_vector.h>
 #endif
+
+namespace titan {
 
 struct CUDA_MASS;
 class Spring;
@@ -301,5 +303,6 @@ public:
 //     /* double _score; */
 // };
 
+} // namespace titan
 
 #endif //TITAN_OBJECT_H

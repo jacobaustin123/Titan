@@ -39,3 +39,6 @@ build
 *.exe
 *.out
 *.app
+
+# other
+*googletest*
