@@ -12,6 +12,8 @@
 #include <cassert>
 #include <cmath>
 
+namespace titan {
+
 namespace stl {
     class Vec3D {
     public:
@@ -45,7 +47,6 @@ namespace stl {
 
     double dot(const Vec3D & a, const Vec3D & b);
     Vec3D cross(const Vec3D & v1, const Vec3D & v2);
-
 
     Vec3D::Vec3D() {
         data[0] = 0;
@@ -334,5 +335,7 @@ namespace stl {
         return data;
     }
 }
+
+} // namespace titan
 
 #endif //STL_PARSER_H

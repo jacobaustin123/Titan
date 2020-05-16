@@ -1,9 +1,12 @@
 //
 // Created by Jacob Austin on 5/17/18.
 //
-#define GLM_FORCE_PURE
 #include "spring.h"
 #include <cmath>
+
+using namespace titan;
+
+namespace titan {
 
 Vec Spring::getForce() { // computes force on right object. left force is - right force.
   //    Vec temp = (_right -> pos) - (_left -> pos);
@@ -67,3 +70,5 @@ CUDA_SPRING::CUDA_SPRING(const Spring & s, CUDA_MASS * left, CUDA_MASS * right) 
     _omega = s._omega;
     _damping = s._damping;
 }
+
+} // namespace titan

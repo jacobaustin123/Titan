@@ -9,6 +9,10 @@
 #ifndef shader_hpp
 #define shader_hpp
 
+namespace titan {
+
 GLuint LoadShaders();
+
+} // namespace titan
 
 #endif /* shader_hpp */

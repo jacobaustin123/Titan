@@ -15,6 +15,10 @@ using namespace std;
 
 #include "shader.h"
 
+using namespace titan;
+
+namespace titan {
+
 GLuint LoadShaders(){
     std::string FragmentShaderCode = "#version 330 core\n"
                                      "\n"
@@ -111,5 +115,7 @@ GLuint LoadShaders(){
 
     return ProgramID;
 }
+
+} // namespace titan
 
 #endif

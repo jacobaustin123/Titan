@@ -2,7 +2,6 @@
 // Created by Jacob Austin on 5/17/18.
 //
 
-#define GLM_FORCE_PURE
 #include "sim.h"
 #include "stlparser.h"
 
@@ -10,6 +9,7 @@
 #include <thrust/execution_policy.h>
 
 #ifdef GRAPHICS
+
 #include <GLFW/glfw3.h>
 #endif
 
@@ -19,12 +19,15 @@
 #include <cuda_gl_interop.h>
 #include <exception>
 
+using namespace titan;
+
+namespace titan {
+
 #ifdef GRAPHICS
 #ifndef SDL2
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 #endif
 #endif
-
 
 __global__ void createSpringPointers(CUDA_SPRING ** ptrs, CUDA_SPRING * data, int size);
 __global__ void createMassPointers(CUDA_MASS ** ptrs, CUDA_MASS * data, int size);
@@ -1503,24 +1506,26 @@ void Simulation::execute() {
             }
 
 #ifdef CONSTRAINTS
+#ifdef GRAPHICS
             if (resize_buffers) {
                 resizeBuffers(); // needs to be run from GPU thread
                 resize_buffers = false;
                 update_colors = true;
                 update_indices = true;
             }
-
+#endif
             if (update_constraints) {
                 d_constraints.d_balls = thrust::raw_pointer_cast(&d_balls[0]);
                 d_constraints.d_planes = thrust::raw_pointer_cast(&d_planes[0]);
                 d_constraints.num_balls = d_balls.size();
                 d_constraints.num_planes = d_planes.size();
 
+#ifdef GRAPHICS
                 for (Constraint * c : constraints) { // generate buffers for constraint objects
                     if (! c -> _initialized)
                         c -> generateBuffers();
                 }
-
+#endif
                 update_constraints = false;
             }
 #endif
@@ -2060,3 +2065,5 @@ void Simulation::setGlobalAcceleration(const Vec & global) {
 
     this -> global = global;
 }
+
+} // namespace titan

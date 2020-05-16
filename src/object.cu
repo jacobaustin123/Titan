@@ -6,10 +6,17 @@
 // to a mass, for example a normal force pushing the mass out of a constaint object or
 // a frictional force.
 
-#define GLM_FORCE_PURE
 #include "object.h"
 #include <cmath>
 #include "sim.h"
+
+#ifdef GRAPHICS
+#define GLM_FORCE_PURE
+#endif
+
+using namespace titan;
+
+namespace titan {
 
 #ifdef GRAPHICS
 const Vec RED(1.0, 0.2, 0.2);
@@ -803,3 +810,5 @@ void ContactPlane::draw() {
     glDisableVertexAttribArray(0);
 }
 #endif
+
+} // namespace titan

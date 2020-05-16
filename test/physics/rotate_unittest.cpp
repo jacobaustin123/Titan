@@ -1,10 +1,18 @@
+#include "gtest/gtest.h"
+
 #include <Titan/sim.h> 
 
-int main() {
-    Simulation sim;
+using titan::Vec;
 
-    Lattice * l2 = sim.createLattice(Vec(0, 0, 10), Vec(5, 5, 5), 10, 10, 10);
-    sim.setViewport(Vec(5, -15, 10), Vec(0, 0, 6), Vec(0, 0, 1));
+struct rotate_fixture : ::testing::Test {
+
+};
+
+TEST_F(rotate_fixture, rotate_test) {
+    titan::Simulation sim;
+
+    titan::Lattice * l2 = sim.createLattice(Vec(0, 0, 10), Vec(5, 5, 5), 10, 10, 10);
+    // sim.setViewport(Vec(5, -15, 10), Vec(0, 0, 6), Vec(0, 0, 1));
 
     sim.setAllSpringConstantValues(1E5);
     l2 -> rotate(Vec(0, 0, 1), -0.78);
@@ -21,6 +29,12 @@ int main() {
         sim.get(l2);
         l2 -> rotate(Vec(0, 0, 1), 0.5);
         sim.set(l2);
+
+        if (sim.time() > 5.0) {
+            sim.stop();
+            return;
+        }
+
         sim.resume();
     }
 }

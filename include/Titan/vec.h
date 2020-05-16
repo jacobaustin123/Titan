@@ -28,6 +28,8 @@
 #include <cmath>
 #include <vector>
 
+namespace titan {
+
 class Vec {
 public:
     CUDA_CALLABLE_MEMBER Vec() {
@@ -158,5 +160,7 @@ private:
 
 CUDA_CALLABLE_MEMBER double dot(const Vec & a, const Vec & b);
 CUDA_CALLABLE_MEMBER Vec cross(const Vec &v1, const Vec &v2);
+
+} // namespace titan
 
 #endif
