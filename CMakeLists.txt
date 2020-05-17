@@ -60,8 +60,9 @@ set(TITAN_HEADER_FILES
     ${TITAN_INCLUDE_DIR}/stlparser.h
 )
 
-# if buildign as a shared library
+# if building as a shared library
 if (TITAN_SHARED_BUILD)
+    message(STATUS "Building Titan as a shared library...")
     set(BUILD_SHARED_LIBS ON)
 endif()
 

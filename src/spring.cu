@@ -4,8 +4,6 @@
 #include "spring.h"
 #include <cmath>
 
-using namespace titan;
-
 namespace titan {
 
 Vec Spring::getForce() { // computes force on right object. left force is - right force.

@@ -19,8 +19,6 @@
 #include <cuda_gl_interop.h>
 #include <exception>
 
-using namespace titan;
-
 namespace titan {
 
 #ifdef GRAPHICS

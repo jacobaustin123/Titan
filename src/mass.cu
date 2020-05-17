@@ -3,8 +3,6 @@
 //
 #include "mass.h"
 
-using namespace titan;
-
 namespace titan {
 
 Mass::Mass() {

@@ -14,8 +14,6 @@
 #define GLM_FORCE_PURE
 #endif
 
-using namespace titan;
-
 namespace titan {
 
 #ifdef GRAPHICS

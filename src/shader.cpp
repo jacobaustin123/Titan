@@ -15,8 +15,6 @@ using namespace std;
 
 #include "shader.h"
 
-using namespace titan;
-
 namespace titan {
 
 GLuint LoadShaders(){

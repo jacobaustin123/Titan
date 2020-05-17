@@ -8,8 +8,6 @@
 
 #include "vec.h"
 
-using namespace titan;
-
 namespace titan {
 
 #if __CUDA_ARCH__ < 600
