@@ -8,7 +8,7 @@
     - [Linux](#linux-installation)
     - [Windows](#windows-installation)
     - [Troubleshooting](#troubleshooting)
-- [API](#api)
+- [API](#api-overview)
 - [About](#about)
 
 ## Overview
@@ -277,7 +277,112 @@ It can be reinstalled at any time using ```./vcpkg install titan``` or ```./vcpk
 
 ## API Overview
 
-Lorem Ipsum Ipsum Lorem
+### Simulation
+
+Titan runs simulations in a `Simulation` object which holds references to user defined objects, graphics buffers, constraints, and other data. Data is held on the GPU, with the user interacting with CPU objects which can fetch data from the GPU, modify it, and push it back to the simulation in real time. The Simulation object controls things like the duration of the run, graphics/rendering options like the viewport, and GPU parameters.
+
+For example:
+
+```cpp
+Simulation sim;
+Mass * m1 = sim.createMass(Vec(0, 0, 0));
+Mass * m2 = sim.createMass(Vec(0, 0, 1));
+Spring * s1 = sim.createSpring(m1, m2);
+
+sim.setTimeStep(0.001);
+sim.start();
+```
+
+### Mass
+The simplest discrete simulation elements. Point masses have individual physical properties (mass, position, velocity, acceleration) and can be affected by forces exerted by different sources. 
+
+```cpp
+Simulation sim;
+Mass * m1 = sim.createMass(Vec(0, 0, 0));
+... // run simulation for a while
+sim.getMass(m1); // pull updates from simulation
+cout << m1 -> pos << endl; // position
+cout << m1 -> vel << endl; // velocity
+cout << m1 -> T << endl; // simulation time
+```
+
+### Spring
+
+Springs connect pairs of masses together and apply simple Hooke's law forces. These forces are applied in parallel on the GPU, achieving a substantial performance improvement over a CPU based system.
+
+```cpp
+Simulation sim;
+Mass * m1 = sim.createMass(Vec(0, 0, 0));
+Mass * m2 = sim.createMass(Vec(0, 0, 1));
+Spring * s1 = sim.createSpring(m1, m2);
+... // run simulation for a while
+cout << s1 -> _k << endl; // spring constant
+cout << m1 -> _rest << endl; // rest length
+cout << m1 -> _left -> pos << endl; // position of left mass
+```
+
+### Contaner
+
+Masses and springs may belong to Containers which enable efficient and convenient transfers of information to and from the GPU. Once a mass or spring has been created, it can be added to a container of related objects. This container can the be pushed to or pulled from the GPU as a single unit, avoiding expensive copies and tedious boilerplate code.
+
+```cpp
+Simulation sim;
+Lattice * l1 = sim.createLattice(titan::Vec(0, 0, 5), titan::Vec(4, 4, 4), 20, 20, 20); // container subbclass
+l1 -> rotate(Vec(0, 0, 1), 3.14);
+l1 -> translate(Vec(1, 2, 5));
+l1 -> setMassValues(0.5); // set all masses in container to 0.5
+```
+
+### **Forces** 
+
+Forces in Titan are defined by 3D vectors and affect masses during the simulation. Forces can be a result of several interactions:
+* Mass-Spring Hooke’s forces due to Springs connecting masses
+* Mass interactions with contact elements  
+* Global accelerations (i.e. gravity) set up by the user
+
+### Contacts
+Contacts are predefined simulation elements that apply forces to masses when certain positional requirements are met. Contact elements only need to be initialized to start working.
+
+Contacts included in Titan:
+
+* **Plane:** Applies a normal force based on the masse’s displacement after breaching one face of the plane. 
+* **Sphere:** Applies a normal force based on the masses’ displacement after breaching the sphere’s surface. 
+
+```cpp
+Simulation sim;
+sim.createPlane(Vec(0, 0, 1), 0); // contact plane facing in the positive z direction with 0 offset
+```
+
+### Constraints
+
+Constraints are positional limitations imposed on masses. Constraints need to be initialized and then associated to masses in order to work.
+
+Constraints included in Titan:
+
+* **Direction:** Constraints the movement of masses to one direction only. 
+* **Plane:** Constraints the movement of masses to a plane. The plane is defined by a normal vector and and the masse’s position at the time of its application. 
+
+Masses can also be marked as "fixed", meaning that they cannot move, and drag can be specified on individual masses, which will be applied according to a C v^2 law.
+
+## Dynamic Simulations 
+
+The Titan simulation environment is asynchronous and dynamic. The user can make arbitrary modifications to the simulation on the run, and these will be immediately reflected in the simulation. The user can:
+
+* Fetch values from the GPU using sim.get(...)
+* Push values to the GPU using sim.set(...)
+* Add constraints and modify parameters of the simulation.
+
+For example:
+
+```cpp
+Simulation sim;
+Lattice * l1 = sim.createLattice(titan::Vec(0, 0, 5), titan::Vec(4, 4, 4), 20, 20, 20); // container subbclass
+sim.start();
+sim.wait(0.5); // sleep at 0.5 seconds
+sim.get(l1); // pull updates from the GPU
+l1 -> masses[0] -> pos = Vec(0, 0, 1); // set position of first mass.
+sim.set(l1); // push updates to the GPU
+```
 
 ## About
 
