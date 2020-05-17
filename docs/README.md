@@ -9,6 +9,14 @@
     - [Windows](#windows-installation)
     - [Troubleshooting](#troubleshooting)
 - [API](#api-overview)
+- [API Details](#api-details)
+    - [Simulation](#simulation-methods)
+    - [Mass](#mass-methods)
+    - [Spring](#spring-methods)
+    - [Container](#container-methods)
+    - [Vec](#vec-methods)
+- [Examples](#examples)
+    - [Energy Conservation](#energy-conservation)
 - [About](#about)
 
 ## Overview
@@ -364,7 +372,7 @@ Constraints included in Titan:
 
 Masses can also be marked as "fixed", meaning that they cannot move, and drag can be specified on individual masses, which will be applied according to a C v^2 law.
 
-## Dynamic Simulations 
+### Dynamic Simulations 
 
 The Titan simulation environment is asynchronous and dynamic. The user can make arbitrary modifications to the simulation on the run, and these will be immediately reflected in the simulation. The user can:
 
@@ -382,6 +390,236 @@ sim.wait(0.5); // sleep at 0.5 seconds
 sim.get(l1); // pull updates from the GPU
 l1 -> masses[0] -> pos = Vec(0, 0, 1); // set position of first mass.
 sim.set(l1); // push updates to the GPU
+```
+
+## API Details
+
+### Simulation Methods
+
+```cpp
+    Mass * createMass();
+    Mass * createMass(const Vec & pos);
+
+    Spring * createSpring();
+    Spring * createSpring(Mass * m1, Mass * m2);
+
+    void deleteMass(Mass * m);
+    void deleteSpring(Spring * s);
+
+    void get(Mass *m); // pull objects from the GPU
+    void get(Spring *s); // not really useful, no commands change springs
+    void get(Container *c);
+
+    void set(Mass * m); // push updates to the GPU
+    void set(Spring *s);
+    void set(Container * c);
+
+    void getAll(); // get all objects from the GPU
+    void setAll(); // set all objects
+
+    // Global constraints (can be rendered)
+    void createPlane(const Vec & abc, double d ); // creates half-space ax + by + cz < d
+    void createPlane(const Vec &abc, double d, double FRICTION_K, double FRICTION_S);  // creates half-space ax + by + cz < d
+
+    void createBall(const Vec & center, double r ); // creates ball with radius r at position center
+    void clearConstraints(); // clears global constraints only
+
+    // Containers
+    Container * createContainer();
+    void deleteContainer(Container * c);
+
+    Cube * createCube(const Vec & center, double side_length); // creates cube
+    Lattice * createLattice(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
+    Beam * createBeam(const Vec & center, const Vec & dims, int nx = 10, int ny = 10, int nz = 10);
+    Container * importFromSTL(const std::string & path, double density = 10.0, int num_rays = 5); // density in vertices / volume
+
+    // Bulk modifications, only update CPU
+    void setAllSpringConstantValues(double k);
+    void setAllMassValues(double m);
+    void setTimeStep(double delta_t);
+    void setGlobalAcceleration(const Vec & global_acc);
+    void defaultRestLengths(); // makes all rest lengths equal to their current length
+
+    // Control
+    void start(); // start simulation
+
+    void stop(); // stop simulation while paused, free all memory.
+    void stop(double time); // stop simulation at time
+
+    void pause(double t); // pause at time t, block CPU until t.
+    void resume();
+
+    void reset(); // reset the simulation
+    
+    void setBreakpoint(double time); // tell the program to stop at a fixed time (doesn't hang).
+
+    void wait(double t); // wait fixed time without stopping simulation
+    void waitUntil(double t); // wait until time without stopping simulation
+    void waitForEvent();  // wait until event (e.g. breakpoint)
+
+    double time();
+    bool running();
+
+    void printPositions();
+
+    Spring * getSpringByIndex(int i);
+    Mass * getMassByIndex(int i);
+    Container * getContainerByIndex(int i);
+
+    std::vector<Mass *> masses;
+    std::vector<Spring *> springs;
+    std::vector<Container *> containers;
+
+#ifdef GRAPHICS
+    void setViewport(const Vec & camera_position, const Vec & target_location, const Vec & up_vector);
+    void moveViewport(const Vec & displacement); // displace camera by vector
+    glm::mat4 & getProjectionMatrix(); // access glm projection matrix
+#endif
+}
+```
+
+### Mass Methods
+
+```cpp
+class Mass {
+    double m; // mass in kg
+    double T; // local time of mass
+    Vec pos; // position in m
+    Vec vel; // velocity in m/s
+
+    void setExternalForce(const Vec & v); // set external force applied every iteration
+    Vec acceleration(); // get acceleration
+
+    void addConstraint(CONSTRAINT_TYPE type, const Vec & vec, double num); // add constraint
+    void clearConstraints(CONSTRAINT_TYPE type); // remove constraints of a certain type
+    void clearConstraints(); // remove all constraints
+
+    void setDrag(double C); // set drag with coefficient C
+    void fix(); // make fixed (unable to move)
+    void unfix(); // undo that
+    
+    Vec color; // RGB color
+```
+
+### Spring Methods
+
+```cpp
+enum SpringType {PASSIVE_SOFT, PASSIVE_STIFF, ACTIVE_CONTRACT_THEN_EXPAND, ACTIVE_EXPAND_THEN_CONTRACT};
+
+class Spring {
+public:
+    Mass * _left; // pointer to left mass object // private
+    Mass * _right; // pointer to right mass object
+
+    double _k; // spring constant (N/m)
+    double _rest; // spring rest length (meters)
+
+    SpringType _type; // type of spring
+    double _omega; // frequency of oscillation
+    double _damping; // damping on the spring
+
+    void setRestLength(double rest_length); // set rest length to rest_length
+    void defaultLength(); // sets rest length to distance between springs
+    void changeType(SpringType type, double omega) { _type = type; _omega = omega;}
+    void addDamping(double constant); // set damping coefficient
+
+    void setLeft(Mass * left); // sets left mass (attaches spring to mass 1)
+    void setRight(Mass * right);
+
+    void setMasses(Mass * left, Mass * right); //sets both right and left masses
+}
+```
+
+### Container Methods
+
+```cpp
+class Container { // contains and manipulates groups of masses and springs
+public:
+    void translate(const Vec & displ); // translate all masses by fixed amount
+    // rotate all masses around a fixed axis by a specified angle with respect to the center of mass in radians
+    void rotate(const Vec & axis, double angle); 
+    void setMassValues(double m); // set masses for all Mass objects
+    void setSpringConstants(double k); // set k for all Spring objects
+    void setRestLengths(double len); // set masses for all Mass objects
+
+#ifdef CONSTRAINTS
+    void addConstraint(CONSTRAINT_TYPE type, const Vec & v, double d);
+    void clearConstraints();
+#endif
+
+    void fix(); // make all objects fixed
+    void add(Mass * m); // add a mass
+    void add(Spring * s); // add a spring
+    void add(Container * c); // add another container
+
+    std::vector<Mass *> masses;
+    std::vector<Spring *> springs;
+}
+```
+
+### Vec Methods
+
+```cpp
+class Vec {
+public:
+    Vec(double x, double y, double z); // initialization from x, y, and z values
+    Vec(const std::vector<double> & v);
+    Vec & operator+=(const Vec & v);
+    Vec & operator-=(const Vec & v);
+    CUDA_DEVICE void atomicVecAdd(const Vec & v);
+    Vec operator-() const;
+    double & operator [] (int n);
+    const double & operator [] (int n) const;
+    friend Vec operator+(const Vec & v1, const Vec & v2);
+    friend Vec operator-(const Vec & v1, const Vec & v2);
+    friend Vec operator*(const double x, const Vec & v);
+    friend Vec operator*(const Vec & v, const double x);
+    friend bool operator==(const Vec & v1, const Vec & v2);
+    friend Vec operator*(const Vec & v1, const Vec & v2);
+    friend Vec operator/(const Vec & v, const double x);
+    friend Vec operator/(const Vec & v1, const Vec & v2);
+    friend std::ostream & operator << (std::ostream & strm, const Vec & v);
+
+    void print(); // supports CUDA printing
+    double norm() const;
+    double sum() const;
+    double dot(const Vec & a, const Vec & b);
+    Vec cross(const Vec &v1, const Vec &v2); // cross product
+};
+```
+
+## Examples
+
+### Energy conservation
+
+```cpp
+#include <Titan/sim.h>
+
+int main() {
+    titan::Simulation sim;
+    sim.createLattice(titan::Vec(0, 0, 5), titan::Vec(4, 4, 4), 20, 20, 20);
+    
+    sim.setAllSpringConstantValues(100);
+    sim.setTimeStep(0.0001);
+    sim.setGlobalAcceleration(titan::Vec(0, 0, -9.8));
+    sim.defaultRestLengths();
+
+    sim.createPlane(titan::Vec(0, 0, 1), 0);
+    sim.start();
+
+    double total_energy = titan::test::energy(sim);
+    double avg_energy = total_energy;
+    double alpha = 0.7;
+    while (sim.time() < 5) {
+        sim.wait(0.1);
+        avg_energy = (1 - alpha) * titan::test::energy(sim) + alpha * avg_energy;
+        EXPECT_NEAR(avg_energy, total_energy, total_energy * tol);
+
+        sim.resume();
+    }
+
+    sim.stop();
+}
 ```
 
 ## About

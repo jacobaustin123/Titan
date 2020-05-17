@@ -516,7 +516,7 @@ Beam::Beam(const Vec & center, const Vec & dims, int nx, int ny, int nz) {
 
 #ifdef CONSTRAINTS
 
-void Container::makeFixed() {
+void Container::fix() {
     for (Mass * mass : masses) {
         mass -> constraints.fixed = true;
     }

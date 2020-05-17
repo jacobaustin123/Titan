@@ -231,7 +231,6 @@ class Container { // contains and manipulates groups of masses and springs
 public:
     virtual ~Container() {};
     void translate(const Vec & displ); // translate all masses by fixed amount
-
     // rotate all masses around a fixed axis by a specified angle with respect to the center of mass.
     // in radians
     void rotate(const Vec & axis, double angle); 
@@ -244,7 +243,7 @@ public:
     void clearConstraints();
 #endif
 
-    void makeFixed();
+    void fix();
 
     void add(Mass * m);
     void add(Spring * s);
