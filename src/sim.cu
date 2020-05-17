@@ -31,7 +31,7 @@ __global__ void createSpringPointers(CUDA_SPRING ** ptrs, CUDA_SPRING * data, in
 __global__ void createMassPointers(CUDA_MASS ** ptrs, CUDA_MASS * data, int size);
 
 __global__ void computeSpringForces(CUDA_SPRING ** device_springs, int num_springs, double t);
-__global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, Vec global, CUDA_GLOBAL_CONSTRAINTS c, int num_masses);
+__global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, int num_masses, double dt, double T, Vec global_acc, CUDA_GLOBAL_CONSTRAINTS c);
 
 bool Simulation::RUNNING;
 bool Simulation::STARTED;
@@ -75,7 +75,7 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=f
 }
 
 Simulation::Simulation() {
-    dt = 0.0;
+    dt = 0.01;
     RUNNING = false;
     STARTED = false;
     ENDED = false;
@@ -83,7 +83,7 @@ Simulation::Simulation() {
     GPU_DONE = false;
 
     update_constraints = true;
-    global = Vec(0, 0, -9.81);
+    _global_acc = Vec(0, 0, -9.81);
 
 #ifdef GRAPHICS
     resize_buffers = true;
@@ -112,7 +112,7 @@ void Simulation::reset() {
     GPU_DONE = false;
 
     update_constraints = true;
-    global = Vec(0, 0, -9.81);
+    _global_acc = Vec(0, 0, -9.81);
 
 #ifdef GRAPHICS
     resize_buffers = true;
@@ -765,7 +765,7 @@ void Simulation::setAllSpringConstantValues(double k) {
     }
 }
 
-void Simulation::defaultRestLength() {
+void Simulation::defaultRestLengths() {
     if (ENDED) {
         throw std::runtime_error("The simulation has ended. Cannot modify simulation after the end of the simulation.");
     }
@@ -784,16 +784,16 @@ void Simulation::setAllMassValues(double m) {
         mass -> m += m;
     }
 }
-void Simulation::setAllDeltaTValues(double delta_t) {
+void Simulation::setTimeStep(double delta_t) {
     if (ENDED) {
         throw std::runtime_error("The simulation has ended. Cannot modify simulation after the end of the simulation.");
     }
 
-    this -> dt = delta_t; // TODO make this work
-
-    for (Mass * m : masses) {
-        m -> dt = delta_t;
+    if (delta_t <= 0) {
+        throw std::runtime_error("Cannot set time step to negative or zero value.");
     }
+
+    this -> dt = delta_t; // TODO make this work
 }
 
 void Simulation::setBreakpoint(double time) {
@@ -1076,7 +1076,7 @@ bool Simulation::running() {
 #ifdef RK2
 template <bool step>
 #endif
-__global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, Vec global, CUDA_GLOBAL_CONSTRAINTS c, int num_masses) {
+__global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, int num_masses, double dt, double T, Vec global_acc, CUDA_GLOBAL_CONSTRAINTS c) {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
 
     if (i < num_masses) {
@@ -1087,7 +1087,9 @@ __global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, Vec global, CUDA_GLOBAL
             return;
 #endif
 
-        mass.force += mass.m * global;
+        mass.force += mass.m * global_acc;
+        mass.force += mass.extern_force;
+
         // mass.force += mass.external;
 
         for (int j = 0; j < c.num_planes; j++) { // global constraints
@@ -1128,21 +1130,25 @@ __global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, Vec global, CUDA_GLOBAL
             mass.__rk2_backup_vel = mass.vel;
             mass.__rk2_backup_pos = mass.pos;
 
-            mass.pos = mass.pos + 0.5 * mass.vel * mass.dt;
-            mass.vel = mass.vel + 0.5 * mass.acc * mass.dt;
+            mass.pos = mass.pos + 0.5 * mass.vel * dt;
+            mass.vel = mass.vel + 0.5 * mass.acc * dt;
+            mass.T += 0.5 * dt;
         } else {
             mass.acc = mass.force / mass.m;
-            mass.pos = mass.__rk2_backup_pos + mass.vel * mass.dt;
-            mass.vel = mass.__rk2_backup_vel + mass.acc * mass.dt;
+            mass.pos = mass.__rk2_backup_pos + mass.vel * dt;
+            mass.vel = mass.__rk2_backup_vel + mass.acc * dt;
+            mass.T += 0.5 * dt;
         }
 #elif VERLET
-        mass.vel += 0.5 * (mass.acc + mass.force / mass.m) * mass.dt;
+        mass.vel += 0.5 * (mass.acc + mass.force / mass.m) * dt;
         mass.acc = mass.force / mass.m;
-        mass.pos += mass.vel * mass.dt + 0.5 * mass.acc * pow(mass.dt, 2);
+        mass.pos += mass.vel * dt + 0.5 * mass.acc * pow(dt, 2);
+        mass.T += dt;
 #else // simple leapfrog Euler integration
         mass.acc = mass.force / mass.m;
-        mass.vel = mass.vel + mass.acc * mass.dt;
-        mass.pos = mass.pos + mass.vel * mass.dt;
+        mass.vel = mass.vel + mass.acc * dt;
+        mass.pos = mass.pos + mass.vel * dt;
+        mass.T += dt;
 #endif
         mass.force = Vec(0, 0, 0);
     }
@@ -1341,14 +1347,8 @@ void Simulation::start() {
     STARTED = true;
 
     T = 0;
-
-    if (this -> dt == 0.0) { // if dt hasn't been set by the user.
-        dt = 0.01; // min delta
-
-        for (Mass * m : masses) {
-            if (m -> dt < dt)
-                dt = m -> dt;
-        }
+    if (this -> dt <= 0) {
+        throw std::runtime_error("Simultation timestep Simulation::dt is invalid. Please choose a positive non-zero value.");
     }
 
 #ifdef GRAPHICS // SDL2 window needs to be created here for Mac OS
@@ -1556,19 +1556,19 @@ void Simulation::execute() {
 #ifdef RK2
         computeSpringForces<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(d_spring, springs.size(), T); // compute mass forces after syncing
         gpuErrchk( cudaPeekAtLastError() );
-        massForcesAndUpdate<true><<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, global, d_constraints, masses.size());
+        massForcesAndUpdate<true><<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, masses.size(), dt, T, _global_acc, d_constraints);
         gpuErrchk( cudaPeekAtLastError() );
         T += 0.5 * dt;
 
         computeSpringForces<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(d_spring, springs.size(), T); // compute mass forces after syncing
         gpuErrchk( cudaPeekAtLastError() );
-        massForcesAndUpdate<false><<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, global, d_constraints, masses.size());
+        massForcesAndUpdate<false><<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, masses.size(), dt, T, _global_acc, d_constraints);
         gpuErrchk( cudaPeekAtLastError() );
         T += 0.5 * dt;
 #else
         computeSpringForces<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(d_spring, springs.size(), T); // compute mass forces after syncing
         gpuErrchk( cudaPeekAtLastError() );
-        massForcesAndUpdate<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, global, d_constraints, masses.size());
+        massForcesAndUpdate<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, masses.size(), dt, T, _global_acc, d_constraints);
         gpuErrchk( cudaPeekAtLastError() );
         T += dt;
 #endif
@@ -2044,26 +2044,6 @@ void Simulation::printPositions() {
     std::cout << std::endl;
 }
 
-void Simulation::printForces() {
-    if (ENDED) {
-        throw std::runtime_error("The simulation has ended. You cannot view parameters of the simulation after it has been stopped.");
-    }
-
-    if (RUNNING) {
-        std::cout << "\nDEVICE FORCES: " << std::endl;
-        printForce<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, masses.size());
-        cudaDeviceSynchronize();
-    }
-    else {
-        std::cout << "\nHOST FORCES: " << std::endl;
-        for (Mass * m : masses) {
-            std::cout << m -> force << std::endl;
-        }
-    }
-
-    std::cout << std::endl;
-}
-
 void Simulation::printSprings() {
     if (ENDED) {
         throw std::runtime_error("The simulation has ended. You cannot view parameters of the simulation after it has been stopped.");
@@ -2081,12 +2061,12 @@ void Simulation::printSprings() {
     std::cout << std::endl;
 }
 
-void Simulation::setGlobalAcceleration(const Vec & global) {
+void Simulation::setGlobalAcceleration(const Vec & global_acc) {
     if (RUNNING) {
         throw std::runtime_error("The simulation is running. The global force parameter cannot be changed during runtime");
     }
 
-    this -> global = global;
+    this -> _global_acc = global_acc;
 }
 
 } // namespace titan

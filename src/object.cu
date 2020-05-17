@@ -152,12 +152,6 @@ void Container::setSpringConstants(double k) {
     }
 }
 
-void Container::setDeltaT(double dt) { // set masses for all Mass objects
-    for (Mass * mass : masses) {
-        mass -> dt += dt;
-    }
-}
-
 void Container::setRestLengths(double len) { // set masses for all Mass objects
     for (Spring * spring : springs) {
         spring -> _rest = len;

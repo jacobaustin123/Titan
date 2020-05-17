@@ -7,7 +7,6 @@ namespace titan {
 
 Mass::Mass() {
     m = 1.0;
-    dt = 0.0001;
     T = 0;
     valid = true;
     arrayptr = nullptr;
@@ -20,13 +19,13 @@ Mass::Mass() {
 
 void Mass::operator=(CUDA_MASS & mass) {
     m = mass.m;
-    dt = mass.dt;
     T = mass.T;
     pos = mass.pos;
     vel = mass.vel;
-    acc = mass.acc;
-    force = mass.force;
     valid = mass.valid;
+
+    acc = mass.acc;
+    extern_force = mass.extern_force;
 
     ref_count = this -> ref_count;
     arrayptr = this -> arrayptr;
@@ -40,12 +39,10 @@ void Mass::operator=(CUDA_MASS & mass) {
 #endif
 }
 
-Mass::Mass(const Vec & position, double mass, bool fixed, double dt) {
+Mass::Mass(const Vec & position, double mass, bool fixed) {
     m = mass;
     pos = position;
     
-    this -> dt = dt;
-
     T = 0;
     
     valid = true;
@@ -59,13 +56,12 @@ Mass::Mass(const Vec & position, double mass, bool fixed, double dt) {
 
 CUDA_MASS::CUDA_MASS(Mass &mass) {
     m = mass.m;
-    dt = mass.dt;
     T = mass.T;
     
     pos = mass.pos;
     vel = mass.vel;
-    acc = mass.acc;
-    force = mass.force;
+    extern_force = mass.extern_force;
+
     valid = true;
 
 #ifdef CONSTRAINTS
@@ -78,9 +74,6 @@ CUDA_MASS::CUDA_MASS(Mass &mass) {
 }
 
 #ifdef CONSTRAINTS
-void addExternalForce(const Vec & vec) {
-    
-}
 
 void Mass::addConstraint(CONSTRAINT_TYPE type, const Vec & vec, double num) { // TODO make this more efficient
     if (type == 0) {

@@ -34,7 +34,6 @@ public:
             _left(left), _right(right), _k(k), _rest(rest_length), _type(type), _omega(omega), _damping(0.0) {};
 	    
     void update(const CUDA_SPRING & spr);
-    void setForce(); // will be private
     void setRestLength(double rest_length) { _rest = rest_length; } //sets Rest length
     void defaultLength(); //sets rest length
     void changeType(SpringType type, double omega) { _type = type; _omega = omega;}
@@ -44,8 +43,6 @@ public:
     void setRight(Mass * right);
 
     void setMasses(Mass * left, Mass * right) { _left = left; _right = right; } //sets both right and left masses
-
-    Vec getForce(); // computes force on right object. left force is - right force.
 
     Mass * _left; // pointer to left mass object // private
     Mass * _right; // pointer to right mass object

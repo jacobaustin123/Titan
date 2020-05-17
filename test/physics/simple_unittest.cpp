@@ -15,7 +15,7 @@ struct simple_fixture : ::testing::Test {
 TEST_F(simple_fixture, simple_test) {
     titan::Simulation sim;
     sim.createMass(titan::Vec(1, 0, 1));
-    sim.setAllDeltaTValues(0.0001);
+    sim.setTimeStep(0.0001);
     sim.setGlobalAcceleration(titan::Vec(0, 0, -9.8));
   
     sim.createPlane(titan::Vec(0, 0, 1), 0);

@@ -79,9 +79,9 @@ public:
     // Bulk modifications, only update CPU
     void setAllSpringConstantValues(double k);
     void setAllMassValues(double m);
-    void setAllDeltaTValues(double dt);
-
-    void defaultRestLength();
+    void setTimeStep(double delta_t);
+    void setGlobalAcceleration(const Vec & global_acc);
+    void defaultRestLengths();
 
     // Control
     void start(); // start simulation
@@ -89,22 +89,21 @@ public:
     void stop(); // stop simulation while paused, free all memory.
     void stop(double time); // stop simulation at time
 
-    void pause(double t); // pause at time t
+    void pause(double t); // pause at time t, block CPU until t.
     void resume();
 
     void reset(); // reset the simulation
     
     void setBreakpoint(double time); // tell the program to stop at a fixed time (doesn't hang).
 
-    void wait(double t); // wait fixed time without stopping
-    void waitUntil(double t);
-    void waitForEvent();
+    void wait(double t); // wait fixed time without stopping simulation
+    void waitUntil(double t); // wait until time without stopping simulation
+    void waitForEvent();  // wait until event (e.g. breakpoint)
 
     double time();
     bool running();
 
     void printPositions();
-    void printForces();
 
     Simulation();
     ~Simulation();
@@ -116,8 +115,6 @@ public:
     std::vector<Mass *> masses;
     std::vector<Spring *> springs;
     std::vector<Container *> containers;
-
-    void setGlobalAcceleration(const Vec & global);
 
 #ifdef GRAPHICS
     void setViewport(const Vec & camera_position, const Vec & target_location, const Vec & up_vector);
@@ -178,7 +175,7 @@ private:
     void fromArray();
 
     std::thread gpu_thread;
-    Vec global; // global force
+    Vec _global_acc; // global acceleration
 
 #ifdef GRAPHICS
 

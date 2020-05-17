@@ -6,23 +6,6 @@
 
 namespace titan {
 
-Vec Spring::getForce() { // computes force on right object. left force is - right force.
-  //    Vec temp = (_right -> pos) - (_left -> pos);
-  //    return _k * (_rest - temp.norm()) * (temp / temp.norm());
-
-    Vec temp = (_left -> pos) - (_right -> pos);
-    Vec spring_force = _k * (temp.norm() - _rest) * (temp / temp.norm());
-
-    spring_force += dot(_left -> vel - _right -> vel, temp / temp.norm()) * _damping * (temp / temp.norm());
-
-    return spring_force;
-}
-
-void Spring::setForce() { // computes force on right object. left force is - right force.
-    Vec f = getForce();
-    _right -> force += f;
-    _left -> force += -f;
-}
 
 // this function is currently unneeded because springs do not need to be updated.
 // this should be updated if any features are implemented to change spring parameters.

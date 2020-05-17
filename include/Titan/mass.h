@@ -13,53 +13,19 @@ namespace titan {
 class Mass;
 struct CUDA_MASS;
 
-//Struct with CPU Spring properties used for optimal memory allocation on GPU memory
-struct CUDA_MASS {
-    CUDA_MASS() = default;
-    CUDA_MASS(Mass & mass);
-
-    double m; // mass in kg
-    double dt; // update interval
-    double T; // local time
-    Vec pos; // position in m
-    Vec vel; // velocity in m/s
-    Vec acc; // acceleration in m/s^2
-    Vec force; // force in kg m / s^2
-
-#ifdef RK2
-    Vec __rk2_backup_pos;
-    Vec __rk2_backup_vel;
-#endif
-
-#ifdef GRAPHICS
-    Vec color;
-#endif
-
-    bool valid;
-
-#ifdef CONSTRAINTS
-    CUDA_LOCAL_CONSTRAINTS constraints;
-#endif
-
-};
-
 class Mass {
 public:
+    Mass(const Vec & position, double mass = 0.1, bool fixed = false);
+
     //Properties
     double m; // mass in kg
-    double dt; // update interval
     double T; // local time
     Vec pos; // position in m
     Vec vel; // velocity in m/s
-    Vec acc; // acceleration in m/s^2
-    Vec force; // force in kg m / s^2
 
-#ifdef RK2
-    Vec __rk2_backup_pos;
-    Vec __rk2_backup_vel;
-#endif
+    void setExternalForce(const Vec & v) { extern_force = v; }
+    Vec acceleration() { return acc; }
 
-    Mass(const Vec & position, double mass = 0.1, bool fixed = false, double dt = 0.0001);
 #ifdef CONSTRAINTS
     void addConstraint(CONSTRAINT_TYPE type, const Vec & vec, double num);
     void clearConstraints(CONSTRAINT_TYPE type);
@@ -75,12 +41,20 @@ public:
 #endif
 
 private:
+    Vec acc; // acceleration in m/s^2
+    Vec extern_force; // force in kg m / s^2
+
     bool valid;
     int ref_count;
 
     void decrementRefCount();
 
     CUDA_MASS * arrayptr; //Pointer to struct version for GPU cudaMemAlloc
+
+#ifdef RK2
+    Vec __rk2_backup_pos;
+    Vec __rk2_backup_vel;
+#endif
 
     Mass();
     void operator=(CUDA_MASS & mass);
@@ -97,6 +71,35 @@ private:
 #ifdef CONSTRAINTS
     LOCAL_CONSTRAINTS constraints;
 
+#endif
+
+};
+//Struct with CPU Spring properties used for optimal memory allocation on GPU memory
+struct CUDA_MASS {
+    CUDA_MASS() = default;
+    CUDA_MASS(Mass & mass);
+
+    double m; // mass in kg
+    double T; // local time
+    Vec pos; // position in m
+    Vec vel; // velocity in m/s
+    Vec acc; // acceleration in m/s^2
+    Vec force; // vector to accumulate external forces
+    Vec extern_force; // external force applied every timestep
+
+#ifdef RK2
+    Vec __rk2_backup_pos;
+    Vec __rk2_backup_vel;
+#endif
+
+#ifdef GRAPHICS
+    Vec color;
+#endif
+
+    bool valid;
+
+#ifdef CONSTRAINTS
+    CUDA_LOCAL_CONSTRAINTS constraints;
 #endif
 
 };

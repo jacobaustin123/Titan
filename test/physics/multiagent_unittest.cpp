@@ -61,9 +61,10 @@ TEST_F(multiagent_fixture, multiagent_test) {
         }
     }
 
-    sim.defaultRestLength();
+    sim.defaultRestLengths();
     sim.start();
-    sim.pause(0.1);
+    sim.setBreakpoint(1.0);
     sim.getAll();
+    sim.stop();
     // sim.printPositions();
 }
