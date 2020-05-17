@@ -32,7 +32,6 @@ namespace titan {
 #define THREADS_PER_BLOCK 1024
 
 #ifndef GRAPHICS
-#define NUM_QUEUED_KERNELS 4 // number of kernels to queue at a given time (this will reduce the frequency of updates from the CPU by this factor
 #endif
 
 class Simulation {

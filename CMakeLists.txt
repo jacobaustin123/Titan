@@ -4,10 +4,14 @@ project("Titan"
         DESCRIPTION "CUDA physics simulator for soft robotics and reinforcement learning"
         LANGUAGES C CXX CUDA)
 
+set(CMAKE_CXX_STANDARD 14) # set C++ standard to C++11
+
 option(TITAN_BUILD_TESTS "Enable unit tests to be built." OFF)
 option(TITAN_SHARED_BUILD "Enables shared library build (static by default)" OFF)
 option(GRAPHICS "Enables Titan OpenGL graphics support" ON)
-option(CONSTRAINTS "Enables Titan support for constraints" ON)
+option(CONSTRAINTS "Enables Titan support for constraints" OFF)
+option(VERLET "Makes Titan use a Verlet integration scheme instead of a naive Euler scheme" OFF)
+option(RK2 "Makes Titan use an RK2 integration scheme instead of a naive Euler scheme. Requires C++17." OFF)
 option(TITAN_INSTALL "Install Titan files at path specified by CMAKE_INSTALL_PREFIX" OFF)
 
 if (TITAN_BUILD_TESTS AND GRAPHICS)
@@ -15,7 +19,6 @@ if (TITAN_BUILD_TESTS AND GRAPHICS)
     set(GRAPHICS OFF)
 endif()
 
-set(CMAKE_CXX_STANDARD 14) # set C++ standard to C++11
 
 # fix GLM compiler warning (try -Xcudafe --display_error_number)
 set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Xcudafe=\"--diag_suppress=2977\"")
@@ -66,6 +69,19 @@ endif()
 if (CONSTRAINTS)
     message(STATUS "Enabling support for Constraints..")
     target_compile_definitions(Titan PUBLIC CONSTRAINTS) 
+endif()
+
+# if enabled, uses a Verlet integration scheme
+if (VERLET)
+    message(STATUS "Enabling support for Verlet integration..")
+    target_compile_definitions(Titan PUBLIC VERLET) 
+endif()
+
+# if enabled, uses an RK2 integration scheme
+if (RK2)
+    message(STATUS "Enabling support for RK2 integration (overrides Verlet and other methods)...")
+    target_compile_features(Titan PRIVATE cxx_std_17)
+    target_compile_definitions(Titan PUBLIC RK2) 
 endif()
 
 # needed for library compilation (see https://stackoverflow.com/a/51353324)

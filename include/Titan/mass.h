@@ -26,6 +26,11 @@ struct CUDA_MASS {
     titan::Vec acc; // acceleration in m/s^2
     titan::Vec force; // force in kg m / s^2
 
+#ifdef RK2
+    titan::Vec __rk2_backup_pos;
+    titan::Vec __rk2_backup_vel;
+#endif
+
 #ifdef GRAPHICS
     titan::Vec color;
 #endif
@@ -48,6 +53,11 @@ public:
     titan::Vec vel; // velocity in m/s
     titan::Vec acc; // acceleration in m/s^2
     titan::Vec force; // force in kg m / s^2
+
+#ifdef RK2
+    titan::Vec __rk2_backup_pos;
+    titan::Vec __rk2_backup_vel;
+#endif
 
     Mass(const titan::Vec & position, double mass = 0.1, bool fixed = false, double dt = 0.0001);
 #ifdef CONSTRAINTS

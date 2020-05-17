@@ -97,10 +97,14 @@ CUDA_CALLABLE_MEMBER void CudaContactPlane::applyForce(CUDA_MASS * m) {
     }
 
     // now apply the offset force to push the object out of the plane.
-    Vec contact = (disp < 0) ? - disp * NORMAL * _normal : 0 * _normal; // displacement force
-    double f_norm = contact.norm();
-    m -> force += contact;
+    // if (disp < 0) {
+    //     m -> pos[2] = 0;
+    //     m -> vel = m -> vel - 2 * dot(m -> vel, _normal) * _normal;
+    //     m -> force -= f_normal;
+    // }
 
+    Vec contact = (disp < 0) ? - disp * NORMAL * _normal : 0 * _normal; // displacement force
+    m -> force += contact;
 }
 
 CUDA_CALLABLE_MEMBER CudaConstraintPlane::CudaConstraintPlane(const Vec & normal, double friction) {

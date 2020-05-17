@@ -810,7 +810,6 @@ __global__ void createMassPointers(CUDA_MASS ** ptrs, CUDA_MASS * data, int size
     int i = blockDim.x * blockIdx.x + threadIdx.x;
 
     if (i < size) {
-//        ptrs[i] = (CUDA_MASS *) malloc(sizeof(CUDA_MASS));
         *ptrs[i] = data[i];
     }
 }
@@ -1049,7 +1048,7 @@ __global__ void computeSpringForces(CUDA_SPRING ** d_spring, int num_springs, do
         } else if (spring._type == ACTIVE_EXPAND_THEN_CONTRACT){
             scale = (1 + 0.2 * sin(spring._omega * t));
 	    }
-	
+
         Vec force = spring._k * (spring._rest * scale - temp.norm()) * (temp / temp.norm()); // normal spring force
         force += dot(spring._left -> vel - spring._right -> vel, temp / temp.norm()) * spring._damping * (temp / temp.norm()); // damping
 
@@ -1076,6 +1075,9 @@ bool Simulation::running() {
     return this -> RUNNING;
 }
 
+#ifdef RK2
+template <bool step>
+#endif
 __global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, Vec global, CUDA_GLOBAL_CONSTRAINTS c, int num_masses) {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
 
@@ -1093,7 +1095,7 @@ __global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, Vec global, CUDA_GLOBAL
         for (int j = 0; j < c.num_planes; j++) { // global constraints
             c.d_planes[j].applyForce(&mass);
         }
-
+        
         for (int j = 0; j < c.num_balls; j++) {
             c.d_balls[j].applyForce(&mass);
         }
@@ -1114,17 +1116,36 @@ __global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, Vec global, CUDA_GLOBAL
         for (int j = 0; j < mass.constraints.num_directions; j++) {
             mass.constraints.direction[j].applyForce(&mass);
         }
-
-        if (mass.vel.norm() != 0.0) { // NOTE TODO this is really janky. On certain platforms, the following code causes excessive memory usage on the GPU.
+        
+        // NOTE TODO this is really janky. On certain platforms, the following code causes excessive memory usage on the GPU.
+        if (mass.vel.norm() != 0.0) {
             double norm = mass.vel.norm();
             mass.force += - mass.constraints.drag_coefficient * pow(norm, 2) * mass.vel / norm; // drag
         }
 #endif
 
+#ifdef RK2
+        if constexpr(step) {
+            mass.acc = mass.force / mass.m;
+            mass.__rk2_backup_vel = mass.vel;
+            mass.__rk2_backup_pos = mass.pos;
+
+            mass.pos = mass.pos + 0.5 * mass.vel * mass.dt;
+            mass.vel = mass.vel + 0.5 * mass.acc * mass.dt;
+        } else {
+            mass.acc = mass.force / mass.m;
+            mass.pos = mass.__rk2_backup_pos + mass.vel * mass.dt;
+            mass.vel = mass.__rk2_backup_vel + mass.acc * mass.dt;
+        }
+#elif VERLET
+        mass.vel += 0.5 * (mass.acc + mass.force / mass.m) * mass.dt;
+        mass.acc = mass.force / mass.m;
+        mass.pos += mass.vel * mass.dt + 0.5 * mass.acc * pow(mass.dt, 2);
+#else
         mass.acc = mass.force / mass.m;
         mass.vel = mass.vel + mass.acc * mass.dt;
         mass.pos = mass.pos + mass.vel * mass.dt;
-
+#endif
         mass.force = Vec(0, 0, 0);
     }
 }
@@ -1182,7 +1203,7 @@ void Simulation::createSDLWindow() {
 
     // Open a window and create its OpenGL context
 
-    window = SDL_CreateWindow("CUDA Physics Simulation", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 768, SDL_WINDOW_OPENGL);
+    window = SDL_CreateWindow("CUDA Physics Simulation", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1920, 1080, SDL_WINDOW_OPENGL);
     SDL_SetWindowResizable(window, SDL_TRUE);
 
     if (window == NULL) {
@@ -1240,7 +1261,7 @@ void Simulation::createGLFWWindow() {
     glfwSwapInterval(1);
 
     // Open a window and create its OpenGL context
-    window = glfwCreateWindow(1024, 768, "CUDA Physics Simulation", NULL, NULL);
+    window = glfwCreateWindow(1920, 1080, "CUDA Physics Simulation", NULL, NULL);
 
     if (window == NULL) {
         fprintf(stderr,
@@ -1534,20 +1555,24 @@ void Simulation::execute() {
 
         cudaDeviceSynchronize(); // synchronize before updating the springs and mass positions
 
-#ifdef GRAPHICS
+#ifdef RK2
+        computeSpringForces<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(d_spring, springs.size(), T); // compute mass forces after syncing
+        gpuErrchk( cudaPeekAtLastError() );
+        massForcesAndUpdate<true><<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, global, d_constraints, masses.size());
+        gpuErrchk( cudaPeekAtLastError() );
+        T += 0.5 * dt;
+
+        computeSpringForces<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(d_spring, springs.size(), T); // compute mass forces after syncing
+        gpuErrchk( cudaPeekAtLastError() );
+        massForcesAndUpdate<false><<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, global, d_constraints, masses.size());
+        gpuErrchk( cudaPeekAtLastError() );
+        T += 0.5 * dt;
+#else
         computeSpringForces<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(d_spring, springs.size(), T); // compute mass forces after syncing
         gpuErrchk( cudaPeekAtLastError() );
         massForcesAndUpdate<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, global, d_constraints, masses.size());
         gpuErrchk( cudaPeekAtLastError() );
         T += dt;
-#else
-        for (int i = 0; i < NUM_QUEUED_KERNELS; i++) {
-	        computeSpringForces<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(d_spring, springs.size(), T); // compute mass forces after syncing
-            gpuErrchk( cudaPeekAtLastError() );
-            massForcesAndUpdate<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, global, d_constraints, masses.size());
-            gpuErrchk( cudaPeekAtLastError() );
-            T += dt;
-        }
 #endif
 
 #ifdef GRAPHICS
