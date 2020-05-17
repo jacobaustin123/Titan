@@ -1,1 +1,6 @@
 theme: jekyll-theme-cayman
+title: <div align="center"><h1>Titan Simulation Library</h1><br></div>
+head_title: Titan Simulation Library
+show_downloads: true
+release_url: https://github.com/jacobaustin123/Titan/releases
+
