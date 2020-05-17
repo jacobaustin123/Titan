@@ -14,17 +14,22 @@ mkdir -p debug
 # if release directory does not exist, create it
 mkdir -p release
 
+args=("$@")
+
 # if debug mode
 if [ "$mode" = "debug" ]; then
     cd debug
 # if release mode
 elif [ "$mode" = "release" ]; then
     cd release
+elif [ "$mode" = "test" ]; then
+    cd debug
+    args+=("-DTITAN_BUILD_TESTS=ON")
 else
-    echo "usage: $0 <debug/release> [cmake options]" 1>&2
+    echo "usage: $0 <debug/release/test> [cmake options]" 1>&2
     exit 1
 fi
 
 rm -rf *
-cmake ../../ "$@"
+cmake ../../ "${args[@]}"
 cmake --build . -- -j12

@@ -6,8 +6,8 @@
 add_executable(physics_unittest
     ${CMAKE_CURRENT_SOURCE_DIR}/physics/simple_unittest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/physics/energy_unittest.cpp
-    # ${CMAKE_CURRENT_SOURCE_DIR}/physics/multiagent_unittest.cpp
-    # ${CMAKE_CURRENT_SOURCE_DIR}/physics/rotate_unittest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/physics/multiagent_unittest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/physics/rotate_unittest.cpp
 )
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")

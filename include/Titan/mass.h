@@ -21,18 +21,18 @@ struct CUDA_MASS {
     double m; // mass in kg
     double dt; // update interval
     double T; // local time
-    titan::Vec pos; // position in m
-    titan::Vec vel; // velocity in m/s
-    titan::Vec acc; // acceleration in m/s^2
-    titan::Vec force; // force in kg m / s^2
+    Vec pos; // position in m
+    Vec vel; // velocity in m/s
+    Vec acc; // acceleration in m/s^2
+    Vec force; // force in kg m / s^2
 
 #ifdef RK2
-    titan::Vec __rk2_backup_pos;
-    titan::Vec __rk2_backup_vel;
+    Vec __rk2_backup_pos;
+    Vec __rk2_backup_vel;
 #endif
 
 #ifdef GRAPHICS
-    titan::Vec color;
+    Vec color;
 #endif
 
     bool valid;
@@ -49,19 +49,19 @@ public:
     double m; // mass in kg
     double dt; // update interval
     double T; // local time
-    titan::Vec pos; // position in m
-    titan::Vec vel; // velocity in m/s
-    titan::Vec acc; // acceleration in m/s^2
-    titan::Vec force; // force in kg m / s^2
+    Vec pos; // position in m
+    Vec vel; // velocity in m/s
+    Vec acc; // acceleration in m/s^2
+    Vec force; // force in kg m / s^2
 
 #ifdef RK2
-    titan::Vec __rk2_backup_pos;
-    titan::Vec __rk2_backup_vel;
+    Vec __rk2_backup_pos;
+    Vec __rk2_backup_vel;
 #endif
 
-    Mass(const titan::Vec & position, double mass = 0.1, bool fixed = false, double dt = 0.0001);
+    Mass(const Vec & position, double mass = 0.1, bool fixed = false, double dt = 0.0001);
 #ifdef CONSTRAINTS
-    void addConstraint(CONSTRAINT_TYPE type, const titan::Vec & vec, double num);
+    void addConstraint(CONSTRAINT_TYPE type, const Vec & vec, double num);
     void clearConstraints(CONSTRAINT_TYPE type);
     void clearConstraints();
 
@@ -71,7 +71,7 @@ public:
 #endif
     
 #ifdef GRAPHICS
-    titan::Vec color;
+    Vec color;
 #endif
 
 private:

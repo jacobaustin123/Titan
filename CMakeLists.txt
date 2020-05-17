@@ -19,6 +19,17 @@ if (TITAN_BUILD_TESTS AND GRAPHICS)
     set(GRAPHICS OFF)
 endif()
 
+# Automate the choosing of config
+if (NOT CMAKE_BUILD_TYPE)
+    # if binary directory ends with "release", use release mode
+    if (${PROJECT_BINARY_DIR} MATCHES "release$")
+        set(CMAKE_BUILD_TYPE RELEASE)
+    # otherwise, use debug mode
+    else()
+        set(CMAKE_BUILD_TYPE DEBUG)
+    endif()
+endif()
+message(STATUS "Compiling in ${CMAKE_BUILD_TYPE} mode")
 
 # fix GLM compiler warning (try -Xcudafe --display_error_number)
 set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Xcudafe=\"--diag_suppress=2977\"")
