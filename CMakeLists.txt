@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 14) # set C++ standard to C++11
 option(TITAN_BUILD_TESTS "Enable unit tests to be built." OFF)
 option(TITAN_SHARED_BUILD "Enables shared library build (static by default)" OFF)
 option(GRAPHICS "Enables Titan OpenGL graphics support" ON)
-option(CONSTRAINTS "Enables Titan support for constraints" OFF)
+option(CONSTRAINTS "Enables Titan support for constraints" ON)
 option(VERLET "Makes Titan use a Verlet integration scheme instead of a naive Euler scheme" OFF)
 option(RK2 "Makes Titan use an RK2 integration scheme instead of a naive Euler scheme. Requires C++17." OFF)
 option(TITAN_INSTALL "Install Titan files at path specified by CMAKE_INSTALL_PREFIX" OFF)

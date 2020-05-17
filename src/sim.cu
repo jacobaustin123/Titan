@@ -1141,7 +1141,7 @@ __global__ void massForcesAndUpdate(CUDA_MASS ** d_mass, Vec global, CUDA_GLOBAL
         mass.vel += 0.5 * (mass.acc + mass.force / mass.m) * mass.dt;
         mass.acc = mass.force / mass.m;
         mass.pos += mass.vel * mass.dt + 0.5 * mass.acc * pow(mass.dt, 2);
-#else
+#else // simple leapfrog Euler integration
         mass.acc = mass.force / mass.m;
         mass.vel = mass.vel + mass.acc * mass.dt;
         mass.pos = mass.pos + mass.vel * mass.dt;
