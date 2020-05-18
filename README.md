@@ -3,7 +3,7 @@
 
 ## Installation
 
-Detailed instructions can be found in the [user wiki](https://github.com/jacobaustin123/Titan/wiki/Set-Up) for building and installing the Titan physics library.
+Detailed instructions can be found in the [Titan user page](https://jacobaustin123.github.io/Titan). Old documentation (not necessarily up to date) can be found on the [user wiki](https://github.com/jacobaustin123/Titan/wiki/Set-Up).
 
 **Try a simple Titan physics simulation**
 
