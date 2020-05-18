@@ -63,7 +63,7 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=f
 {
     if (code != cudaSuccess)
     {
-        fprintf(stderr,"GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
+        fprintf(stderr,"GPUassert: %d %s %s %d\n", code, cudaGetErrorString(code), file, line);
 
         if (abort) {
             char buffer[200];
@@ -75,7 +75,7 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=f
 }
 
 Simulation::Simulation() {
-    dt = 0.01;
+    dt = 0.0001;
     RUNNING = false;
     STARTED = false;
     ENDED = false;
@@ -165,6 +165,16 @@ void Simulation::freeGPU() {
 
 //    freeSprings<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(d_spring, springs.size()); // MUST COME BEFORE freeMasses
 //    freeMasses<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, masses.size());
+
+// #ifdef GRAPHICS
+//     cudaGLUnmapBufferObject(this -> colors);
+//     cudaGLUnmapBufferObject(this -> indices);
+//     cudaGLUnmapBufferObject(this -> vertices);
+
+//     cudaGLUnregisterBufferObject(this -> colors);
+//     cudaGLUnregisterBufferObject(this -> indices);
+//     cudaGLUnregisterBufferObject(this -> vertices);
+// #endif
 
     FREED = true; // just to be safe
     ENDED = true; // just to be safe
@@ -1523,8 +1533,7 @@ void Simulation::execute() {
                     return;
                 }
             }
-
-#ifdef CONSTRAINTS
+            
 #ifdef GRAPHICS
             if (resize_buffers) {
                 resizeBuffers(); // needs to be run from GPU thread
@@ -1533,6 +1542,8 @@ void Simulation::execute() {
                 update_indices = true;
             }
 #endif
+
+#ifdef CONSTRAINTS
             if (update_constraints) {
                 d_constraints.d_balls = thrust::raw_pointer_cast(&d_balls[0]);
                 d_constraints.d_planes = thrust::raw_pointer_cast(&d_planes[0]);
@@ -1541,7 +1552,7 @@ void Simulation::execute() {
 
 #ifdef GRAPHICS
                 for (Constraint * c : constraints) { // generate buffers for constraint objects
-                    if (! c -> _initialized)
+                    if (!c -> _initialized)
                         c -> generateBuffers();
                 }
 #endif
@@ -1551,8 +1562,9 @@ void Simulation::execute() {
             continue;
         }
 
+        gpuErrchk( cudaPeekAtLastError() );
         cudaDeviceSynchronize(); // synchronize before updating the springs and mass positions
-
+                
 #ifdef RK2
         computeSpringForces<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(d_spring, springs.size(), T); // compute mass forces after syncing
         gpuErrchk( cudaPeekAtLastError() );
@@ -1568,6 +1580,7 @@ void Simulation::execute() {
 #else
         computeSpringForces<<<springBlocksPerGrid, THREADS_PER_BLOCK>>>(d_spring, springs.size(), T); // compute mass forces after syncing
         gpuErrchk( cudaPeekAtLastError() );
+
         massForcesAndUpdate<<<massBlocksPerGrid, THREADS_PER_BLOCK>>>(d_mass, masses.size(), dt, T, _global_acc, d_constraints);
         gpuErrchk( cudaPeekAtLastError() );
         T += dt;
@@ -1673,7 +1686,7 @@ void Simulation::generateBuffers() {
         GLuint colorbuffer; // bind colors to buffer colorbuffer
         glGenBuffers(1, &colorbuffer);
         glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-        glBufferData(GL_ARRAY_BUFFER, 3 * masses.size() * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, std::max(3 * masses.size() * sizeof(GLfloat), 3 * sizeof(GLfloat)), NULL, GL_DYNAMIC_DRAW);
         cudaGLRegisterBufferObject(colorbuffer);
         this -> colors = colorbuffer;
     }
@@ -1682,7 +1695,7 @@ void Simulation::generateBuffers() {
         GLuint elementbuffer; // create buffer for main cube object
         glGenBuffers(1, &elementbuffer);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * springs.size() * sizeof(GLuint), NULL, GL_DYNAMIC_DRAW); // second argument is number of bytes
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, std::max(2 * springs.size() * sizeof(GLuint), 3 * sizeof(GLfloat)), NULL, GL_DYNAMIC_DRAW); // second argument is number of bytes
         cudaGLRegisterBufferObject(elementbuffer);
         this -> indices = elementbuffer;
     }
@@ -1691,7 +1704,7 @@ void Simulation::generateBuffers() {
         GLuint vertexbuffer;
         glGenBuffers(1, &vertexbuffer); // bind cube vertex buffer
         glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-        glBufferData(GL_ARRAY_BUFFER, 3 * masses.size() * sizeof(GLfloat), NULL, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, std::max(3 * masses.size() * sizeof(GLfloat), 3 * sizeof(GLfloat)), NULL, GL_DYNAMIC_DRAW);
         cudaGLRegisterBufferObject(vertexbuffer);
         this -> vertices = vertexbuffer;
     }

@@ -15,8 +15,8 @@ option(RK2 "Makes Titan use an RK2 integration scheme instead of a naive Euler s
 option(TITAN_INSTALL "Install Titan files at path specified by CMAKE_INSTALL_PREFIX" OFF)
 
 if (TITAN_BUILD_TESTS AND GRAPHICS)
-    message(WARNING "Cannot run tests while building with graphics support. Disabling graphics support.")
-    set(GRAPHICS OFF)
+   message(WARNING "Cannot run tests while building with graphics support. Disabling graphics support.")
+   set(GRAPHICS OFF)
 endif()
 
 # Automate the choosing of config

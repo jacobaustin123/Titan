@@ -15,7 +15,7 @@ TEST_F(energy_fixture, energy_test) {
     titan::Simulation sim;
     sim.createLattice(titan::Vec(0, 0, 5), titan::Vec(4, 4, 4), 20, 20, 20);
     
-    sim.setAllSpringConstantValues(100);
+    sim.setAllSpringConstantValues(1000);
     sim.setTimeStep(0.0001);
     sim.setGlobalAcceleration(titan::Vec(0, 0, -9.8));
     sim.defaultRestLengths();

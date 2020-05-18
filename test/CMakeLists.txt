@@ -9,7 +9,7 @@ add_executable(physics_unittest
     ${CMAKE_CURRENT_SOURCE_DIR}/physics/multiagent_unittest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/physics/rotate_unittest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/physics/external_unittest.cpp
-)
+    )
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	target_compile_options(physics_unittest PRIVATE -g -Wall)

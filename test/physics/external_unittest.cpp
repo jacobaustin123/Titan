@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include <testutil/utils.h>
+#include <thread>
 
 #include "gtest/gtest.h"
 
@@ -42,27 +43,7 @@ TEST_F(external_fixture, external_acc_test) {
     sim.setGlobalAcceleration(titan::Vec(0, 0, -9.8));
 
     sim.start();
-    while (sim.time() < 5) {
-        sim.wait(0.1);
-        sim.getAll();
-        EXPECT_NEAR(m1 -> pos[0], 1, tol);
-        EXPECT_NEAR(m1 -> pos[1], 0, tol);
-        EXPECT_NEAR(m1 -> pos[2], 1 + 0.5 * -9.8 * pow(sim.time(), 2), z_tol);
-
-        sim.resume();
-    }
-
-    sim.stop();
-}
-
-TEST_F(external_fixture, external_acc_test2) {
-    titan::Simulation sim;
-    titan::Mass * m1 = sim.createMass(titan::Vec(1, 0, 1));
-    sim.setTimeStep(0.0001);
-    sim.setGlobalAcceleration(titan::Vec(0, 0, -9.8));
-
-    sim.start();
-    while (sim.time() < 5) {
+    while (sim.time() < 1) {
         sim.wait(0.1);
         sim.getAll();
         EXPECT_NEAR(m1 -> pos[0], 1, tol);
