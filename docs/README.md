@@ -564,6 +564,8 @@ class Spring {
 
 ### Container Methods
 
+Containers represent collections of springs or masses. Many of the built in large objects, like `Lattice` or `Cube` objects, are subclasses of the `Container` class. You can define new containers by subclassing the `Container` class. 
+
 ```cpp
 class Container { // contains and manipulates groups of masses and springs
     void translate(const Vec & displ); // translate all masses by fixed amount
@@ -590,6 +592,8 @@ class Container { // contains and manipulates groups of masses and springs
 
 ### Vec Methods
 
+Vectors are the workhorse of Titan. They are 3-dimensional vectors with all the methods you'd expect. 
+
 ```cpp
 class Vec {
     Vec(double x, double y, double z); // initialization from x, y, and z values
@@ -614,6 +618,7 @@ class Vec {
     double norm() const;
     double sum() const;
     double dot(const Vec & a, const Vec & b);
+    Vec normalize() const;
     Vec cross(const Vec &v1, const Vec &v2); // cross product
 };
 ```
