@@ -63,7 +63,8 @@ TEST_F(multiagent_fixture, multiagent_test) {
 
     sim.defaultRestLengths();
     sim.start();
-    sim.setBreakpoint(1.0);
+    sim.pause(1.0);
+
     sim.getAll();
     sim.stop();
     // sim.printPositions();

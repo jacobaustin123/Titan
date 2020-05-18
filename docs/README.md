@@ -8,7 +8,12 @@
     - [Linux](#linux-installation)
     - [Windows](#windows-installation)
     - [Troubleshooting](#troubleshooting)
-- [API](#api-overview)
+- [API Overview](#api-overview)
+    - [Simulation](#simulation)
+    - [Mass](#mass)
+    - [Spring](#spring)
+    - [Container](#container)
+    - [Vec](#vec)
 - [API Details](#api-details)
     - [Simulation](#simulation-methods)
     - [Mass](#mass-methods)
@@ -17,6 +22,7 @@
     - [Vec](#vec-methods)
 - [Examples](#examples)
     - [Energy Conservation](#energy-conservation)
+    - [Rotation](#rotation)
 - [About](#about)
 
 ## Overview
@@ -341,7 +347,7 @@ l1 -> translate(Vec(1, 2, 5));
 l1 -> setMassValues(0.5); // set all masses in container to 0.5
 ```
 
-### **Forces** 
+### Forces
 
 Forces in Titan are defined by 3D vectors and affect masses during the simulation. Forces can be a result of several interactions:
 * Mass-Spring Hooke’s forces due to Springs connecting masses
@@ -349,6 +355,7 @@ Forces in Titan are defined by 3D vectors and affect masses during the simulatio
 * Global accelerations (i.e. gravity) set up by the user
 
 ### Contacts
+
 Contacts are predefined simulation elements that apply forces to masses when certain positional requirements are met. Contact elements only need to be initialized to start working.
 
 Contacts included in Titan:
@@ -359,6 +366,7 @@ Contacts included in Titan:
 ```cpp
 Simulation sim;
 sim.createPlane(Vec(0, 0, 1), 0); // contact plane facing in the positive z direction with 0 offset
+sim.createPlane(Vec(0, 0, 0), 2); // contact ball centered at origin with radius 2
 ```
 
 ### Constraints
@@ -394,9 +402,30 @@ sim.set(l1); // push updates to the GPU
 
 ## API Details
 
+Below are details of the Titan API, including documentation for all the major classes in Titan.
+
 ### Simulation Methods
 
+The Simulation class is the main container for running simulations in Titan. You invoke it to:
+* create Masses, Springs, and Container objects
+* delete Masses, Springs, and Container objects
+* push and pull updates from the GPU using get() and set()
+* create constraints using methods like createPlane and createBall
+* create Containers using createLattice, createCube, importFromSTL, e.g.
+* modify the simulation using commands like `setAllSpringConstantValues` or `defaultRestLengths`,
+* start the simulation using `sim.start()`, pause it using `sim.pause(time)`, set breakpoints with `setBreakpoint()`, or wait a fixed period of time using `sim.wait(time)` without stopping the simulation. You can resume the simulation with `sim.resume()`.
+* end the simulation and free memory with `sim.stop()`
+* control graphics, e.g. move the current viewport using `setViewport` or `moveViewport`
+
+Key points:
+* The simulation should be paused before calling getter or setter methods like `sim.getAll()`.
+* All methods that modify masses or springs, like `sim.setAllSpringConstantValues()` must be followed by `sim.setAll()` if called while the simulation is running. They merely modify copies of the data on the CPU.
+* You do not need to call `sim.setAll()` before the simulation has started. Calling `sim.start()` will automatically copy all data to the GPU.
+
+Here is a full documentation of the Simulation library:
+
 ```cpp
+class Simulation {
     Mass * createMass();
     Mass * createMass(const Vec & pos);
 
@@ -480,6 +509,8 @@ sim.set(l1); // push updates to the GPU
 
 ### Mass Methods
 
+The mass object is the main particle class in Titan. A mass has a mass `m`, a time `T`, a position `pos` and a velocity `vel`. You can set any of these methods and then update the GPU with `sim.set(Mass * m)`. You can also access the acceleration of the particle using the `acceleration()` method. You can add constraints or external forces as well.
+
 ```cpp
 class Mass {
     double m; // mass in kg
@@ -503,11 +534,12 @@ class Mass {
 
 ### Spring Methods
 
+Springs connect masses. Each spring has a rest length, a spring constant, and can oscillate. They also support damping. You can change the rest length or modify the attached masses as desired.
+
 ```cpp
 enum SpringType {PASSIVE_SOFT, PASSIVE_STIFF, ACTIVE_CONTRACT_THEN_EXPAND, ACTIVE_EXPAND_THEN_CONTRACT};
 
 class Spring {
-public:
     Mass * _left; // pointer to left mass object // private
     Mass * _right; // pointer to right mass object
 
@@ -534,7 +566,6 @@ public:
 
 ```cpp
 class Container { // contains and manipulates groups of masses and springs
-public:
     void translate(const Vec & displ); // translate all masses by fixed amount
     // rotate all masses around a fixed axis by a specified angle with respect to the center of mass in radians
     void rotate(const Vec & axis, double angle); 
@@ -561,7 +592,6 @@ public:
 
 ```cpp
 class Vec {
-public:
     Vec(double x, double y, double z); // initialization from x, y, and z values
     Vec(const std::vector<double> & v);
     Vec & operator+=(const Vec & v);
@@ -592,6 +622,8 @@ public:
 
 ### Energy conservation
 
+Here we create a lattice bouncing on a plane under the influence of gravity. We ensure that energy is appropriately conserved over a 5 second simulation.
+
 ```cpp
 #include <Titan/sim.h>
 
@@ -610,8 +642,9 @@ int main() {
     double total_energy = titan::test::energy(sim);
     double avg_energy = total_energy;
     double alpha = 0.7;
+    double tol = 0.001;
     while (sim.time() < 5) {
-        sim.wait(0.1);
+        sim.pause(sim.time() + 0.1);
         avg_energy = (1 - alpha) * titan::test::energy(sim) + alpha * avg_energy;
         EXPECT_NEAR(avg_energy, total_energy, total_energy * tol);
 
@@ -619,6 +652,46 @@ int main() {
     }
 
     sim.stop();
+}
+```
+
+### Rotation
+
+Here we create a lattice and repeatedly rotate it around the z axis. 
+
+```cpp
+#include <Titan/sim.h> 
+
+using titan::Vec;
+
+int main() {
+    titan::Simulation sim;
+
+    titan::Lattice * l2 = sim.createLattice(Vec(0, 0, 10), Vec(5, 5, 5), 10, 10, 10);
+
+    sim.setAllSpringConstantValues(1E5);
+    l2 -> rotate(Vec(0, 0, 1), -0.78);
+
+    std::cout << sim.masses.size() << " " << sim.springs.size() << std::endl;
+    sim.createPlane(Vec(0, 0, 1), 0, 10, 10);
+
+    sim.setGlobalAcceleration(Vec(0, 0, -9.8));
+
+    sim.start(); // 10 second runtime.
+
+    while (true) {
+        sim.pause(sim.time() + 1);
+        sim.get(l2);
+        l2 -> rotate(Vec(0, 0, 1), 0.5);
+        sim.set(l2);
+
+        if (sim.time() > 5.0) {
+            sim.stop();
+            return;
+        }
+
+        sim.resume();
+    }
 }
 ```
 
