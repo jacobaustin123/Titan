@@ -80,6 +80,8 @@ public:
     void setAllSpringConstantValues(double k);
     void setAllMassValues(double m);
     void setTimeStep(double delta_t);
+    double getTimeStep();
+    
     void setGlobalAcceleration(const Vec & global_acc);
     void defaultRestLengths();
 

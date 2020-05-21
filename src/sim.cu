@@ -803,7 +803,11 @@ void Simulation::setTimeStep(double delta_t) {
         throw std::runtime_error("Cannot set time step to negative or zero value.");
     }
 
-    this -> dt = delta_t; // TODO make this work
+    this -> dt = delta_t;
+}
+
+double Simulation::getTimeStep() {
+    return this -> dt;
 }
 
 void Simulation::setBreakpoint(double time) {
