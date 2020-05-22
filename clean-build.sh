@@ -35,3 +35,11 @@ fi
 rm -rf *
 cmake ../../ "${args[@]}"
 cmake --build . -- -j12
+
+read -p "Do you want to install Titan globally? [y/N]" -r
+echo    # (optional) move to a new line
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+    sudo make install
+    sudo chmod 755 /usr/local
+fi
