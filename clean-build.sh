@@ -41,5 +41,5 @@ echo    # (optional) move to a new line
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
     sudo make install
-    sudo chmod 755 /usr/local
+    sudo chmod -R 755 /usr/local
 fi
