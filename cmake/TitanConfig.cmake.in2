@@ -3,6 +3,9 @@ find_dependency(glfw3)
 find_dependency(GLEW)
 find_dependency(glm)
 find_dependency(CUDA)
+find_dependency(thrust)
+
+set(OpenGL_GL_PREFERENCE LEGACY)
 find_dependency(OpenGL)
 
 #if (LINUX)

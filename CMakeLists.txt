@@ -12,7 +12,6 @@ option(GRAPHICS "Enables Titan OpenGL graphics support" ON)
 option(CONSTRAINTS "Enables Titan support for constraints" ON)
 option(VERLET "Makes Titan use a Verlet integration scheme instead of a naive Euler scheme" OFF)
 option(RK2 "Makes Titan use an RK2 integration scheme instead of a naive Euler scheme. Requires C++17." OFF)
-option(TITAN_INSTALL "Install Titan files at path specified by CMAKE_INSTALL_PREFIX" OFF)
 
 if (TITAN_BUILD_TESTS AND GRAPHICS)
    message(WARNING "Cannot run tests while building with graphics support. Disabling graphics support.")
@@ -181,27 +180,28 @@ target_include_directories(Titan PUBLIC
 
 set_target_properties(Titan PROPERTIES PUBLIC_HEADER "${TITAN_HEADER_FILES}")
 
-if (TITAN_INSTALL)
-    install(TARGETS Titan
-            EXPORT TitanTargets
-            PUBLIC_HEADER DESTINATION include/Titan
-            LIBRARY DESTINATION bin
-            ARCHIVE DESTINATION lib
-            RUNTIME DESTINATION bin
-            )
+install(TARGETS Titan
+        EXPORT TitanTargets
+        PUBLIC_HEADER DESTINATION include/Titan
+        LIBRARY DESTINATION bin
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin
+        )
 
-    if (TITAN_SHARED_BUILD)
-        install(EXPORT TitanTargets
-                FILE TitanConfig.cmake
-                DESTINATION share/titan)
-    else()
-        install(EXPORT TitanTargets
-                FILE TitanTargets.cmake
-                DESTINATION share/titan)
+if (TITAN_SHARED_BUILD)
+    install(EXPORT TitanTargets
+            FILE TitanConfig.cmake
+            DESTINATION share/titan)
+else()
+    install(EXPORT TitanTargets
+            FILE TitanTargets.cmake
+            DESTINATION share/titan)
 
-        configure_file(cmake/TitanConfig.cmake.in2
-                ${CMAKE_INSTALL_PREFIX}/share/titan/TitanConfig.cmake @ONLY)
-    endif()
+        configure_file(${CMAKE_CURRENT_LIST_DIR}/cmake/TitanConfig.cmake.in2
+               ${CMAKE_BINARY_DIR}/TitanConfig.cmake @ONLY)
+
+        install(FILES ${CMAKE_BINARY_DIR}/TitanConfig.cmake
+                DESTINATION share/titan)
 endif()
 
 set(GTEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/googletest/googletest)
