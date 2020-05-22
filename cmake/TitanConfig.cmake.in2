@@ -2,11 +2,18 @@ include(CMakeFindDependencyMacro)
 find_dependency(glfw3)
 find_dependency(GLEW)
 find_dependency(glm)
-find_dependency(CUDA)
-find_dependency(thrust)
 
 set(OpenGL_GL_PREFERENCE LEGACY)
 find_dependency(OpenGL)
+
+find_package(CUDA REQUIRED) # find and include CUDA
+if (CUDA_FOUND)
+    message(STATUS "CUDA FOUND")
+    set(Titan_INCLUDE_DIRS ${Titan_INCLUDE_DIRS} ${CUDA_INCLUDE_DIRS})
+    set(Titan_LIBRARIES ${Titan_LIBRARIES} ${CUDA_LIBRARIES} cuda Titan)
+else()
+    message(STATUS "CUDA NOT FOUND")
+endif()
 
 #if (LINUX)
 #    find_program(NVCC
