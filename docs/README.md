@@ -70,26 +70,46 @@ TLDR (note this requires CUDA to be installed):
 
 ```bash
 ./setup.sh
-./clean-build.sh debug # (or release)
+./clean-build.sh release # (or debug, test)
 ```
 
-The `clean-build.sh` script can also take CMake flags as arguments. For example, to build tests, do 
+The script will prompt you to install Titan globally where CMake can find it. If you say no, it will
+be built in the `build/release` or `build/debug` directories. The `clean-build.sh` script can also take 
+CMake flags as arguments. For example, to disable graphics, you can run
 
 ```bash
 ./setup.sh
-./clean-build.sh debug --DTITAN_BUILD_TESTS=ON
+./clean-build.sh debug --DGRAPHICS=OFF
 ```
 
 or to build with support for Verlet integration do
 
 ```bash
 ./setup.sh
-./clean-build.sh debug --DTITAN_BUILD_TESTS=ON -DVERLET=ON
+./clean-build.sh debug --DVERLET=ON
 ```
 
 Other options include `-DGRAPHICS`, `-DCONSTRAINTS`, `-DRK2`. See the CMakeFile for full documentation.
+Running `./clean-build.sh test` will build tests in the build/debug directory, which you can run with
+`./build/debug/test/physics_unittest'. Once you've run this and said yes to the installer script, you
+should be able to include Titan in your CMake project with
 
-If this doesn't work, try the following manual installation steps:
+```cmake
+cmake_minimum_required(VERSION 3.10)
+project("MyTitanProject"
+        LANGUAGES C CXX CUDA)
+
+add_executable(MyTitanProject main.cpp)
+
+find_package(Titan CONFIG REQUIRED)
+if (Titan_FOUND)
+    message(STATUS "Titan FOUND")
+    target_include_directories(MyTitanProject PRIVATE ${Titan_INCLUDE_DIRS})
+    target_link_libraries(MyTitanProject PRIVATE ${Titan_LIBRARIES} Titan)
+endif()
+```
+
+If this doesn't work, you can also try the following manual installation steps.
 
 #### 1. Install the NVIDIA CUDA Toolkit
 
