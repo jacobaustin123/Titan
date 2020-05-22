@@ -12,4 +12,4 @@ if [ ! -d "$gtestpath" ]; then
 fi
 
 sudo apt-get install -y --no-install-recommends \
-    libglew-dev libglfw3-dev libglm-dev libgl-dev
+    libglew-dev libglfw3-dev libglm-dev libgl-dev libgl1-mesa-dev
